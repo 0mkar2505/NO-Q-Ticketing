@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tickets | NO-Q</title>
+
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+
+    <!-- Navbar (shared) -->
+    <header id="navbar"></header>
+
+    <!-- App layout -->
+    <div class="app-layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <!-- Main content -->
+      <main class="app-content">
+        <h1 class="page-title">Support Tickets</h1>
+        <p class="page-subtitle">
+          Manage customer support tickets
+        </p>
+
+        <div class="tickets-container">
+          <div id="ticket-list" class="ticket-list"></div>
+
+          <div id="ticket-view" class="ticket-view hidden">
+            <h3 id="ticket-subject"></h3>
+            <span id="ticket-status" class="ticket-status"></span>
+
+            <div id="messages" class="messages"></div>
+
+            <div class="reply-section">
+              <textarea id="reply-box" placeholder="Type your reply..."></textarea>
+              <button id="send-reply" class="auth-btn">Send Reply</button>
+            </div>
+
+            <button id="resolve-ticket" class="btn btn-secondary">Resolve Ticket</button>
+          </div>
+        </div>
+      </main>
+
+    </div>
+
+    <!-- Minimal app footer -->
+    <footer class="app-footer">
+      © 2026 NO-Q
+    </footer>
+
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="/app/client/tickets.js"></script>
+</body>
+</html>

@@ -131,3 +131,17 @@ document
   .addEventListener("click", () => {
     window.location.href = "/auth/login.html";
   });
+
+// Password toggle functionality
+const togglePasswordBtns = document.querySelectorAll(".toggle-password");
+
+togglePasswordBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const input = btn.previousElementSibling;
+    const isHidden = input.type === "password";
+
+    input.type = isHidden ? "text" : "password";
+    btn.textContent = isHidden ? "🙈" : "👁";
+    btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+  });
+});
