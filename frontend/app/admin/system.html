@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System | NO-Q Admin</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">System</h1>
+        <p class="page-subtitle">
+          Platform configuration, security controls, and operational settings
+        </p>
+
+        <section class="admin-section-grid">
+          <article class="admin-section-card">
+            <div class="admin-section-head">
+              <h2>Authentication Policy</h2>
+              <span class="admin-badge">Skeleton</span>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" checked />
+              <span>Require strong passwords</span>
+            </label>
+            <label class="settings-toggle">
+              <input type="checkbox" />
+              <span>Enforce multi-factor auth for admins</span>
+            </label>
+            <label class="settings-toggle">
+              <input type="checkbox" checked />
+              <span>Auto-expire inactive sessions</span>
+            </label>
+          </article>
+
+          <article class="admin-section-card">
+            <div class="admin-section-head">
+              <h2>Maintenance Controls</h2>
+              <span class="admin-badge">Skeleton</span>
+            </div>
+            <div class="admin-form-grid">
+              <div class="admin-field">
+                <label for="logRetention">Log Retention</label>
+                <select id="logRetention">
+                  <option>30 days</option>
+                  <option>60 days</option>
+                  <option>90 days</option>
+                </select>
+              </div>
+              <div class="admin-field">
+                <label for="backupWindow">Backup Window</label>
+                <select id="backupWindow">
+                  <option>Daily at 02:00 UTC</option>
+                  <option>Daily at 04:00 UTC</option>
+                  <option>Daily at 06:00 UTC</option>
+                </select>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="admin-section-card">
+          <div class="admin-section-head">
+            <h2>Audit Trail</h2>
+            <span class="admin-badge">Skeleton</span>
+          </div>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Scope</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="4" class="admin-table-empty">Audit entries will render here after backend integration.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="settings-actions">
+            <button class="btn btn-secondary" type="button">Export Logs</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+</body>
+</html>

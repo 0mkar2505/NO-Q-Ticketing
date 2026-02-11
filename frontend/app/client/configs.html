@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings | NO-Q</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Settings</h1>
+        <p class="page-subtitle">
+          Configure ticket workflow and notification preferences
+        </p>
+
+        <section class="settings-grid">
+          <article class="settings-card">
+            <h2>Ticket Defaults</h2>
+            <p class="settings-copy">Base behavior for new and active tickets.</p>
+
+            <div class="settings-field">
+              <label for="defaultPriority">Default Priority</label>
+              <select id="defaultPriority">
+                <option>Normal</option>
+                <option>High</option>
+                <option>Low</option>
+              </select>
+            </div>
+
+            <div class="settings-field">
+              <label for="slaWindow">SLA Response Window</label>
+              <select id="slaWindow">
+                <option>2 hours</option>
+                <option>4 hours</option>
+                <option>8 hours</option>
+              </select>
+            </div>
+
+            <div class="settings-field">
+              <label for="signatureText">Reply Signature</label>
+              <textarea id="signatureText" placeholder="Type a default signature...">Thanks for reaching out.
+NO-Q Support Team</textarea>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <h2>Notifications</h2>
+            <p class="settings-copy">Control alerts for support activity.</p>
+
+            <label class="settings-toggle">
+              <input type="checkbox" checked />
+              <span>Email alerts for new tickets</span>
+            </label>
+            <label class="settings-toggle">
+              <input type="checkbox" checked />
+              <span>Daily summary report</span>
+            </label>
+            <label class="settings-toggle">
+              <input type="checkbox" />
+              <span>Escalation alerts to managers</span>
+            </label>
+          </article>
+
+          <article class="settings-card settings-card-wide">
+            <h2>Automation Rules (Preview)</h2>
+            <p class="settings-copy">Rules UI is ready. Processing logic will be wired next.</p>
+
+            <div class="rule-row">
+              <div>
+                <strong>If Subject Contains</strong>
+                <p>billing, invoice, payment</p>
+              </div>
+              <span class="rule-chip">Tag: Billing</span>
+            </div>
+
+            <div class="rule-row">
+              <div>
+                <strong>If Customer Domain Matches</strong>
+                <p>@enterprise.com</p>
+              </div>
+              <span class="rule-chip">Priority: High</span>
+            </div>
+
+            <div class="rule-row">
+              <div>
+                <strong>If Message Contains</strong>
+                <p>cannot login, reset password</p>
+              </div>
+              <span class="rule-chip">Tag: Access</span>
+            </div>
+          </article>
+        </section>
+
+        <div class="settings-actions">
+          <button class="btn btn-secondary" type="button">Reset</button>
+          <button class="btn btn-primary" type="button">Save Changes</button>
+        </div>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+</body>
+</html>

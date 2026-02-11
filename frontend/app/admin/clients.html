@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clients | NO-Q Admin</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Clients</h1>
+        <p class="page-subtitle">
+          Manage client organizations and workspace access
+        </p>
+
+        <section class="admin-section-card">
+          <div class="admin-section-head">
+            <h2>Client Directory</h2>
+            <span class="admin-badge">Skeleton</span>
+          </div>
+
+          <div class="admin-toolbar">
+            <input type="text" placeholder="Search client name or domain" />
+            <button class="btn btn-secondary" type="button">Filter</button>
+          </div>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Plan</th>
+                <th>Members</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="admin-table-empty">Client data will appear here after backend integration.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing | NO-Q Admin</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Billing</h1>
+        <p class="page-subtitle">
+          Subscription plans, invoices, and platform revenue controls
+        </p>
+
+        <section class="admin-section-grid">
+          <article class="admin-section-card">
+            <div class="admin-section-head">
+              <h2>Plan Catalog</h2>
+              <span class="admin-badge">Skeleton</span>
+            </div>
+            <p class="admin-empty-copy">Pricing tiers and feature limits UI is ready for data wiring.</p>
+          </article>
+
+          <article class="admin-section-card">
+            <div class="admin-section-head">
+              <h2>Recent Invoices</h2>
+              <span class="admin-badge">Skeleton</span>
+            </div>
+            <p class="admin-empty-copy">Invoice history and payment status will render here.</p>
+          </article>
+        </section>
+
+        <section class="admin-section-card">
+          <div class="admin-section-head">
+            <h2>Billing Rules</h2>
+            <span class="admin-badge">Skeleton</span>
+          </div>
+
+          <div class="admin-form-grid">
+            <div class="admin-field">
+              <label for="graceDays">Payment Grace Period (days)</label>
+              <input id="graceDays" type="number" value="7" />
+            </div>
+
+            <div class="admin-field">
+              <label for="currency">Default Currency</label>
+              <select id="currency">
+                <option>USD</option>
+                <option>EUR</option>
+                <option>INR</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button class="btn btn-secondary" type="button">Discard</button>
+            <button class="btn btn-primary" type="button">Save Rules</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+</body>
+</html>

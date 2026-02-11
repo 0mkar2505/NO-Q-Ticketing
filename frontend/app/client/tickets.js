@@ -4,11 +4,20 @@ const token = localStorage.getItem("token");
 const ticketList = document.getElementById("ticket-list");
 const ticketView = document.getElementById("ticket-view");
 const messagesDiv = document.getElementById("messages");
+const replyBox = document.getElementById("reply-box");
+const sendReplyBtn = document.getElementById("send-reply");
+const resolveBtn = document.getElementById("resolve-ticket");
 
 let currentTicketId = null;
+let ticketCache = [];
 
 // Fetch & Render Tickets
 async function loadTickets() {
+  if (!token) {
+    console.error("Missing auth token");
+    return;
+  }
+
   const res = await fetch(`${API_BASE}/tickets`, {
     headers: {
       "Authorization": `Bearer ${token}`
@@ -21,16 +30,22 @@ async function loadTickets() {
   }
 
   const tickets = await res.json();
+  ticketCache = Array.isArray(tickets) ? tickets : [];
   ticketList.innerHTML = "";
 
-  if (tickets.length === 0) {
+  if (ticketCache.length === 0) {
     ticketList.innerHTML = "<p class=\"no-tickets\">No tickets found</p>";
+    ticketView.classList.add("hidden");
+    currentTicketId = null;
     return;
   }
 
-  tickets.forEach(ticket => {
+  ticketCache.forEach(ticket => {
     const div = document.createElement("div");
     div.className = "ticket-item";
+    if (ticket._id === currentTicketId) {
+      div.classList.add("active");
+    }
     div.innerHTML = `
       <span class="ticket-subject">${ticket.subject}</span>
       <span class="ticket-status-badge ${ticket.status}">${ticket.status}</span>
@@ -39,6 +54,13 @@ async function loadTickets() {
     div.onclick = () => openTicket(ticket);
     ticketList.appendChild(div);
   });
+
+  if (currentTicketId) {
+    const updated = ticketCache.find(t => t._id === currentTicketId);
+    if (updated) {
+      openTicket(updated);
+    }
+  }
 }
 
 loadTickets();
@@ -66,16 +88,18 @@ function openTicket(ticket) {
     messagesDiv.innerHTML = "<p class=\"no-messages\">No messages yet</p>";
   }
 
-  document.getElementById("resolve-ticket").style.display =
-    ticket.status === "resolved" ? "none" : "block";
+  const isResolved = ticket.status === "resolved";
+  resolveBtn.style.display = isResolved ? "none" : "block";
+  replyBox.disabled = isResolved;
+  sendReplyBtn.disabled = isResolved;
 }
 
 // Reply to Ticket
-document.getElementById("send-reply").onclick = async () => {
-  const text = document.getElementById("reply-box").value.trim();
+sendReplyBtn.onclick = async () => {
+  const text = replyBox.value.trim();
   if (!text || !currentTicketId) return;
 
-  await fetch(`${API_BASE}/tickets/${currentTicketId}/reply`, {
+  const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/reply`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -84,23 +108,30 @@ document.getElementById("send-reply").onclick = async () => {
     body: JSON.stringify({ message: text })
   });
 
-  document.getElementById("reply-box").value = "";
-  loadTickets(); // refresh state
-  ticketView.classList.add("hidden");
+  if (!res.ok) {
+    console.error("Failed to send reply");
+    return;
+  }
+
+  replyBox.value = "";
+  await loadTickets();
 };
 
 // Resolve Ticket
-document.getElementById("resolve-ticket").onclick = async () => {
+resolveBtn.onclick = async () => {
   if (!currentTicketId) return;
 
-  await fetch(`${API_BASE}/tickets/${currentTicketId}/resolve`, {
+  const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/resolve`, {
     method: "PATCH",
     headers: {
       "Authorization": `Bearer ${token}`
     }
   });
 
-  loadTickets();
-  ticketView.classList.add("hidden");
-  currentTicketId = null;
+  if (!res.ok) {
+    console.error("Failed to resolve ticket");
+    return;
+  }
+
+  await loadTickets();
 };

@@ -2,61 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard | NO-Q</title>
-
   <link rel="stylesheet" href="/assets/css/style.css" />
 </head>
-
 <body>
   <div class="page-wrapper">
-
-    <!-- Navbar -->
     <header id="navbar"></header>
 
-    <!-- App layout -->
     <div class="app-layout">
-
-      <!-- Sidebar -->
       <aside class="sidebar" id="sidebar"></aside>
 
-      <!-- Main content -->
       <main class="app-content">
         <h1 class="page-title">Admin Dashboard</h1>
         <p class="page-subtitle">
           Platform overview and system insights
         </p>
 
-        <!-- Admin stats -->
         <div class="stats-grid">
           <div class="stat-card">
             <h3>Total Clients</h3>
-            <p class="stat-number">0</p>
+            <p class="stat-number">-</p>
           </div>
 
           <div class="stat-card">
             <h3>Total Tickets</h3>
-            <p class="stat-number">0</p>
+            <p class="stat-number">-</p>
           </div>
 
           <div class="stat-card">
             <h3>Active Users</h3>
-            <p class="stat-number">0</p>
+            <p class="stat-number">-</p>
           </div>
 
           <div class="stat-card">
             <h3>System Status</h3>
-            <p class="stat-number">🟢</p>
+            <p class="stat-number">Pending</p>
           </div>
         </div>
-      </main>
 
+        <section class="admin-section-grid">
+          <article class="admin-section-card">
+            <div class="admin-section-head">
+              <h2>Recent Platform Activity</h2>
+              <span class="admin-badge">Skeleton</span>
+            </div>
+            <p class="admin-empty-copy">Activity feed UI is ready. Data binding will be added in the next phase.</p>
+          </article>
+
+          <article class="admin-section-card">
+            <div class="admin-section-head">
+              <h2>Operational Health</h2>
+              <span class="admin-badge">Skeleton</span>
+            </div>
+            <p class="admin-empty-copy">System checks and service metrics will appear here after backend integration.</p>
+          </article>
+        </section>
+      </main>
     </div>
 
-    <!-- Minimal app footer -->
     <footer class="app-footer">
-      © 2026 NO-Q
+      &copy; 2026 NO-Q
     </footer>
-
   </div>
 
   <script src="/shared/js/auth-guard.js"></script>
