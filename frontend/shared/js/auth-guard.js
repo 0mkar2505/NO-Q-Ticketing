@@ -1,28 +1,33 @@
-// Auth guard - redirect to login if not authenticated
-const token = localStorage.getItem("token");
+(() => {
+  // Auth guard - redirect to login if not authenticated
+  const token = localStorage.getItem("token");
+  const currentPath = window.location.pathname;
+  const pathBase = currentPath.startsWith("/frontend/") ? "/frontend" : "";
+  const loginPath = `${pathBase}/auth/login.html`;
 
-if (!token) {
-  window.location.href = "/auth/login.html";
-} else {
+  if (!token) {
+    window.location.href = loginPath;
+    return;
+  }
+
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    const currentPath = window.location.pathname;
 
     // Enforce role-based access
-    if (currentPath.startsWith("/app/admin")) {
-      if (payload.role !== "admin") {
-        window.location.href = "/auth/login.html";
-      }
-    } else if (currentPath.startsWith("/app/client")) {
-      if (payload.role !== "client") {
-        window.location.href = "/auth/login.html";
-      }
+    if (/\/app\/admin(\/|$)/.test(currentPath) && payload.role !== "admin") {
+      window.location.href = loginPath;
+      return;
+    }
+
+    if (/\/app\/client(\/|$)/.test(currentPath) && payload.role !== "client") {
+      window.location.href = loginPath;
+      return;
     }
 
     // Store user info for shared components
     localStorage.setItem("user", JSON.stringify(payload));
   } catch (e) {
     localStorage.removeItem("token");
-    window.location.href = "/auth/login.html";
+    window.location.href = loginPath;
   }
-}
+})();
