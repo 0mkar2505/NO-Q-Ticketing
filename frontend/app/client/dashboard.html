@@ -19,6 +19,7 @@
         <p class="page-subtitle">
           Overview of your support activity
         </p>
+        <p id="dashboard-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
 
         <div class="stats-grid dashboard-stats-grid">
           <div class="stat-card stat-card--open">
@@ -43,10 +44,34 @@
         </div>
 
         <div class="dashboard-actions">
-          <a href="./create-ticket.html" class="primary-btn dashboard-primary-btn">
+          <a id="dash-create-ticket" href="/app/client/create-ticket.html" class="primary-btn dashboard-primary-btn">
             + Create Ticket
           </a>
         </div>
+
+        <section class="dashboard-insights">
+          <article class="panel-card">
+            <div class="panel-head">
+              <h2>Unresolved by Priority</h2>
+              <span class="panel-tag">Live</span>
+            </div>
+            <ul class="analytics-list" id="dash-priority-breakdown">
+              <li><span>High</span><strong>0</strong></li>
+              <li><span>Normal</span><strong>0</strong></li>
+              <li><span>Low</span><strong>0</strong></li>
+            </ul>
+          </article>
+
+          <article class="panel-card">
+            <div class="panel-head">
+              <h2>Recent Tickets</h2>
+              <span class="panel-tag">Latest 5</span>
+            </div>
+            <ul class="analytics-list" id="dash-recent-tickets">
+              <li><span>No tickets yet</span><strong>-</strong></li>
+            </ul>
+          </article>
+        </section>
       </main>
     </div>
 

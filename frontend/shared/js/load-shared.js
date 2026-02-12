@@ -1,4 +1,12 @@
 (() => {
+  function navigateWithFade(path, duration = 180) {
+    document.body.style.transition = `opacity ${duration}ms ease`;
+    document.body.style.opacity = "0";
+    setTimeout(() => {
+      window.location.href = path;
+    }, duration);
+  }
+
   async function loadHTML(id, path) {
     const res = await fetch(path);
     const html = await res.text();
@@ -38,10 +46,11 @@
 
   // Logout handler
   document.addEventListener("click", (e) => {
-    if (e.target.id === "logoutBtn") {
+    const logoutBtn = e.target.closest("#logoutBtn");
+    if (logoutBtn) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = toAppPath("/auth/login.html");
+      navigateWithFade(toAppPath("/public/index.html"));
     }
   });
 })();

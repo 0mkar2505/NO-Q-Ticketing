@@ -1,4 +1,4 @@
-const SUPPORT_API_BASE = "http://127.0.0.1:5000/api/support";
+const SUPPORT_API_BASE = "/api/support";
 
 const supportFeedbackEl = document.getElementById("support-feedback");
 const supportAssistantTitleEl = document.getElementById("support-assistant-title");

@@ -1,7 +1,8 @@
-const API_BASE = "http://127.0.0.1:5000/api/client";
+const API_BASE = "/api/client";
 const token = localStorage.getItem("token");
 const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const loginPath = `${pathBase}/auth/login.html`;
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const ticketList = document.getElementById("ticket-list");
 const ticketView = document.getElementById("ticket-view");
@@ -18,6 +19,18 @@ let currentTicketId = null;
 let ticketCache = [];
 let isSubmitting = false;
 let isAiRunning = false;
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -119,7 +132,7 @@ async function loadTickets() {
   setFeedback("info", "Loading tickets...");
 
   try {
-    const res = await fetch(`${API_BASE}/tickets`, {
+    const res = await apiFetch(`${API_BASE}/tickets`, {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -214,7 +227,7 @@ sendReplyBtn.onclick = async () => {
   setFeedback("", "");
 
   try {
-    const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/reply`, {
+    const res = await apiFetch(`${API_BASE}/tickets/${currentTicketId}/reply`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -248,7 +261,7 @@ resolveBtn.onclick = async () => {
   setFeedback("", "");
 
   try {
-    const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/resolve`, {
+    const res = await apiFetch(`${API_BASE}/tickets/${currentTicketId}/resolve`, {
       method: "PATCH",
       headers: {
         "Authorization": `Bearer ${token}`
@@ -278,7 +291,7 @@ runAiAssistBtn.onclick = async () => {
   setFeedback("", "");
 
   try {
-    const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/ai-assist`, {
+    const res = await apiFetch(`${API_BASE}/tickets/${currentTicketId}/ai-assist`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,

@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:5000/api/client";
+const API_BASE = "/api/client";
 const token = localStorage.getItem("token");
 const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const loginPath = `${pathBase}/auth/login.html`;

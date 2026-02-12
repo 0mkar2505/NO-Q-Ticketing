@@ -2,6 +2,15 @@ const form = document.getElementById("loginForm");
 const errorEl = document.getElementById("error");
 const submitBtn = document.getElementById("submitBtn");
 
+function navigateWithFade(path, duration = 180) {
+  document.body.classList.add("is-leaving");
+  document.body.style.transition = `opacity ${duration}ms ease`;
+  document.body.style.opacity = "0";
+  setTimeout(() => {
+    window.location.href = path;
+  }, duration);
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -62,9 +71,9 @@ form.addEventListener("submit", async (e) => {
 
     // Redirect by role
     if (payload.role === "admin") {
-      window.location.href = "../app/admin/dashboard.html";
+      navigateWithFade("../app/admin/dashboard.html");
     } else {
-      window.location.href = "../app/client/dashboard.html";
+      navigateWithFade("../app/client/dashboard.html");
     }
 
   } catch (err) {

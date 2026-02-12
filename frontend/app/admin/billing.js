@@ -1,5 +1,5 @@
-const ADMIN_BILLING_API = "http://127.0.0.1:5000/api/admin/billing";
-const ADMIN_BILLING_RULES_API = "http://127.0.0.1:5000/api/admin/billing/rules";
+const ADMIN_BILLING_API = "/api/admin/billing";
+const ADMIN_BILLING_RULES_API = "/api/admin/billing/rules";
 const adminBillingToken = localStorage.getItem("token");
 const adminBillingPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const adminBillingLoginPath = `${adminBillingPathBase}/auth/login.html`;

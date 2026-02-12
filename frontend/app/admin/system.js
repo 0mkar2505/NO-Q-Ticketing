@@ -1,4 +1,4 @@
-const ADMIN_SYSTEM_API = "http://127.0.0.1:5000/api/admin/system";
+const ADMIN_SYSTEM_API = "/api/admin/system";
 const adminSystemToken = localStorage.getItem("token");
 const adminSystemPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const adminSystemLoginPath = `${adminSystemPathBase}/auth/login.html`;

@@ -1,7 +1,8 @@
-const CONFIGS_API_BASE = "http://127.0.0.1:5000/api/client/configs";
+const CONFIGS_API_BASE = "/api/client/configs";
 const configsToken = localStorage.getItem("token");
 const configsPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const configsLoginPath = `${configsPathBase}/auth/login.html`;
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const configsFeedbackEl = document.getElementById("configs-feedback");
 const defaultPriorityEl = document.getElementById("defaultPriority");
@@ -22,6 +23,18 @@ const saveBtnEl = document.getElementById("saveConfigsBtn");
 
 let lastLoadedConfig = null;
 let isSaving = false;
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function setConfigsFeedback(type, text) {
   if (!configsFeedbackEl) return;
@@ -113,7 +126,7 @@ async function loadConfigs() {
   setConfigsFeedback("info", "Loading settings...");
 
   try {
-    const res = await fetch(CONFIGS_API_BASE, {
+    const res = await apiFetch(CONFIGS_API_BASE, {
       headers: { Authorization: `Bearer ${configsToken}` },
     });
 
@@ -150,7 +163,7 @@ async function saveConfigs() {
   setConfigsFeedback("", "");
 
   try {
-    const res = await fetch(CONFIGS_API_BASE, {
+    const res = await apiFetch(CONFIGS_API_BASE, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${configsToken}`,
