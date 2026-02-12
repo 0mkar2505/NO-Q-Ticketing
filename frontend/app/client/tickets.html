@@ -27,6 +27,25 @@
         </p>
         <p id="tickets-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
 
+        <section class="ticket-create-card">
+          <h2>Create Ticket</h2>
+          <div class="ticket-create-grid">
+            <div class="settings-field">
+              <label for="create-subject">Subject</label>
+              <input id="create-subject" type="text" placeholder="Login issue on checkout page" />
+            </div>
+            <div class="settings-field">
+              <label for="create-customer-email">Customer Email</label>
+              <input id="create-customer-email" type="email" placeholder="customer@company.com" />
+            </div>
+          </div>
+          <div class="settings-field">
+            <label for="create-message">Initial Customer Message</label>
+            <textarea id="create-message" placeholder="Describe the issue details..."></textarea>
+          </div>
+          <button id="create-ticket-btn" class="btn btn-primary" type="button">Create Ticket</button>
+        </section>
+
         <div class="tickets-container">
           <div id="ticket-list" class="ticket-list"></div>
 
@@ -42,6 +61,15 @@
             </div>
 
             <button id="resolve-ticket" class="btn btn-secondary">Resolve Ticket</button>
+
+            <section class="ticket-ai-panel">
+              <div class="ticket-ai-head">
+                <h4>AI Assist</h4>
+                <button id="run-ai-assist" class="btn btn-secondary" type="button">Generate</button>
+              </div>
+              <p id="ai-priority" class="ticket-ai-priority">Priority Suggestion: -</p>
+              <p id="ai-summary" class="ticket-ai-summary">Summary will appear here after generation.</p>
+            </section>
           </div>
         </div>
       </main>

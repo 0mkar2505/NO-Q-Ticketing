@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support Assistant | NO-Q</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper support-page">
+    <header class="navbar navbar--auth">
+      <div class="navbar-left">
+        <img src="../assets/images/NO-Q logo 1.png" alt="NO-Q Logo" class="navbar-logo" />
+        <span class="navbar-brand">NO-Q Support</span>
+      </div>
+      <div class="navbar-right">
+        <a href="./index.html" class="btn btn-secondary">Home</a>
+      </div>
+    </header>
+
+    <main class="support-main">
+      <section class="support-card">
+        <h1 id="support-assistant-title" class="support-title">Guided Support Assistant</h1>
+        <p id="support-assistant-subtitle" class="support-subtitle">Answer a few guided prompts and we will create a support ticket for you.</p>
+        <p id="support-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <div class="support-form-row">
+          <div class="support-field">
+            <label for="support-company">Company Name</label>
+            <input id="support-company" type="text" placeholder="Acme Corp" />
+          </div>
+          <div class="support-field">
+            <label for="support-email">Your Email</label>
+            <input id="support-email" type="email" placeholder="you@company.com" />
+          </div>
+        </div>
+
+        <button id="support-start" class="btn btn-primary" type="button">Start Assistant</button>
+
+        <div id="support-chat" class="support-chat"></div>
+
+        <div id="support-options" class="support-options"></div>
+
+        <div id="support-details-wrap" class="support-details-wrap hidden">
+          <label for="support-details">Describe your issue</label>
+          <textarea id="support-details" placeholder="Add key details to help support resolve faster..."></textarea>
+          <button id="support-details-submit" class="btn btn-primary" type="button">Continue</button>
+        </div>
+
+        <div id="support-review" class="support-review hidden">
+          <h3>Issue Review</h3>
+          <p id="review-category">Category: -</p>
+          <p id="review-priority">Priority: -</p>
+          <p id="review-severity">Severity: -</p>
+          <button id="support-create-ticket" class="btn btn-primary" type="button">Create Ticket</button>
+        </div>
+      </section>
+
+      <section class="support-card">
+        <h2 class="support-title support-title--small">Check Ticket Status</h2>
+        <p class="support-subtitle">Enter your ticket ID and email to see latest status.</p>
+
+        <div class="support-form-row">
+          <div class="support-field">
+            <label for="status-ticket-id">Ticket ID</label>
+            <input id="status-ticket-id" type="text" placeholder="67a123..." />
+          </div>
+          <div class="support-field">
+            <label for="status-email">Email</label>
+            <input id="status-email" type="email" placeholder="you@company.com" />
+          </div>
+        </div>
+
+        <button id="status-check" class="btn btn-secondary" type="button">Check Status</button>
+        <p id="status-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+        <div id="status-result" class="status-result hidden"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./support.js"></script>
+</body>
+</html>

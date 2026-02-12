@@ -10,6 +10,13 @@ const signatureEl = document.getElementById("signatureText");
 const notifyNewTicketsEl = document.getElementById("notifyNewTickets");
 const notifyDailySummaryEl = document.getElementById("notifyDailySummary");
 const notifyEscalationsEl = document.getElementById("notifyEscalations");
+const chatAssistantTitleEl = document.getElementById("chatAssistantTitle");
+const chatAssistantSubtitleEl = document.getElementById("chatAssistantSubtitle");
+const chatPrimaryColorEl = document.getElementById("chatPrimaryColor");
+const chatAssistantBubbleColorEl = document.getElementById("chatAssistantBubbleColor");
+const chatAssistantTextColorEl = document.getElementById("chatAssistantTextColor");
+const chatCustomerBubbleColorEl = document.getElementById("chatCustomerBubbleColor");
+const chatCustomerTextColorEl = document.getElementById("chatCustomerTextColor");
 const resetBtnEl = document.getElementById("resetConfigsBtn");
 const saveBtnEl = document.getElementById("saveConfigsBtn");
 
@@ -36,6 +43,7 @@ function setSavingState(saving) {
 
 function normalizeConfig(config) {
   const notifications = config?.notifications || {};
+  const chat = config?.customer_chat_ui || {};
   return {
     default_priority: config?.default_priority || "normal",
     sla_response_hours: Number(config?.sla_response_hours || 4),
@@ -44,6 +52,15 @@ function normalizeConfig(config) {
       email_new_tickets: Boolean(notifications.email_new_tickets),
       daily_summary_report: Boolean(notifications.daily_summary_report),
       manager_escalation_alerts: Boolean(notifications.manager_escalation_alerts),
+    },
+    customer_chat_ui: {
+      assistant_title: chat.assistant_title || "Guided Support Assistant",
+      assistant_subtitle: chat.assistant_subtitle || "Answer a few guided prompts and we will create a support ticket for you.",
+      primary_color: chat.primary_color || "#7c3aed",
+      assistant_bubble_color: chat.assistant_bubble_color || "#eef2ff",
+      assistant_text_color: chat.assistant_text_color || "#312e81",
+      customer_bubble_color: chat.customer_bubble_color || "#dcfce7",
+      customer_text_color: chat.customer_text_color || "#14532d",
     },
   };
 }
@@ -56,6 +73,13 @@ function applyConfigToForm(config) {
   notifyNewTicketsEl.checked = normalized.notifications.email_new_tickets;
   notifyDailySummaryEl.checked = normalized.notifications.daily_summary_report;
   notifyEscalationsEl.checked = normalized.notifications.manager_escalation_alerts;
+  chatAssistantTitleEl.value = normalized.customer_chat_ui.assistant_title;
+  chatAssistantSubtitleEl.value = normalized.customer_chat_ui.assistant_subtitle;
+  chatPrimaryColorEl.value = normalized.customer_chat_ui.primary_color;
+  chatAssistantBubbleColorEl.value = normalized.customer_chat_ui.assistant_bubble_color;
+  chatAssistantTextColorEl.value = normalized.customer_chat_ui.assistant_text_color;
+  chatCustomerBubbleColorEl.value = normalized.customer_chat_ui.customer_bubble_color;
+  chatCustomerTextColorEl.value = normalized.customer_chat_ui.customer_text_color;
 }
 
 function readFormConfig() {
@@ -67,6 +91,15 @@ function readFormConfig() {
       email_new_tickets: notifyNewTicketsEl.checked,
       daily_summary_report: notifyDailySummaryEl.checked,
       manager_escalation_alerts: notifyEscalationsEl.checked,
+    },
+    customer_chat_ui: {
+      assistant_title: chatAssistantTitleEl.value.trim(),
+      assistant_subtitle: chatAssistantSubtitleEl.value.trim(),
+      primary_color: chatPrimaryColorEl.value.trim(),
+      assistant_bubble_color: chatAssistantBubbleColorEl.value.trim(),
+      assistant_text_color: chatAssistantTextColorEl.value.trim(),
+      customer_bubble_color: chatCustomerBubbleColorEl.value.trim(),
+      customer_text_color: chatCustomerTextColorEl.value.trim(),
     },
   };
 }

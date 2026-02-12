@@ -10,10 +10,19 @@ const replyBox = document.getElementById("reply-box");
 const sendReplyBtn = document.getElementById("send-reply");
 const resolveBtn = document.getElementById("resolve-ticket");
 const feedbackEl = document.getElementById("tickets-feedback");
+const runAiAssistBtn = document.getElementById("run-ai-assist");
+const aiPriorityEl = document.getElementById("ai-priority");
+const aiSummaryEl = document.getElementById("ai-summary");
+const createSubjectEl = document.getElementById("create-subject");
+const createCustomerEmailEl = document.getElementById("create-customer-email");
+const createMessageEl = document.getElementById("create-message");
+const createTicketBtn = document.getElementById("create-ticket-btn");
 
 let currentTicketId = null;
 let ticketCache = [];
 let isSubmitting = false;
+let isAiRunning = false;
+let isCreating = false;
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -42,6 +51,20 @@ function setSubmittingState(isBusy) {
     sendReplyBtn.textContent = "Send Reply";
     resolveBtn.textContent = "Resolve Ticket";
   }
+}
+
+function setAiState(isBusy) {
+  isAiRunning = isBusy;
+  if (!runAiAssistBtn) return;
+  runAiAssistBtn.disabled = isBusy || !currentTicketId;
+  runAiAssistBtn.textContent = isBusy ? "Generating..." : "Generate";
+}
+
+function setCreateState(isBusy) {
+  isCreating = isBusy;
+  if (!createTicketBtn) return;
+  createTicketBtn.disabled = isBusy;
+  createTicketBtn.textContent = isBusy ? "Creating..." : "Create Ticket";
 }
 
 function getErrorMessage(res, fallback) {
@@ -131,6 +154,57 @@ async function loadTickets() {
 
 loadTickets();
 
+async function createTicket() {
+  if (isCreating) return;
+
+  const subject = createSubjectEl?.value.trim();
+  const customer_email = createCustomerEmailEl?.value.trim().toLowerCase();
+  const message = createMessageEl?.value.trim();
+
+  if (!subject || !customer_email || !message) {
+    setFeedback("error", "Subject, customer email, and message are required.");
+    return;
+  }
+
+  setCreateState(true);
+  setFeedback("", "");
+
+  try {
+    const res = await fetch(`${API_BASE}/tickets`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ subject, customer_email, message })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = loginPath;
+        return;
+      }
+      setFeedback("error", data.error || "Unable to create ticket.");
+      return;
+    }
+
+    setFeedback("success", "Ticket created.");
+    createSubjectEl.value = "";
+    createCustomerEmailEl.value = "";
+    createMessageEl.value = "";
+    currentTicketId = data.ticket?._id || null;
+    await loadTickets();
+  } catch (error) {
+    console.error("Create ticket error:", error);
+    setFeedback("error", "Unable to create ticket right now.");
+  } finally {
+    setCreateState(false);
+  }
+}
+
 // Open Ticket & Render Conversation
 function openTicket(ticket) {
   currentTicketId = ticket._id;
@@ -159,6 +233,12 @@ function openTicket(ticket) {
   resolveBtn.style.display = isResolved ? "none" : "block";
   replyBox.disabled = isResolved || isSubmitting;
   sendReplyBtn.disabled = isResolved || isSubmitting;
+  setAiState(false);
+
+  const suggestedPriority = ticket.ai_priority_suggestion || "-";
+  const summary = ticket.ai_summary || "Summary will appear here after generation.";
+  aiPriorityEl.textContent = `Priority Suggestion: ${suggestedPriority}`;
+  aiSummaryEl.textContent = summary;
 }
 
 // Reply to Ticket
@@ -226,3 +306,38 @@ resolveBtn.onclick = async () => {
     setSubmittingState(false);
   }
 };
+
+runAiAssistBtn.onclick = async () => {
+  if (!currentTicketId || isAiRunning) return;
+
+  setAiState(true);
+  setFeedback("", "");
+
+  try {
+    const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/ai-assist`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    });
+
+    if (!res.ok) {
+      const error = await getErrorMessage(res, "Unable to generate AI assist");
+      setFeedback("error", error);
+      return;
+    }
+
+    const data = await res.json();
+    aiPriorityEl.textContent = `Priority Suggestion: ${data.ai_priority_suggestion || "-"}`;
+    aiSummaryEl.textContent = data.ai_summary || "Summary unavailable.";
+    setFeedback("success", "AI assist generated");
+    await loadTickets();
+  } catch (error) {
+    console.error("AI assist error:", error);
+    setFeedback("error", "AI assist unavailable right now.");
+  } finally {
+    setAiState(false);
+  }
+};
+
+createTicketBtn?.addEventListener("click", createTicket);

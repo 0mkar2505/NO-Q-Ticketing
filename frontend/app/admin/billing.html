@@ -18,29 +18,48 @@
         <p class="page-subtitle">
           Subscription plans, invoices, and platform revenue controls
         </p>
+        <p id="admin-billing-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
 
         <section class="admin-section-grid">
           <article class="admin-section-card">
             <div class="admin-section-head">
               <h2>Plan Catalog</h2>
-              <span class="admin-badge">Skeleton</span>
+              <span class="admin-badge" id="billing-total-clients">0 clients</span>
             </div>
-            <p class="admin-empty-copy">Pricing tiers and feature limits UI is ready for data wiring.</p>
+            <div id="billing-plan-summary" class="admin-kv-list">
+              <div><span>Free</span><strong>0</strong></div>
+              <div><span>Starter</span><strong>0</strong></div>
+              <div><span>Growth</span><strong>0</strong></div>
+              <div><span>Enterprise</span><strong>0</strong></div>
+            </div>
           </article>
 
           <article class="admin-section-card">
             <div class="admin-section-head">
               <h2>Recent Invoices</h2>
-              <span class="admin-badge">Skeleton</span>
+              <span class="admin-badge">Latest</span>
             </div>
-            <p class="admin-empty-copy">Invoice history and payment status will render here.</p>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Invoice</th>
+                  <th>Company</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="billing-invoices-body">
+                <tr>
+                  <td colspan="3" class="admin-table-empty">Loading invoices...</td>
+                </tr>
+              </tbody>
+            </table>
           </article>
         </section>
 
         <section class="admin-section-card">
           <div class="admin-section-head">
             <h2>Billing Rules</h2>
-            <span class="admin-badge">Skeleton</span>
+            <span class="admin-badge">Config</span>
           </div>
 
           <div class="admin-form-grid">
@@ -52,16 +71,16 @@
             <div class="admin-field">
               <label for="currency">Default Currency</label>
               <select id="currency">
-                <option>USD</option>
-                <option>EUR</option>
-                <option>INR</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="INR">INR</option>
               </select>
             </div>
           </div>
 
           <div class="settings-actions">
-            <button class="btn btn-secondary" type="button">Discard</button>
-            <button class="btn btn-primary" type="button">Save Rules</button>
+            <button id="billing-discard-btn" class="btn btn-secondary" type="button">Discard</button>
+            <button id="billing-save-btn" class="btn btn-primary" type="button">Save Rules</button>
           </div>
         </section>
       </main>
@@ -74,5 +93,6 @@
 
   <script src="/shared/js/auth-guard.js"></script>
   <script src="/shared/js/load-shared.js"></script>
+  <script src="./billing.js"></script>
 </body>
 </html>

@@ -39,22 +39,53 @@ class Ticket:
 
     @staticmethod
     def create(company_id, subject, customer_email, message):
+        now = datetime.utcnow()
         ticket = {
             "company_id": company_id,
             "subject": subject,
-            "customer_email": customer_email,
+            "customer_email": customer_email.lower().strip(),
             "messages": [
                 {
                     "sender": "customer",
                     "text": message,
-                    "timestamp": datetime.utcnow()
+                    "timestamp": now
                 }
             ],
             "status": "open",
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "ai_summary": None,
+            "ai_priority_suggestion": None,
+            "ai_meta": None,
+            "ai_last_processed_at": None,
+            "created_at": now,
+            "updated_at": now
         }
-        ticket_collection.insert_one(ticket)
+        result = ticket_collection.insert_one(ticket)
+        ticket["_id"] = str(result.inserted_id)
+        return ticket
+
+    @staticmethod
+    def create_from_support(company_id, customer_email, subject, transcript, category, severity, priority, chat_session_id=None):
+        now = datetime.utcnow()
+        ticket = {
+            "company_id": company_id,
+            "subject": subject,
+            "customer_email": customer_email.lower().strip(),
+            "messages": transcript or [],
+            "status": "open",
+            "category": category,
+            "severity": severity,
+            "priority": priority,
+            "source": "customer_assistant",
+            "chat_session_id": chat_session_id,
+            "ai_summary": None,
+            "ai_priority_suggestion": None,
+            "ai_meta": None,
+            "ai_last_processed_at": None,
+            "created_at": now,
+            "updated_at": now,
+        }
+        result = ticket_collection.insert_one(ticket)
+        ticket["_id"] = str(result.inserted_id)
         return ticket
 
     @staticmethod
@@ -208,3 +239,38 @@ class Ticket:
             "top_categories": top_categories,
             "team_performance": []
         }
+
+    @staticmethod
+    def update_ai_assist(ticket_id, company_id, ai_assist):
+        ticket = ticket_collection.find_one(
+            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id}
+        )
+        if not ticket:
+            return None, "not_found"
+
+        now = datetime.utcnow()
+        ticket_collection.update_one(
+            {"_id": ticket["_id"], "company_id": company_id},
+            {
+                "$set": {
+                    "ai_summary": ai_assist.get("ai_summary"),
+                    "ai_priority_suggestion": ai_assist.get("ai_priority_suggestion"),
+                    "ai_meta": ai_assist.get("ai_meta"),
+                    "ai_last_processed_at": now,
+                    "updated_at": now,
+                }
+            }
+        )
+
+        updated = ticket_collection.find_one({"_id": ticket["_id"], "company_id": company_id})
+        return Ticket._serialize(updated), None
+
+    @staticmethod
+    def get_customer_status(ticket_id, customer_email):
+        ticket = ticket_collection.find_one(
+            {
+                "_id": Ticket._coerce_object_id(ticket_id),
+                "customer_email": (customer_email or "").strip().lower(),
+            }
+        )
+        return Ticket._serialize(ticket)

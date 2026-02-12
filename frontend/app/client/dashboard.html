@@ -2,68 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Client Dashboard | NO-Q</title>
-
   <link rel="stylesheet" href="/assets/css/style.css" />
 </head>
 
 <body>
   <div class="page-wrapper">
-
-    <!-- Navbar (shared) -->
     <header id="navbar"></header>
 
-    <!-- App layout -->
     <div class="app-layout">
-
-      <!-- Sidebar -->
       <aside class="sidebar" id="sidebar"></aside>
 
-      <!-- Main content -->
-      <main class="app-content">
+      <main class="app-content dashboard-page dashboard-page--client">
         <h1 class="page-title">Dashboard</h1>
         <p class="page-subtitle">
           Overview of your support activity
         </p>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-          <div class="stat-card">
+        <div class="stats-grid dashboard-stats-grid">
+          <div class="stat-card stat-card--open">
             <h3>Open Tickets</h3>
             <p class="stat-number">0</p>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card stat-card--pending">
             <h3>Pending</h3>
             <p class="stat-number">0</p>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card stat-card--resolved">
             <h3>Resolved</h3>
             <p class="stat-number">0</p>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card stat-card--ai">
             <h3>AI Suggestions</h3>
             <p class="stat-number">0</p>
           </div>
         </div>
 
-        <!-- Primary CTA -->
         <div class="dashboard-actions">
-          <button class="primary-btn">
+          <button class="primary-btn dashboard-primary-btn">
             + Create Ticket
           </button>
         </div>
       </main>
-
     </div>
 
-    <!-- Minimal app footer -->
     <footer class="app-footer">
-      © 2026 NO-Q
+      &copy; 2026 NO-Q
     </footer>
-
   </div>
 
   <script src="/shared/js/auth-guard.js"></script>

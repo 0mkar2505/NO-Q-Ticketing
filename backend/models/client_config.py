@@ -14,6 +14,15 @@ class ClientConfig:
             "daily_summary_report": True,
             "manager_escalation_alerts": False,
         },
+        "customer_chat_ui": {
+            "assistant_title": "Guided Support Assistant",
+            "assistant_subtitle": "Answer a few guided prompts and we will create a support ticket for you.",
+            "primary_color": "#7c3aed",
+            "assistant_bubble_color": "#eef2ff",
+            "assistant_text_color": "#312e81",
+            "customer_bubble_color": "#dcfce7",
+            "customer_text_color": "#14532d",
+        },
     }
 
     @staticmethod
@@ -43,6 +52,11 @@ class ClientConfig:
         for key, value in incoming_notifications.items():
             if key in merged["notifications"]:
                 merged["notifications"][key] = bool(value)
+
+        incoming_chat_ui = config.get("customer_chat_ui") or {}
+        for key, value in incoming_chat_ui.items():
+            if key in merged["customer_chat_ui"]:
+                merged["customer_chat_ui"][key] = value
 
         return merged
 
