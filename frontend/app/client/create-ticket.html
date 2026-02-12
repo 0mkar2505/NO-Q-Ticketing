@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Ticket | NO-Q</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Create New Ticket</h1>
+        <p class="page-subtitle">Create a manual support ticket on behalf of a customer.</p>
+        <p id="create-ticket-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="ticket-create-card ticket-create-card--standalone">
+          <div class="ticket-create-grid">
+            <div class="settings-field">
+              <label for="create-subject">Subject</label>
+              <input id="create-subject" type="text" placeholder="Login issue on checkout page" />
+            </div>
+            <div class="settings-field">
+              <label for="create-customer-email">Customer Email</label>
+              <input id="create-customer-email" type="email" placeholder="customer@example.com" />
+            </div>
+          </div>
+
+          <div class="settings-field">
+            <label for="create-message">Initial Customer Message</label>
+            <textarea id="create-message" placeholder="Describe the issue details..."></textarea>
+          </div>
+
+          <div class="ticket-create-actions">
+            <button id="create-ticket-btn" class="btn btn-primary" type="button">Create Ticket</button>
+            <a href="./tickets.html" class="btn btn-secondary">Go to Tickets</a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="./create-ticket.js"></script>
+</body>
+</html>

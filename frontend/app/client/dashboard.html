@@ -22,30 +22,30 @@
 
         <div class="stats-grid dashboard-stats-grid">
           <div class="stat-card stat-card--open">
-            <h3>Open Tickets</h3>
-            <p class="stat-number">0</p>
+            <h3>Unresolved Tickets</h3>
+            <p class="stat-number" id="dash-unresolved">0</p>
           </div>
 
           <div class="stat-card stat-card--pending">
-            <h3>Pending</h3>
-            <p class="stat-number">0</p>
+            <h3>Open</h3>
+            <p class="stat-number" id="dash-open">0</p>
           </div>
 
           <div class="stat-card stat-card--resolved">
             <h3>Resolved</h3>
-            <p class="stat-number">0</p>
+            <p class="stat-number" id="dash-resolved">0</p>
           </div>
 
           <div class="stat-card stat-card--ai">
-            <h3>AI Suggestions</h3>
-            <p class="stat-number">0</p>
+            <h3>Total Tickets</h3>
+            <p class="stat-number" id="dash-total">0</p>
           </div>
         </div>
 
         <div class="dashboard-actions">
-          <button class="primary-btn dashboard-primary-btn">
+          <a href="./create-ticket.html" class="primary-btn dashboard-primary-btn">
             + Create Ticket
-          </button>
+          </a>
         </div>
       </main>
     </div>
@@ -57,5 +57,6 @@
 
   <script src="/shared/js/auth-guard.js"></script>
   <script src="/shared/js/load-shared.js"></script>
+  <script src="./dashboard.js"></script>
 </body>
 </html>

@@ -117,7 +117,7 @@ async function startAssistant() {
   const company_name = supportCompanyEl.value.trim();
   const customer_email = supportEmailEl.value.trim().toLowerCase();
   if (!company_name || !customer_email) {
-    setFeedback(supportFeedbackEl, "error", "Company name and email are required.");
+    setFeedback(supportFeedbackEl, "error", "Company name and customer email are required.");
     return;
   }
 

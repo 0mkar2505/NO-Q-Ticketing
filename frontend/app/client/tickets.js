@@ -13,16 +13,11 @@ const feedbackEl = document.getElementById("tickets-feedback");
 const runAiAssistBtn = document.getElementById("run-ai-assist");
 const aiPriorityEl = document.getElementById("ai-priority");
 const aiSummaryEl = document.getElementById("ai-summary");
-const createSubjectEl = document.getElementById("create-subject");
-const createCustomerEmailEl = document.getElementById("create-customer-email");
-const createMessageEl = document.getElementById("create-message");
-const createTicketBtn = document.getElementById("create-ticket-btn");
 
 let currentTicketId = null;
 let ticketCache = [];
 let isSubmitting = false;
 let isAiRunning = false;
-let isCreating = false;
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -60,13 +55,6 @@ function setAiState(isBusy) {
   runAiAssistBtn.textContent = isBusy ? "Generating..." : "Generate";
 }
 
-function setCreateState(isBusy) {
-  isCreating = isBusy;
-  if (!createTicketBtn) return;
-  createTicketBtn.disabled = isBusy;
-  createTicketBtn.textContent = isBusy ? "Creating..." : "Create Ticket";
-}
-
 function getErrorMessage(res, fallback) {
   return res
     .json()
@@ -77,6 +65,47 @@ function getErrorMessage(res, fallback) {
 function markActiveTicket() {
   document.querySelectorAll(".ticket-item").forEach((item) => {
     item.classList.toggle("active", item.dataset.ticketId === currentTicketId);
+  });
+}
+
+function normalizePriority(priority) {
+  const value = String(priority || "").toLowerCase();
+  if (value === "high" || value === "normal" || value === "low") return value;
+  return "unspecified";
+}
+
+function renderTicketGroups(tickets) {
+  const groups = { high: [], normal: [], low: [], unspecified: [] };
+  tickets.forEach((ticket) => {
+    groups[normalizePriority(ticket.priority)].push(ticket);
+  });
+
+  ticketList.innerHTML = "";
+  ["high", "normal", "low", "unspecified"].forEach((priorityKey) => {
+    const groupTickets = groups[priorityKey];
+    if (!groupTickets.length) return;
+
+    const header = document.createElement("div");
+    header.className = "ticket-group-header";
+    header.textContent = `${priorityKey[0].toUpperCase()}${priorityKey.slice(1)} Priority (${groupTickets.length})`;
+    ticketList.appendChild(header);
+
+    groupTickets.forEach((ticket) => {
+      const priority = normalizePriority(ticket.priority);
+      const div = document.createElement("div");
+      div.className = "ticket-item";
+      div.dataset.ticketId = ticket._id;
+      if (ticket._id === currentTicketId) div.classList.add("active");
+      div.innerHTML = `
+        <span class="ticket-subject">${ticket.subject}</span>
+        <div class="ticket-item-meta">
+          <span class="ticket-status-badge ${ticket.status}">${ticket.status}</span>
+          <span class="ticket-priority-badge ticket-priority-${priority}">${priority}</span>
+        </div>
+      `;
+      div.onclick = () => openTicket(ticket);
+      ticketList.appendChild(div);
+    });
   });
 }
 
@@ -118,21 +147,7 @@ async function loadTickets() {
       return;
     }
 
-    ticketCache.forEach((ticket) => {
-      const div = document.createElement("div");
-      div.className = "ticket-item";
-      div.dataset.ticketId = ticket._id;
-      if (ticket._id === currentTicketId) {
-        div.classList.add("active");
-      }
-      div.innerHTML = `
-        <span class="ticket-subject">${ticket.subject}</span>
-        <span class="ticket-status-badge ${ticket.status}">${ticket.status}</span>
-      `;
-
-      div.onclick = () => openTicket(ticket);
-      ticketList.appendChild(div);
-    });
+    renderTicketGroups(ticketCache);
 
     if (currentTicketId) {
       const updated = ticketCache.find((t) => t._id === currentTicketId);
@@ -153,57 +168,6 @@ async function loadTickets() {
 }
 
 loadTickets();
-
-async function createTicket() {
-  if (isCreating) return;
-
-  const subject = createSubjectEl?.value.trim();
-  const customer_email = createCustomerEmailEl?.value.trim().toLowerCase();
-  const message = createMessageEl?.value.trim();
-
-  if (!subject || !customer_email || !message) {
-    setFeedback("error", "Subject, customer email, and message are required.");
-    return;
-  }
-
-  setCreateState(true);
-  setFeedback("", "");
-
-  try {
-    const res = await fetch(`${API_BASE}/tickets`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ subject, customer_email, message })
-    });
-
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        window.location.href = loginPath;
-        return;
-      }
-      setFeedback("error", data.error || "Unable to create ticket.");
-      return;
-    }
-
-    setFeedback("success", "Ticket created.");
-    createSubjectEl.value = "";
-    createCustomerEmailEl.value = "";
-    createMessageEl.value = "";
-    currentTicketId = data.ticket?._id || null;
-    await loadTickets();
-  } catch (error) {
-    console.error("Create ticket error:", error);
-    setFeedback("error", "Unable to create ticket right now.");
-  } finally {
-    setCreateState(false);
-  }
-}
 
 // Open Ticket & Render Conversation
 function openTicket(ticket) {
@@ -339,5 +303,3 @@ runAiAssistBtn.onclick = async () => {
     setAiState(false);
   }
 };
-
-createTicketBtn?.addEventListener("click", createTicket);
