@@ -18,6 +18,7 @@
         <p class="page-subtitle">
           Configure ticket workflow and notification preferences
         </p>
+        <p id="configs-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
 
         <section class="settings-grid">
           <article class="settings-card">
@@ -27,18 +28,18 @@
             <div class="settings-field">
               <label for="defaultPriority">Default Priority</label>
               <select id="defaultPriority">
-                <option>Normal</option>
-                <option>High</option>
-                <option>Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="low">Low</option>
               </select>
             </div>
 
             <div class="settings-field">
               <label for="slaWindow">SLA Response Window</label>
               <select id="slaWindow">
-                <option>2 hours</option>
-                <option>4 hours</option>
-                <option>8 hours</option>
+                <option value="2">2 hours</option>
+                <option value="4">4 hours</option>
+                <option value="8">8 hours</option>
               </select>
             </div>
 
@@ -54,15 +55,15 @@ NO-Q Support Team</textarea>
             <p class="settings-copy">Control alerts for support activity.</p>
 
             <label class="settings-toggle">
-              <input type="checkbox" checked />
+              <input id="notifyNewTickets" type="checkbox" checked />
               <span>Email alerts for new tickets</span>
             </label>
             <label class="settings-toggle">
-              <input type="checkbox" checked />
+              <input id="notifyDailySummary" type="checkbox" checked />
               <span>Daily summary report</span>
             </label>
             <label class="settings-toggle">
-              <input type="checkbox" />
+              <input id="notifyEscalations" type="checkbox" />
               <span>Escalation alerts to managers</span>
             </label>
           </article>
@@ -98,8 +99,8 @@ NO-Q Support Team</textarea>
         </section>
 
         <div class="settings-actions">
-          <button class="btn btn-secondary" type="button">Reset</button>
-          <button class="btn btn-primary" type="button">Save Changes</button>
+          <button id="resetConfigsBtn" class="btn btn-secondary" type="button">Reset</button>
+          <button id="saveConfigsBtn" class="btn btn-primary" type="button">Save Changes</button>
         </div>
       </main>
     </div>
@@ -111,5 +112,6 @@ NO-Q Support Team</textarea>
 
   <script src="/shared/js/auth-guard.js"></script>
   <script src="/shared/js/load-shared.js"></script>
+  <script src="./configs.js"></script>
 </body>
 </html>

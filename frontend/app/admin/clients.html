@@ -18,16 +18,17 @@
         <p class="page-subtitle">
           Manage client organizations and workspace access
         </p>
+        <p id="admin-clients-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
 
         <section class="admin-section-card">
           <div class="admin-section-head">
             <h2>Client Directory</h2>
-            <span class="admin-badge">Skeleton</span>
+            <span class="admin-badge" id="admin-clients-count">0 clients</span>
           </div>
 
           <div class="admin-toolbar">
-            <input type="text" placeholder="Search client name or domain" />
-            <button class="btn btn-secondary" type="button">Filter</button>
+            <input id="admin-clients-search" type="text" placeholder="Search client name or domain" />
+            <button id="admin-clients-filter" class="btn btn-secondary" type="button">Filter</button>
           </div>
 
           <table class="admin-table">
@@ -36,13 +37,13 @@
                 <th>Company</th>
                 <th>Plan</th>
                 <th>Members</th>
+                <th>Tickets</th>
                 <th>Status</th>
-                <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="admin-clients-body">
               <tr>
-                <td colspan="5" class="admin-table-empty">Client data will appear here after backend integration.</td>
+                <td colspan="5" class="admin-table-empty">Loading client data...</td>
               </tr>
             </tbody>
           </table>
@@ -57,5 +58,6 @@
 
   <script src="/shared/js/auth-guard.js"></script>
   <script src="/shared/js/load-shared.js"></script>
+  <script src="./clients.js"></script>
 </body>
 </html>

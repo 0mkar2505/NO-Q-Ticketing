@@ -1,5 +1,7 @@
 const API_BASE = "http://127.0.0.1:5000/api/client";
 const token = localStorage.getItem("token");
+const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
+const loginPath = `${pathBase}/auth/login.html`;
 
 const ticketList = document.getElementById("ticket-list");
 const ticketView = document.getElementById("ticket-view");
@@ -7,59 +9,123 @@ const messagesDiv = document.getElementById("messages");
 const replyBox = document.getElementById("reply-box");
 const sendReplyBtn = document.getElementById("send-reply");
 const resolveBtn = document.getElementById("resolve-ticket");
+const feedbackEl = document.getElementById("tickets-feedback");
 
 let currentTicketId = null;
 let ticketCache = [];
+let isSubmitting = false;
+
+function setFeedback(type, text) {
+  if (!feedbackEl) return;
+  if (!text) {
+    feedbackEl.className = "tickets-feedback hidden";
+    feedbackEl.textContent = "";
+    return;
+  }
+
+  feedbackEl.textContent = text;
+  feedbackEl.className = `tickets-feedback ${type}`;
+}
+
+function setSubmittingState(isBusy) {
+  isSubmitting = isBusy;
+
+  const ticket = ticketCache.find((t) => t._id === currentTicketId);
+  const isResolved = ticket?.status === "resolved";
+
+  sendReplyBtn.disabled = isBusy || isResolved;
+  resolveBtn.disabled = isBusy;
+  if (isBusy) {
+    sendReplyBtn.textContent = "Sending...";
+    resolveBtn.textContent = "Resolving...";
+  } else {
+    sendReplyBtn.textContent = "Send Reply";
+    resolveBtn.textContent = "Resolve Ticket";
+  }
+}
+
+function getErrorMessage(res, fallback) {
+  return res
+    .json()
+    .then((data) => data?.error || fallback)
+    .catch(() => fallback);
+}
+
+function markActiveTicket() {
+  document.querySelectorAll(".ticket-item").forEach((item) => {
+    item.classList.toggle("active", item.dataset.ticketId === currentTicketId);
+  });
+}
 
 // Fetch & Render Tickets
 async function loadTickets() {
   if (!token) {
-    console.error("Missing auth token");
+    window.location.href = loginPath;
     return;
   }
 
-  const res = await fetch(`${API_BASE}/tickets`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
+  setFeedback("info", "Loading tickets...");
+
+  try {
+    const res = await fetch(`${API_BASE}/tickets`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = loginPath;
+        return;
+      }
+      throw new Error("Failed to fetch tickets");
     }
-  });
 
-  if (!res.ok) {
-    console.error("Failed to fetch tickets");
-    return;
-  }
+    const tickets = await res.json();
+    ticketCache = Array.isArray(tickets) ? tickets : [];
+    ticketList.innerHTML = "";
 
-  const tickets = await res.json();
-  ticketCache = Array.isArray(tickets) ? tickets : [];
-  ticketList.innerHTML = "";
-
-  if (ticketCache.length === 0) {
-    ticketList.innerHTML = "<p class=\"no-tickets\">No tickets found</p>";
-    ticketView.classList.add("hidden");
-    currentTicketId = null;
-    return;
-  }
-
-  ticketCache.forEach(ticket => {
-    const div = document.createElement("div");
-    div.className = "ticket-item";
-    if (ticket._id === currentTicketId) {
-      div.classList.add("active");
+    if (ticketCache.length === 0) {
+      ticketList.innerHTML = "<p class=\"no-tickets\">No tickets found</p>";
+      ticketView.classList.add("hidden");
+      currentTicketId = null;
+      setFeedback("", "");
+      return;
     }
-    div.innerHTML = `
-      <span class="ticket-subject">${ticket.subject}</span>
-      <span class="ticket-status-badge ${ticket.status}">${ticket.status}</span>
-    `;
 
-    div.onclick = () => openTicket(ticket);
-    ticketList.appendChild(div);
-  });
+    ticketCache.forEach((ticket) => {
+      const div = document.createElement("div");
+      div.className = "ticket-item";
+      div.dataset.ticketId = ticket._id;
+      if (ticket._id === currentTicketId) {
+        div.classList.add("active");
+      }
+      div.innerHTML = `
+        <span class="ticket-subject">${ticket.subject}</span>
+        <span class="ticket-status-badge ${ticket.status}">${ticket.status}</span>
+      `;
 
-  if (currentTicketId) {
-    const updated = ticketCache.find(t => t._id === currentTicketId);
-    if (updated) {
-      openTicket(updated);
+      div.onclick = () => openTicket(ticket);
+      ticketList.appendChild(div);
+    });
+
+    if (currentTicketId) {
+      const updated = ticketCache.find((t) => t._id === currentTicketId);
+      if (updated) {
+        openTicket(updated);
+      } else {
+        currentTicketId = null;
+        ticketView.classList.add("hidden");
+      }
     }
+
+    setFeedback("", "");
+  } catch (error) {
+    console.error("Tickets fetch error:", error);
+    setFeedback("error", "Unable to load tickets right now.");
+    ticketList.innerHTML = "<p class=\"no-tickets\">Could not load tickets</p>";
   }
 }
 
@@ -68,6 +134,7 @@ loadTickets();
 // Open Ticket & Render Conversation
 function openTicket(ticket) {
   currentTicketId = ticket._id;
+  markActiveTicket();
   ticketView.classList.remove("hidden");
 
   document.getElementById("ticket-subject").textContent = ticket.subject;
@@ -90,48 +157,72 @@ function openTicket(ticket) {
 
   const isResolved = ticket.status === "resolved";
   resolveBtn.style.display = isResolved ? "none" : "block";
-  replyBox.disabled = isResolved;
-  sendReplyBtn.disabled = isResolved;
+  replyBox.disabled = isResolved || isSubmitting;
+  sendReplyBtn.disabled = isResolved || isSubmitting;
 }
 
 // Reply to Ticket
 sendReplyBtn.onclick = async () => {
   const text = replyBox.value.trim();
-  if (!text || !currentTicketId) return;
+  if (!text || !currentTicketId || isSubmitting) return;
 
-  const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/reply`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ message: text })
-  });
+  setSubmittingState(true);
+  setFeedback("", "");
 
-  if (!res.ok) {
-    console.error("Failed to send reply");
-    return;
+  try {
+    const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/reply`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: text })
+    });
+
+    if (!res.ok) {
+      const error = await getErrorMessage(res, "Failed to send reply");
+      setFeedback("error", error);
+      return;
+    }
+
+    replyBox.value = "";
+    setFeedback("success", "Reply sent");
+    await loadTickets();
+  } catch (error) {
+    console.error("Reply error:", error);
+    setFeedback("error", "Unable to send reply right now.");
+  } finally {
+    setSubmittingState(false);
   }
-
-  replyBox.value = "";
-  await loadTickets();
 };
 
 // Resolve Ticket
 resolveBtn.onclick = async () => {
-  if (!currentTicketId) return;
+  if (!currentTicketId || isSubmitting) return;
 
-  const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/resolve`, {
-    method: "PATCH",
-    headers: {
-      "Authorization": `Bearer ${token}`
+  setSubmittingState(true);
+  setFeedback("", "");
+
+  try {
+    const res = await fetch(`${API_BASE}/tickets/${currentTicketId}/resolve`, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const error = await getErrorMessage(res, "Failed to resolve ticket");
+      setFeedback("error", error);
+      return;
     }
-  });
 
-  if (!res.ok) {
-    console.error("Failed to resolve ticket");
-    return;
+    setFeedback("success", "Ticket marked as resolved");
+    await loadTickets();
+  } catch (error) {
+    console.error("Resolve error:", error);
+    setFeedback("error", "Unable to resolve ticket right now.");
+  } finally {
+    setSubmittingState(false);
   }
-
-  await loadTickets();
 };

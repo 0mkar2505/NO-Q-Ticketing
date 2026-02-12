@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from bson import ObjectId
 from models.db import db
 
@@ -22,6 +22,22 @@ class Ticket:
         return data
 
     @staticmethod
+    def _coerce_datetime(value):
+        if isinstance(value, datetime):
+            if value.tzinfo:
+                return value.astimezone(timezone.utc).replace(tzinfo=None)
+            return value
+        if isinstance(value, str):
+            try:
+                parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                if parsed.tzinfo:
+                    return parsed.astimezone(timezone.utc).replace(tzinfo=None)
+                return parsed
+            except ValueError:
+                return None
+        return None
+
+    @staticmethod
     def create(company_id, subject, customer_email, message):
         ticket = {
             "company_id": company_id,
@@ -43,7 +59,7 @@ class Ticket:
 
     @staticmethod
     def get_by_company(company_id):
-        tickets = ticket_collection.find({"company_id": company_id})
+        tickets = ticket_collection.find({"company_id": company_id}).sort("updated_at", -1)
         return [Ticket._serialize(ticket) for ticket in tickets]
 
     @staticmethod
@@ -55,8 +71,17 @@ class Ticket:
 
     @staticmethod
     def reply(ticket_id, company_id, message):
-        ticket_collection.update_one(
-            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id},
+        ticket = ticket_collection.find_one(
+            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id}
+        )
+        if not ticket:
+            return False, "not_found"
+
+        if ticket.get("status") == "resolved":
+            return False, "already_resolved"
+
+        result = ticket_collection.update_one(
+            {"_id": ticket["_id"], "company_id": company_id},
             {
                 "$push": {
                     "messages": {
@@ -68,11 +93,21 @@ class Ticket:
                 "$set": {"updated_at": datetime.utcnow()}
             }
         )
+        return result.modified_count == 1, None
 
     @staticmethod
     def resolve(ticket_id, company_id):
-        ticket_collection.update_one(
-            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id},
+        ticket = ticket_collection.find_one(
+            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id}
+        )
+        if not ticket:
+            return False, "not_found"
+
+        if ticket.get("status") == "resolved":
+            return False, "already_resolved"
+
+        result = ticket_collection.update_one(
+            {"_id": ticket["_id"], "company_id": company_id},
             {
                 "$set": {
                     "status": "resolved",
@@ -80,3 +115,96 @@ class Ticket:
                 }
             }
         )
+        return result.modified_count == 1, None
+
+    @staticmethod
+    def get_analytics(company_id):
+        now = datetime.utcnow()
+        start_date = (now - timedelta(days=6)).replace(hour=0, minute=0, second=0, microsecond=0)
+        day_keys = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+        volume_map = {key: 0 for key in day_keys}
+
+        tickets = list(ticket_collection.find({"company_id": company_id}))
+        total_tickets = len(tickets)
+        status_counts = {"open": 0, "pending": 0, "resolved": 0}
+        resolved_tickets = 0
+        tickets_this_week = 0
+        reopened_tickets = 0
+        response_total_minutes = 0
+        response_sample_size = 0
+        categories = {}
+
+        for ticket in tickets:
+            status = (ticket.get("status") or "open").lower()
+            if status in status_counts:
+                status_counts[status] += 1
+            if status == "resolved":
+                resolved_tickets += 1
+
+            created_at = Ticket._coerce_datetime(ticket.get("created_at"))
+            if created_at:
+                created_key = created_at.strftime("%Y-%m-%d")
+                if created_key in volume_map:
+                    volume_map[created_key] += 1
+                    tickets_this_week += 1
+
+            if ticket.get("reopened_count"):
+                reopened_tickets += int(ticket.get("reopened_count", 0))
+
+            category = (ticket.get("category") or "Uncategorized").strip()
+            categories[category] = categories.get(category, 0) + 1
+
+            messages = ticket.get("messages") or []
+            first_customer_time = None
+            first_client_time = None
+
+            for message in messages:
+                sender = (message.get("sender") or "").lower()
+                timestamp = Ticket._coerce_datetime(message.get("timestamp"))
+                if not timestamp:
+                    continue
+                if sender == "customer" and first_customer_time is None:
+                    first_customer_time = timestamp
+                if sender == "client" and first_customer_time:
+                    if timestamp >= first_customer_time:
+                        first_client_time = timestamp
+                        break
+
+            if first_customer_time and first_client_time:
+                delta_minutes = (first_client_time - first_customer_time).total_seconds() / 60
+                if delta_minutes >= 0:
+                    response_total_minutes += delta_minutes
+                    response_sample_size += 1
+
+        if total_tickets > 0:
+            resolution_rate = round((resolved_tickets / total_tickets) * 100)
+        else:
+            resolution_rate = 0
+
+        if response_sample_size > 0:
+            avg_response_minutes = round(response_total_minutes / response_sample_size)
+        else:
+            avg_response_minutes = None
+
+        top_categories = [
+            {"name": name, "count": count}
+            for name, count in sorted(categories.items(), key=lambda item: item[1], reverse=True)[:5]
+        ]
+
+        volume_last_7_days = [
+            {"date": day, "count": volume_map[day]}
+            for day in day_keys
+        ]
+
+        return {
+            "summary": {
+                "tickets_this_week": tickets_this_week,
+                "avg_response_minutes": avg_response_minutes,
+                "resolution_rate": resolution_rate,
+                "reopened_tickets": reopened_tickets
+            },
+            "status_distribution": status_counts,
+            "volume_last_7_days": volume_last_7_days,
+            "top_categories": top_categories,
+            "team_performance": []
+        }

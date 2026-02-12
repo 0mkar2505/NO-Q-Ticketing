@@ -18,27 +18,28 @@
         <p class="page-subtitle">
           Support trends and ticket performance at a glance
         </p>
+        <p id="analytics-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
 
         <section class="analytics-metrics">
           <article class="metric-card">
             <p class="metric-label">Tickets This Week</p>
-            <p class="metric-value">128</p>
-            <p class="metric-trend trend-up">+12.4% vs last week</p>
+            <p class="metric-value" id="metric-tickets-week">0</p>
+            <p class="metric-trend trend-flat" id="trend-tickets-week">Derived from last 7 days</p>
           </article>
           <article class="metric-card">
             <p class="metric-label">Avg Response Time</p>
-            <p class="metric-value">2h 14m</p>
-            <p class="metric-trend trend-down">-19m improvement</p>
+            <p class="metric-value" id="metric-response-time">-</p>
+            <p class="metric-trend trend-flat" id="trend-response-time">Based on first client reply</p>
           </article>
           <article class="metric-card">
             <p class="metric-label">Resolution Rate</p>
-            <p class="metric-value">84%</p>
-            <p class="metric-trend trend-up">+4.0% vs last week</p>
+            <p class="metric-value" id="metric-resolution-rate">0%</p>
+            <p class="metric-trend trend-flat" id="trend-resolution-rate">Resolved / total tickets</p>
           </article>
           <article class="metric-card">
             <p class="metric-label">Reopened Tickets</p>
-            <p class="metric-value">9</p>
-            <p class="metric-trend trend-flat">No change</p>
+            <p class="metric-value" id="metric-reopened">0</p>
+            <p class="metric-trend trend-flat" id="trend-reopened">Tracks reopen count field</p>
           </article>
         </section>
 
@@ -48,14 +49,14 @@
               <h2>Ticket Volume</h2>
               <span class="panel-tag">Last 7 Days</span>
             </div>
-            <div class="bar-chart-placeholder" aria-hidden="true">
-              <div style="height: 35%"></div>
-              <div style="height: 62%"></div>
-              <div style="height: 48%"></div>
-              <div style="height: 74%"></div>
-              <div style="height: 54%"></div>
-              <div style="height: 80%"></div>
-              <div style="height: 67%"></div>
+            <div class="bar-chart-placeholder" aria-hidden="true" id="volume-bars">
+              <div style="height: 5%"></div>
+              <div style="height: 5%"></div>
+              <div style="height: 5%"></div>
+              <div style="height: 5%"></div>
+              <div style="height: 5%"></div>
+              <div style="height: 5%"></div>
+              <div style="height: 5%"></div>
             </div>
           </article>
 
@@ -64,10 +65,10 @@
               <h2>Status Distribution</h2>
               <span class="panel-tag">Current</span>
             </div>
-            <div class="status-stack" aria-hidden="true">
-              <div class="status-bar-open" style="width: 58%">Open 58%</div>
-              <div class="status-bar-progress" style="width: 27%">Pending 27%</div>
-              <div class="status-bar-resolved" style="width: 15%">Resolved 15%</div>
+            <div class="status-stack" aria-hidden="true" id="status-stack">
+              <div class="status-bar-open" id="status-open" style="width: 0%">Open 0%</div>
+              <div class="status-bar-progress" id="status-pending" style="width: 0%">Pending 0%</div>
+              <div class="status-bar-resolved" id="status-resolved" style="width: 0%">Resolved 0%</div>
             </div>
           </article>
 
@@ -76,22 +77,10 @@
               <h2>Top Categories</h2>
               <span class="panel-tag">By Volume</span>
             </div>
-            <ul class="analytics-list">
+            <ul class="analytics-list" id="top-categories-list">
               <li>
-                <span>Login & Access</span>
-                <strong>42 tickets</strong>
-              </li>
-              <li>
-                <span>Billing & Invoices</span>
-                <strong>31 tickets</strong>
-              </li>
-              <li>
-                <span>Product Bugs</span>
-                <strong>28 tickets</strong>
-              </li>
-              <li>
-                <span>Account Setup</span>
-                <strong>19 tickets</strong>
+                <span>No categories yet</span>
+                <strong>0 tickets</strong>
               </li>
             </ul>
           </article>
@@ -110,24 +99,9 @@
                   <th>Avg Time</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="team-performance-body">
                 <tr>
-                  <td>A. Sharma</td>
-                  <td>34</td>
-                  <td>29</td>
-                  <td>1h 56m</td>
-                </tr>
-                <tr>
-                  <td>M. Patel</td>
-                  <td>29</td>
-                  <td>24</td>
-                  <td>2h 31m</td>
-                </tr>
-                <tr>
-                  <td>R. Khan</td>
-                  <td>25</td>
-                  <td>22</td>
-                  <td>2h 09m</td>
+                  <td colspan="4">No team data available yet</td>
                 </tr>
               </tbody>
             </table>
@@ -143,5 +117,6 @@
 
   <script src="/shared/js/auth-guard.js"></script>
   <script src="/shared/js/load-shared.js"></script>
+  <script src="./analytics.js"></script>
 </body>
 </html>
