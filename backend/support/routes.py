@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
 import re
+import time
+from collections import defaultdict, deque
 from models.chat_session import ChatSession
 from models.client_config import ClientConfig
 from models.db import company_collection
@@ -15,6 +17,45 @@ from support.rules import (
 support_bp = Blueprint("support", __name__)
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+MAX_EMAIL_LENGTH = 320
+MAX_SUBJECT_LENGTH = 200
+MAX_DETAILS_LENGTH = 4000
+
+# Simple in-memory rate limiter for public support APIs.
+# Keyed by "route_key:ip" and enforced with a sliding window.
+_RATE_WINDOWS = {
+    "start": (10, 60),         # 10 requests / 60s
+    "step": (60, 60),          # 60 requests / 60s
+    "create_ticket": (10, 60), # 10 requests / 60s
+    "ticket_status": (30, 60), # 30 requests / 60s
+}
+_RATE_STATE = defaultdict(deque)
+
+
+def _get_request_ip():
+    forwarded_for = (request.headers.get("X-Forwarded-For") or "").strip()
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return (request.remote_addr or "unknown").strip()
+
+
+def _check_rate_limit(route_key):
+    limit, window_seconds = _RATE_WINDOWS[route_key]
+    ip = _get_request_ip()
+    key = f"{route_key}:{ip}"
+    bucket = _RATE_STATE[key]
+    now = time.time()
+    window_start = now - window_seconds
+
+    while bucket and bucket[0] < window_start:
+        bucket.popleft()
+
+    if len(bucket) >= limit:
+        retry_after = max(1, int(bucket[0] + window_seconds - now))
+        return False, retry_after
+
+    bucket.append(now)
+    return True, None
 
 
 def _find_company_by_slug(company_slug):
@@ -36,6 +77,10 @@ def _review_payload(answers):
 
 @support_bp.route("/api/support/start", methods=["POST"])
 def support_start():
+    allowed, retry_after = _check_rate_limit("start")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
     data = request.get_json(silent=True) or {}
     company_slug = (data.get("company_slug") or "").strip().lower()
     customer_email = (data.get("customer_email") or "").strip().lower()
@@ -46,6 +91,8 @@ def support_start():
         return jsonify({"error": "company_slug format is invalid"}), 400
     if not customer_email:
         return jsonify({"error": "customer_email is required"}), 400
+    if len(customer_email) > MAX_EMAIL_LENGTH:
+        return jsonify({"error": "customer_email is too long"}), 400
     if not EMAIL_PATTERN.match(customer_email):
         return jsonify({"error": "customer_email format is invalid"}), 400
 
@@ -78,6 +125,10 @@ def support_start():
 
 @support_bp.route("/api/support/step", methods=["POST"])
 def support_step():
+    allowed, retry_after = _check_rate_limit("step")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
     data = request.get_json(silent=True) or {}
     session_id = (data.get("session_id") or "").strip()
     option_id = (data.get("option_id") or "").strip()
@@ -105,6 +156,8 @@ def support_step():
     if current_step == "details":
         if not details:
             return jsonify({"error": "details is required for this step"}), 400
+        if len(details) > MAX_DETAILS_LENGTH:
+            return jsonify({"error": f"details is too long (max {MAX_DETAILS_LENGTH} characters)"}), 400
         answers["details"] = details
         ChatSession.append_turn(session_id, "customer", details)
     else:
@@ -153,6 +206,10 @@ def support_step():
 
 @support_bp.route("/api/support/create-ticket", methods=["POST"])
 def support_create_ticket():
+    allowed, retry_after = _check_rate_limit("create_ticket")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
     data = request.get_json(silent=True) or {}
     session_id = (data.get("session_id") or "").strip()
     if not session_id:
@@ -175,6 +232,8 @@ def support_create_ticket():
     category_label = compute_category(answers["category"])
     priority, severity = compute_priority(answers)
     subject = (data.get("subject") or "").strip() or build_subject(answers)
+    if len(subject) > MAX_SUBJECT_LENGTH:
+        return jsonify({"error": f"subject is too long (max {MAX_SUBJECT_LENGTH} characters)"}), 400
 
     transcript = []
     for turn in session.get("transcript") or []:
@@ -217,6 +276,10 @@ def support_create_ticket():
 
 @support_bp.route("/api/support/ticket-status", methods=["GET"])
 def support_ticket_status():
+    allowed, retry_after = _check_rate_limit("ticket_status")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
     ticket_id = (request.args.get("ticket_id") or "").strip()
     customer_email = (request.args.get("email") or "").strip().lower()
 
@@ -224,6 +287,10 @@ def support_ticket_status():
         return jsonify({"error": "ticket_id is required"}), 400
     if not customer_email:
         return jsonify({"error": "email is required"}), 400
+    if len(customer_email) > MAX_EMAIL_LENGTH:
+        return jsonify({"error": "email is too long"}), 400
+    if not EMAIL_PATTERN.match(customer_email):
+        return jsonify({"error": "email format is invalid"}), 400
 
     ticket = Ticket.get_customer_status(ticket_id, customer_email)
     if not ticket:

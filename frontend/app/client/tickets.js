@@ -14,18 +14,28 @@ const feedbackEl = document.getElementById("tickets-feedback");
 const runAiAssistBtn = document.getElementById("run-ai-assist");
 const aiPriorityEl = document.getElementById("ai-priority");
 const aiSummaryEl = document.getElementById("ai-summary");
+const searchEl = document.getElementById("ticket-search");
+const statusFilterEl = document.getElementById("ticket-filter-status");
+const priorityFilterEl = document.getElementById("ticket-filter-priority");
+const sortEl = document.getElementById("ticket-sort");
+const prevPageBtn = document.getElementById("ticket-prev-page");
+const nextPageBtn = document.getElementById("ticket-next-page");
+const pageInfoEl = document.getElementById("ticket-page-info");
 
 let currentTicketId = null;
 let ticketCache = [];
 let isSubmitting = false;
 let isAiRunning = false;
+let currentPage = 1;
+const PAGE_SIZE = 12;
 
 async function apiFetch(path, options = {}) {
   try {
     const res = await fetch(path, options);
-    if (res.status !== 404 || window.location.port === "5000") {
-      return res;
-    }
+    const shouldFallback =
+      window.location.port !== "5000" &&
+      (res.status === 404 || res.status === 405 || res.status === 501);
+    if (!shouldFallback) return res;
   } catch (error) {
     // Try backend fallback when local frontend is on another port.
   }
@@ -87,6 +97,88 @@ function normalizePriority(priority) {
   return "unspecified";
 }
 
+function priorityRank(priority) {
+  const map = { high: 3, normal: 2, low: 1, unspecified: 0 };
+  return map[normalizePriority(priority)] ?? 0;
+}
+
+function toEpoch(value) {
+  const ts = Date.parse(value || "");
+  return Number.isFinite(ts) ? ts : 0;
+}
+
+function getFilteredAndSortedTickets() {
+  const query = (searchEl?.value || "").trim().toLowerCase();
+  const statusFilter = (statusFilterEl?.value || "all").toLowerCase();
+  const priorityFilter = (priorityFilterEl?.value || "all").toLowerCase();
+  const sortKey = (sortEl?.value || "updated_desc").toLowerCase();
+
+  let list = ticketCache.filter((ticket) => {
+    const ticketStatus = String(ticket.status || "").toLowerCase();
+    const ticketPriority = normalizePriority(ticket.priority);
+
+    if (statusFilter !== "all" && ticketStatus !== statusFilter) return false;
+    if (priorityFilter !== "all" && ticketPriority !== priorityFilter) return false;
+
+    if (!query) return true;
+    const haystack = [
+      ticket.subject,
+      ticket.customer_email,
+      ticket.category,
+      ticketPriority,
+      ticketStatus,
+    ]
+      .map((v) => String(v || "").toLowerCase())
+      .join(" ");
+    return haystack.includes(query);
+  });
+
+  list.sort((a, b) => {
+    const aUpdated = toEpoch(a.updated_at);
+    const bUpdated = toEpoch(b.updated_at);
+    const aCreated = toEpoch(a.created_at);
+    const bCreated = toEpoch(b.created_at);
+    const aPriority = priorityRank(a.priority);
+    const bPriority = priorityRank(b.priority);
+
+    switch (sortKey) {
+      case "updated_asc":
+        return aUpdated - bUpdated;
+      case "created_desc":
+        return bCreated - aCreated;
+      case "created_asc":
+        return aCreated - bCreated;
+      case "priority_desc":
+        return bPriority - aPriority || bUpdated - aUpdated;
+      case "priority_asc":
+        return aPriority - bPriority || bUpdated - aUpdated;
+      case "updated_desc":
+      default:
+        return bUpdated - aUpdated;
+    }
+  });
+
+  return list;
+}
+
+function getPageSlice(tickets) {
+  const totalPages = Math.max(1, Math.ceil(tickets.length / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageItems = tickets.slice(start, start + PAGE_SIZE);
+  return { pageItems, totalPages };
+}
+
+function renderPagination(totalPages, totalItems) {
+  if (pageInfoEl) {
+    pageInfoEl.textContent = `Page ${currentPage} of ${totalPages} (${totalItems} tickets)`;
+  }
+  if (prevPageBtn) prevPageBtn.disabled = currentPage <= 1;
+  if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
+}
+
 function renderTicketGroups(tickets) {
   const groups = { high: [], normal: [], low: [], unspecified: [] };
   tickets.forEach((ticket) => {
@@ -122,6 +214,38 @@ function renderTicketGroups(tickets) {
   });
 }
 
+function refreshTicketList() {
+  if (!Array.isArray(ticketCache) || ticketCache.length === 0) {
+    ticketList.innerHTML = "<p class=\"no-tickets\">No tickets found</p>";
+    ticketView.classList.add("hidden");
+    currentTicketId = null;
+    renderPagination(1, 0);
+    return;
+  }
+
+  const filtered = getFilteredAndSortedTickets();
+  if (filtered.length === 0) {
+    ticketList.innerHTML = "<p class=\"no-tickets\">No tickets match current filters</p>";
+    ticketView.classList.add("hidden");
+    renderPagination(1, 0);
+    return;
+  }
+
+  const { pageItems, totalPages } = getPageSlice(filtered);
+  renderTicketGroups(pageItems);
+  renderPagination(totalPages, filtered.length);
+
+  if (currentTicketId) {
+    const updated = filtered.find((t) => t._id === currentTicketId);
+    if (updated) {
+      openTicket(updated);
+      return;
+    }
+    currentTicketId = null;
+    ticketView.classList.add("hidden");
+  }
+}
+
 // Fetch & Render Tickets
 async function loadTickets() {
   if (!token) {
@@ -150,33 +274,13 @@ async function loadTickets() {
 
     const tickets = await res.json();
     ticketCache = Array.isArray(tickets) ? tickets : [];
-    ticketList.innerHTML = "";
-
-    if (ticketCache.length === 0) {
-      ticketList.innerHTML = "<p class=\"no-tickets\">No tickets found</p>";
-      ticketView.classList.add("hidden");
-      currentTicketId = null;
-      setFeedback("", "");
-      return;
-    }
-
-    renderTicketGroups(ticketCache);
-
-    if (currentTicketId) {
-      const updated = ticketCache.find((t) => t._id === currentTicketId);
-      if (updated) {
-        openTicket(updated);
-      } else {
-        currentTicketId = null;
-        ticketView.classList.add("hidden");
-      }
-    }
-
+    refreshTicketList();
     setFeedback("", "");
   } catch (error) {
     console.error("Tickets fetch error:", error);
     setFeedback("error", "Unable to load tickets right now.");
     ticketList.innerHTML = "<p class=\"no-tickets\">Could not load tickets</p>";
+    renderPagination(1, 0);
   }
 }
 
@@ -316,3 +420,24 @@ runAiAssistBtn.onclick = async () => {
     setAiState(false);
   }
 };
+
+function resetToFirstPageAndRefresh() {
+  currentPage = 1;
+  refreshTicketList();
+}
+
+searchEl?.addEventListener("input", resetToFirstPageAndRefresh);
+statusFilterEl?.addEventListener("change", resetToFirstPageAndRefresh);
+priorityFilterEl?.addEventListener("change", resetToFirstPageAndRefresh);
+sortEl?.addEventListener("change", resetToFirstPageAndRefresh);
+
+prevPageBtn?.addEventListener("click", () => {
+  if (currentPage <= 1) return;
+  currentPage -= 1;
+  refreshTicketList();
+});
+
+nextPageBtn?.addEventListener("click", () => {
+  currentPage += 1;
+  refreshTicketList();
+});

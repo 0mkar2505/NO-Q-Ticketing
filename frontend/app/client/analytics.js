@@ -19,9 +19,10 @@ const teamBodyEl = document.getElementById("team-performance-body");
 async function apiFetch(path, options = {}) {
   try {
     const res = await fetch(path, options);
-    if (res.status !== 404 || window.location.port === "5000") {
-      return res;
-    }
+    const shouldFallback =
+      window.location.port !== "5000" &&
+      (res.status === 404 || res.status === 405 || res.status === 501);
+    if (!shouldFallback) return res;
   } catch (error) {
     // Try backend fallback when local frontend is on another port.
   }

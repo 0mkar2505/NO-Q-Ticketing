@@ -143,9 +143,9 @@ togglePasswordBtns.forEach((btn) => {
   btn.addEventListener("click", () => {
     const input = btn.previousElementSibling;
     const isHidden = input.type === "password";
-
+okay
     input.type = isHidden ? "text" : "password";
     btn.textContent = isHidden ? "🙈" : "👁";
-    btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+    btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");1
   });
 });

@@ -11,13 +11,6 @@ const signatureEl = document.getElementById("signatureText");
 const notifyNewTicketsEl = document.getElementById("notifyNewTickets");
 const notifyDailySummaryEl = document.getElementById("notifyDailySummary");
 const notifyEscalationsEl = document.getElementById("notifyEscalations");
-const chatAssistantTitleEl = document.getElementById("chatAssistantTitle");
-const chatAssistantSubtitleEl = document.getElementById("chatAssistantSubtitle");
-const chatPrimaryColorEl = document.getElementById("chatPrimaryColor");
-const chatAssistantBubbleColorEl = document.getElementById("chatAssistantBubbleColor");
-const chatAssistantTextColorEl = document.getElementById("chatAssistantTextColor");
-const chatCustomerBubbleColorEl = document.getElementById("chatCustomerBubbleColor");
-const chatCustomerTextColorEl = document.getElementById("chatCustomerTextColor");
 const resetBtnEl = document.getElementById("resetConfigsBtn");
 const saveBtnEl = document.getElementById("saveConfigsBtn");
 
@@ -27,9 +20,10 @@ let isSaving = false;
 async function apiFetch(path, options = {}) {
   try {
     const res = await fetch(path, options);
-    if (res.status !== 404 || window.location.port === "5000") {
-      return res;
-    }
+    const shouldFallback =
+      window.location.port !== "5000" &&
+      (res.status === 404 || res.status === 405 || res.status === 501);
+    if (!shouldFallback) return res;
   } catch (error) {
     // Try backend fallback when local frontend is on another port.
   }
@@ -67,6 +61,8 @@ function normalizeConfig(config) {
       manager_escalation_alerts: Boolean(notifications.manager_escalation_alerts),
     },
     customer_chat_ui: {
+      brand_name: chat.brand_name || "NO-Q Support",
+      logo_url: chat.logo_url || "",
       assistant_title: chat.assistant_title || "Guided Support Assistant",
       assistant_subtitle: chat.assistant_subtitle || "Answer a few guided prompts and we will create a support ticket for you.",
       primary_color: chat.primary_color || "#7c3aed",
@@ -86,16 +82,13 @@ function applyConfigToForm(config) {
   notifyNewTicketsEl.checked = normalized.notifications.email_new_tickets;
   notifyDailySummaryEl.checked = normalized.notifications.daily_summary_report;
   notifyEscalationsEl.checked = normalized.notifications.manager_escalation_alerts;
-  chatAssistantTitleEl.value = normalized.customer_chat_ui.assistant_title;
-  chatAssistantSubtitleEl.value = normalized.customer_chat_ui.assistant_subtitle;
-  chatPrimaryColorEl.value = normalized.customer_chat_ui.primary_color;
-  chatAssistantBubbleColorEl.value = normalized.customer_chat_ui.assistant_bubble_color;
-  chatAssistantTextColorEl.value = normalized.customer_chat_ui.assistant_text_color;
-  chatCustomerBubbleColorEl.value = normalized.customer_chat_ui.customer_bubble_color;
-  chatCustomerTextColorEl.value = normalized.customer_chat_ui.customer_text_color;
 }
 
 function readFormConfig() {
+  // Backend validation currently requires customer_chat_ui in every PATCH payload.
+  // Settings no longer edits branding, so preserve whatever was last loaded.
+  const fallbackChat = normalizeConfig({}).customer_chat_ui;
+  const preservedChat = lastLoadedConfig?.customer_chat_ui || fallbackChat;
   return {
     default_priority: defaultPriorityEl.value,
     sla_response_hours: Number(slaWindowEl.value),
@@ -105,15 +98,7 @@ function readFormConfig() {
       daily_summary_report: notifyDailySummaryEl.checked,
       manager_escalation_alerts: notifyEscalationsEl.checked,
     },
-    customer_chat_ui: {
-      assistant_title: chatAssistantTitleEl.value.trim(),
-      assistant_subtitle: chatAssistantSubtitleEl.value.trim(),
-      primary_color: chatPrimaryColorEl.value.trim(),
-      assistant_bubble_color: chatAssistantBubbleColorEl.value.trim(),
-      assistant_text_color: chatAssistantTextColorEl.value.trim(),
-      customer_bubble_color: chatCustomerBubbleColorEl.value.trim(),
-      customer_text_color: chatCustomerTextColorEl.value.trim(),
-    },
+    customer_chat_ui: preservedChat,
   };
 }
 

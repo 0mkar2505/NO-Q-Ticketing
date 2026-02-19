@@ -26,6 +26,30 @@
           Manage customer support tickets
         </p>
         <p id="tickets-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+        <section class="ticket-toolbar">
+          <input id="ticket-search" type="text" placeholder="Search subject, category, or customer email" />
+          <select id="ticket-filter-status">
+            <option value="all">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="pending">Pending</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <select id="ticket-filter-priority">
+            <option value="all">All Priorities</option>
+            <option value="high">High</option>
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+            <option value="unspecified">Unspecified</option>
+          </select>
+          <select id="ticket-sort">
+            <option value="updated_desc">Newest Updated</option>
+            <option value="updated_asc">Oldest Updated</option>
+            <option value="created_desc">Newest Created</option>
+            <option value="created_asc">Oldest Created</option>
+            <option value="priority_desc">Priority High to Low</option>
+            <option value="priority_asc">Priority Low to High</option>
+          </select>
+        </section>
 
         <div class="tickets-container">
           <div id="ticket-list" class="ticket-list"></div>
@@ -52,6 +76,11 @@
               <p id="ai-summary" class="ticket-ai-summary">Summary will appear here after generation.</p>
             </section>
           </div>
+        </div>
+        <div class="ticket-pagination">
+          <button id="ticket-prev-page" class="btn btn-secondary" type="button">Prev</button>
+          <span id="ticket-page-info">Page 1 of 1</span>
+          <button id="ticket-next-page" class="btn btn-secondary" type="button">Next</button>
         </div>
       </main>
 

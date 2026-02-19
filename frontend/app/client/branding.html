@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Branding | NO-Q</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Customer Chat Branding</h1>
+        <p class="page-subtitle">Customize your public support assistant with a live preview.</p>
+        <p id="branding-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="branding-layout">
+          <article class="settings-card">
+            <h2>Basics</h2>
+            <p class="settings-copy">Header identity shown to customers.</p>
+
+            <div class="settings-field">
+              <label for="brandName">Brand Name</label>
+              <input id="brandName" type="text" maxlength="60" placeholder="Acme Support" />
+            </div>
+
+            <div class="settings-field">
+              <label for="logoUrl">Logo URL (optional)</label>
+              <input id="logoUrl" type="text" maxlength="500" placeholder="https://... or /assets/images/logo.png" />
+            </div>
+
+            <div class="settings-field">
+              <label for="assistantTitle">Assistant Title</label>
+              <input id="assistantTitle" type="text" maxlength="100" />
+            </div>
+
+            <div class="settings-field">
+              <label for="assistantSubtitle">Assistant Subtitle</label>
+              <textarea id="assistantSubtitle" maxlength="240"></textarea>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <h2>Colors</h2>
+            <p class="settings-copy">Use pickers, not hex codes.</p>
+
+            <div class="branding-color-grid">
+              <div class="branding-color-row">
+                <label>Primary</label>
+                <input id="primaryColorPicker" type="color" />
+                <input id="primaryColorText" type="text" />
+              </div>
+              <div class="branding-color-row">
+                <label>Assistant Bubble</label>
+                <input id="assistantBubblePicker" type="color" />
+                <input id="assistantBubbleText" type="text" />
+              </div>
+              <div class="branding-color-row">
+                <label>Assistant Text</label>
+                <input id="assistantTextPicker" type="color" />
+                <input id="assistantTextText" type="text" />
+              </div>
+              <div class="branding-color-row">
+                <label>Customer Bubble</label>
+                <input id="customerBubblePicker" type="color" />
+                <input id="customerBubbleText" type="text" />
+              </div>
+              <div class="branding-color-row">
+                <label>Customer Text</label>
+                <input id="customerTextPicker" type="color" />
+                <input id="customerTextText" type="text" />
+              </div>
+            </div>
+          </article>
+
+          <article class="settings-card branding-preview-card">
+            <div class="panel-head">
+              <h2>Live Preview</h2>
+              <span class="panel-tag">Customer View</span>
+            </div>
+
+            <div id="branding-preview" class="support-preview">
+              <header class="navbar navbar--auth support-preview-nav">
+                <div class="navbar-left">
+                  <img id="preview-logo" src="/assets/images/NO-Q logo 1.png" alt="Logo" class="navbar-logo" />
+                  <span id="preview-brand" class="navbar-brand">NO-Q Support</span>
+                </div>
+              </header>
+
+              <div class="support-card support-preview-card">
+                <h3 id="preview-title" class="support-title support-title--small">Guided Support Assistant</h3>
+                <p id="preview-subtitle" class="support-subtitle">Answer a few guided prompts and we will create a support ticket for you.</p>
+
+                <div class="support-chat support-preview-chat">
+                  <div class="support-msg assistant"><p>Hello. What can we help with today?</p></div>
+                  <div class="support-msg customer"><p>Payments are failing after checkout.</p></div>
+                  <div class="support-msg assistant"><p>Got it. We will create a ticket with the right priority.</p></div>
+                </div>
+
+                <div class="support-options support-preview-options">
+                  <button class="btn btn-primary" type="button">Start Assistant</button>
+                  <button class="btn btn-secondary" type="button">Check Status</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <div class="settings-actions">
+          <button id="brandingResetBtn" class="btn btn-secondary" type="button">Reset</button>
+          <button id="brandingSaveBtn" class="btn btn-primary" type="button">Save Branding</button>
+        </div>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="./branding.js"></script>
+</body>
+</html>

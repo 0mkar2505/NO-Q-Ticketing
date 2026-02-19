@@ -7,6 +7,8 @@ client_configs_bp = Blueprint("client_configs", __name__)
 ALLOWED_PRIORITIES = {"low", "normal", "high"}
 ALLOWED_SLA_HOURS = {2, 4, 8}
 HEX_COLOR_LENGTH = 7
+MAX_BRAND_NAME_LENGTH = 60
+MAX_LOGO_URL_LENGTH = 500
 
 
 def _coerce_bool(value):
@@ -53,6 +55,8 @@ def _validate_payload(data):
     if not isinstance(customer_chat_ui, dict):
         return None, "customer_chat_ui must be an object"
 
+    brand_name = (customer_chat_ui.get("brand_name") or "").strip()
+    logo_url = (customer_chat_ui.get("logo_url") or "").strip()
     assistant_title = (customer_chat_ui.get("assistant_title") or "").strip()
     assistant_subtitle = (customer_chat_ui.get("assistant_subtitle") or "").strip()
     primary_color = (customer_chat_ui.get("primary_color") or "").strip()
@@ -60,6 +64,17 @@ def _validate_payload(data):
     assistant_text_color = (customer_chat_ui.get("assistant_text_color") or "").strip()
     customer_bubble_color = (customer_chat_ui.get("customer_bubble_color") or "").strip()
     customer_text_color = (customer_chat_ui.get("customer_text_color") or "").strip()
+
+    if brand_name and len(brand_name) > MAX_BRAND_NAME_LENGTH:
+        return None, f"customer_chat_ui.brand_name is too long (max {MAX_BRAND_NAME_LENGTH} characters)"
+    if logo_url and len(logo_url) > MAX_LOGO_URL_LENGTH:
+        return None, f"customer_chat_ui.logo_url is too long (max {MAX_LOGO_URL_LENGTH} characters)"
+    if logo_url and not (
+        logo_url.startswith("http://")
+        or logo_url.startswith("https://")
+        or logo_url.startswith("/")
+    ):
+        return None, "customer_chat_ui.logo_url must be a http(s) URL or a relative path starting with /"
 
     if not assistant_title:
         return None, "customer_chat_ui.assistant_title is required"
@@ -91,6 +106,8 @@ def _validate_payload(data):
             "manager_escalation_alerts": _coerce_bool(notifications.get("manager_escalation_alerts")),
         },
         "customer_chat_ui": {
+            "brand_name": brand_name,
+            "logo_url": logo_url,
             "assistant_title": assistant_title,
             "assistant_subtitle": assistant_subtitle,
             "primary_color": primary_color,

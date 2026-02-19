@@ -4,6 +4,8 @@ const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 const supportFeedbackEl = document.getElementById("support-feedback");
 const supportAssistantTitleEl = document.getElementById("support-assistant-title");
 const supportAssistantSubtitleEl = document.getElementById("support-assistant-subtitle");
+const supportBrandNameEl = document.getElementById("support-brand-name");
+const supportBrandLogoEl = document.getElementById("support-brand-logo");
 const supportCompanySlugEl = document.getElementById("support-company-slug");
 const supportEmailEl = document.getElementById("support-email");
 const supportStartBtn = document.getElementById("support-start");
@@ -32,9 +34,10 @@ let isCreatingTicket = false;
 async function apiFetch(path, options = {}) {
   try {
     const res = await fetch(path, options);
-    if (res.status !== 404 || window.location.port === "5000") {
-      return res;
-    }
+    const shouldFallback =
+      window.location.port !== "5000" &&
+      (res.status === 404 || res.status === 405 || res.status === 501);
+    if (!shouldFallback) return res;
   } catch (error) {
     // Try backend fallback when local frontend is on another port.
   }
@@ -71,6 +74,13 @@ function appendChat(role, text) {
 
 function applyCustomerChatUi(chatUi = {}) {
   if (!chatUi || typeof chatUi !== "object") return;
+
+  if (supportBrandNameEl && chatUi.brand_name) {
+    supportBrandNameEl.textContent = chatUi.brand_name;
+  }
+  if (supportBrandLogoEl && chatUi.logo_url) {
+    supportBrandLogoEl.src = chatUi.logo_url;
+  }
 
   if (supportAssistantTitleEl && chatUi.assistant_title) {
     supportAssistantTitleEl.textContent = chatUi.assistant_title;
