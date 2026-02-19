@@ -1,6 +1,7 @@
 const form = document.getElementById("registerForm");
 const errorEl = document.getElementById("error");
 const submitBtn = document.getElementById("submitBtn");
+const successModalSubtextEl = document.querySelector("#successModal .modal-subtext");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -107,6 +108,9 @@ form.addEventListener("submit", async (e) => {
     }
 
     // Registration successful - show success modal
+    if (successModalSubtextEl && data.company_slug) {
+      successModalSubtextEl.textContent = `Your account is ready. Your tenant slug is "${data.company_slug}". Use it on the support page.`;
+    }
     document.getElementById("successModal").classList.remove("hidden");
 
   } catch (err) {

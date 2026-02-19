@@ -43,9 +43,10 @@ def admin_clients():
     for company in companies:
         company_name = (company.get("name") or "Unnamed Company").strip()
         company_email = (company.get("email") or "").strip()
+        company_slug = (company.get("slug") or "").strip()
 
         if query:
-            haystack = f"{company_name} {company_email}".lower()
+            haystack = f"{company_name} {company_email} {company_slug}".lower()
             if query not in haystack:
                 continue
 
@@ -54,6 +55,7 @@ def admin_clients():
             "company_id": str(company_id),
             "company_name": company_name,
             "company_email": company_email,
+            "company_slug": company_slug,
             "plan": company.get("plan", "N/A"),
             "members": int(users_by_company.get(company_id, 0)),
             "tickets": int(tickets_by_company.get(company_id, 0)),

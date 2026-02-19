@@ -72,4 +72,7 @@ def register():
         company_id=company_id
     )
 
-    return jsonify({"message": "User registered successfully"}), 201
+    return jsonify({
+        "message": "User registered successfully",
+        "company_slug": company.get("slug"),
+    }), 201

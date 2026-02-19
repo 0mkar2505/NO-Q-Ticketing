@@ -2,6 +2,7 @@ const API_BASE = "/api/client";
 const token = localStorage.getItem("token");
 const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const loginPath = `${pathBase}/auth/login.html`;
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const feedbackEl = document.getElementById("analytics-feedback");
 const ticketsWeekEl = document.getElementById("metric-tickets-week");
@@ -14,6 +15,18 @@ const statusPendingEl = document.getElementById("status-pending");
 const statusResolvedEl = document.getElementById("status-resolved");
 const topCategoriesEl = document.getElementById("top-categories-list");
 const teamBodyEl = document.getElementById("team-performance-body");
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -139,7 +152,7 @@ async function loadAnalytics() {
   setFeedback("info", "Loading analytics...");
 
   try {
-    const res = await fetch(`${API_BASE}/analytics`, {
+    const res = await apiFetch(`${API_BASE}/analytics`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -167,3 +180,5 @@ async function loadAnalytics() {
 }
 
 loadAnalytics();
+
+

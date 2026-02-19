@@ -1,9 +1,10 @@
 const SUPPORT_API_BASE = "/api/support";
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const supportFeedbackEl = document.getElementById("support-feedback");
 const supportAssistantTitleEl = document.getElementById("support-assistant-title");
 const supportAssistantSubtitleEl = document.getElementById("support-assistant-subtitle");
-const supportCompanyEl = document.getElementById("support-company");
+const supportCompanySlugEl = document.getElementById("support-company-slug");
 const supportEmailEl = document.getElementById("support-email");
 const supportStartBtn = document.getElementById("support-start");
 const supportChatEl = document.getElementById("support-chat");
@@ -27,6 +28,18 @@ let sessionId = null;
 let currentStep = null;
 let ticketCreated = false;
 let isCreatingTicket = false;
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -114,10 +127,10 @@ function applyAssistantState(payload) {
 }
 
 async function startAssistant() {
-  const company_name = supportCompanyEl.value.trim();
+  const company_slug = supportCompanySlugEl.value.trim().toLowerCase();
   const customer_email = supportEmailEl.value.trim().toLowerCase();
-  if (!company_name || !customer_email) {
-    setFeedback(supportFeedbackEl, "error", "Company name and customer email are required.");
+  if (!company_slug || !customer_email) {
+    setFeedback(supportFeedbackEl, "error", "Tenant slug and customer email are required.");
     return;
   }
 
@@ -130,10 +143,10 @@ async function startAssistant() {
   supportCreateTicketBtn.disabled = false;
 
   try {
-    const res = await fetch(`${SUPPORT_API_BASE}/start`, {
+    const res = await apiFetch(`${SUPPORT_API_BASE}/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ company_name, customer_email }),
+      body: JSON.stringify({ company_slug, customer_email }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -156,7 +169,7 @@ async function submitStep({ option_id = "", details = "", display_text = "" }) {
   if (display_text) appendChat("customer", display_text);
 
   try {
-    const res = await fetch(`${SUPPORT_API_BASE}/step`, {
+    const res = await apiFetch(`${SUPPORT_API_BASE}/step`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: sessionId, option_id, details }),
@@ -181,7 +194,7 @@ async function createTicket() {
   setFeedback(supportFeedbackEl, "info", "Creating ticket...");
 
   try {
-    const res = await fetch(`${SUPPORT_API_BASE}/create-ticket`, {
+    const res = await apiFetch(`${SUPPORT_API_BASE}/create-ticket`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: sessionId }),
@@ -227,7 +240,7 @@ async function checkStatus() {
 
   setFeedback(statusFeedbackEl, "info", "Checking status...");
   try {
-    const res = await fetch(`${SUPPORT_API_BASE}/ticket-status?ticket_id=${encodeURIComponent(ticketId)}&email=${encodeURIComponent(email)}`);
+    const res = await apiFetch(`${SUPPORT_API_BASE}/ticket-status?ticket_id=${encodeURIComponent(ticketId)}&email=${encodeURIComponent(email)}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setFeedback(statusFeedbackEl, "error", data.error || "Unable to fetch ticket status.");
@@ -262,3 +275,5 @@ supportDetailsSubmitBtn?.addEventListener("click", () => {
 });
 supportCreateTicketBtn?.addEventListener("click", createTicket);
 statusCheckBtn?.addEventListener("click", checkStatus);
+
+

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request
+from flask import send_from_directory
 from flask_cors import CORS
 from auth.routes import auth_bp
 from admin.routes import admin_bp
@@ -8,8 +9,11 @@ from client.tickets import client_tickets_bp
 from client.analytics import client_analytics_bp
 from client.configs import client_configs_bp
 from support.routes import support_bp
-from auth.routes import auth_bp
 from routes.ai_routes import ai_bp
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend"))
 
 app = Flask(__name__)
 CORS(app)
@@ -37,7 +41,16 @@ def protected():
         "user": request.user
     }
 
+@app.route("/", defaults={"path": "public/index.html"})
+@app.route("/<path:path>")
+def serve_frontend(path):
+    file_path = os.path.join(FRONTEND_DIR, path)
+
+    if os.path.isfile(file_path):
+        return send_from_directory(FRONTEND_DIR, path)
+
+    return send_from_directory(FRONTEND_DIR, "public/index.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
-

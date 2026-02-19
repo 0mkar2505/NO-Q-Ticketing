@@ -2,6 +2,7 @@ const API_BASE = "/api/client";
 const token = localStorage.getItem("token");
 const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const loginPath = `${pathBase}/auth/login.html`;
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const feedbackEl = document.getElementById("create-ticket-feedback");
 const createSubjectEl = document.getElementById("create-subject");
@@ -10,6 +11,18 @@ const createMessageEl = document.getElementById("create-message");
 const createTicketBtn = document.getElementById("create-ticket-btn");
 
 let isCreating = false;
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -49,7 +62,7 @@ async function createTicket() {
   setFeedback("", "");
 
   try {
-    const res = await fetch(`${API_BASE}/tickets`, {
+    const res = await apiFetch(`${API_BASE}/tickets`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -83,3 +96,5 @@ async function createTicket() {
 }
 
 createTicketBtn?.addEventListener("click", createTicket);
+
+

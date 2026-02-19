@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+import re
 from models.chat_session import ChatSession
 from models.client_config import ClientConfig
 from models.db import company_collection
@@ -12,14 +13,14 @@ from support.rules import (
 )
 
 support_bp = Blueprint("support", __name__)
+SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-def _find_company(company_name):
-    if not company_name:
+def _find_company_by_slug(company_slug):
+    if not company_slug:
         return None
-    return company_collection.find_one(
-        {"name": {"$regex": f"^{company_name.strip()}$", "$options": "i"}}
-    )
+    return company_collection.find_one({"slug": company_slug.strip().lower()})
 
 
 def _review_payload(answers):
@@ -36,15 +37,19 @@ def _review_payload(answers):
 @support_bp.route("/api/support/start", methods=["POST"])
 def support_start():
     data = request.get_json(silent=True) or {}
-    company_name = (data.get("company_name") or "").strip()
+    company_slug = (data.get("company_slug") or "").strip().lower()
     customer_email = (data.get("customer_email") or "").strip().lower()
 
-    if not company_name:
-        return jsonify({"error": "company_name is required"}), 400
+    if not company_slug:
+        return jsonify({"error": "company_slug is required"}), 400
+    if not SLUG_PATTERN.match(company_slug):
+        return jsonify({"error": "company_slug format is invalid"}), 400
     if not customer_email:
         return jsonify({"error": "customer_email is required"}), 400
+    if not EMAIL_PATTERN.match(customer_email):
+        return jsonify({"error": "customer_email format is invalid"}), 400
 
-    company = _find_company(company_name)
+    company = _find_company_by_slug(company_slug)
     if not company:
         return jsonify({"error": "Company not found"}), 404
     client_config = ClientConfig.get_by_company(company["_id"])
@@ -52,7 +57,7 @@ def support_start():
 
     session = ChatSession.create(
         company_id=company["_id"],
-        company_name=company.get("name") or company_name,
+        company_name=company.get("name") or company_slug,
         customer_email=customer_email,
     )
 

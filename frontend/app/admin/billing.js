@@ -3,6 +3,7 @@ const ADMIN_BILLING_RULES_API = "/api/admin/billing/rules";
 const adminBillingToken = localStorage.getItem("token");
 const adminBillingPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const adminBillingLoginPath = `${adminBillingPathBase}/auth/login.html`;
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const feedbackEl = document.getElementById("admin-billing-feedback");
 const totalClientsEl = document.getElementById("billing-total-clients");
@@ -15,6 +16,18 @@ const saveBtnEl = document.getElementById("billing-save-btn");
 
 let savedRules = { grace_days: 7, currency: "USD" };
 let isSaving = false;
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -102,7 +115,7 @@ async function loadBilling() {
   setFeedback("info", "Loading billing data...");
 
   try {
-    const res = await fetch(ADMIN_BILLING_API, {
+    const res = await apiFetch(ADMIN_BILLING_API, {
       headers: { Authorization: `Bearer ${adminBillingToken}` },
     });
 
@@ -150,7 +163,7 @@ async function saveRules() {
   setFeedback("", "");
 
   try {
-    const res = await fetch(ADMIN_BILLING_RULES_API, {
+    const res = await apiFetch(ADMIN_BILLING_RULES_API, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${adminBillingToken}`,
@@ -194,3 +207,5 @@ saveBtnEl?.addEventListener("click", saveRules);
 discardBtnEl?.addEventListener("click", discardRules);
 
 loadBilling();
+
+

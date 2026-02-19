@@ -3,6 +3,7 @@ const dashboardToken = localStorage.getItem("token");
 const dashboardPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const dashboardLoginPath = `${dashboardPathBase}/auth/login.html`;
 const createTicketPath = `${dashboardPathBase}/app/client/create-ticket.html`;
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const unresolvedEl = document.getElementById("dash-unresolved");
 const openEl = document.getElementById("dash-open");
@@ -12,6 +13,18 @@ const feedbackEl = document.getElementById("dashboard-feedback");
 const createTicketBtn = document.getElementById("dash-create-ticket");
 const breakdownEl = document.getElementById("dash-priority-breakdown");
 const recentEl = document.getElementById("dash-recent-tickets");
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -71,7 +84,7 @@ async function loadDashboardCounts() {
   }
 
   try {
-    const res = await fetch(`${DASHBOARD_API_BASE}/tickets`, {
+    const res = await apiFetch(`${DASHBOARD_API_BASE}/tickets`, {
       headers: { Authorization: `Bearer ${dashboardToken}` },
     });
 
@@ -110,3 +123,7 @@ createTicketBtn?.addEventListener("click", () => {
 });
 
 loadDashboardCounts();
+
+
+
+

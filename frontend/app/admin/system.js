@@ -2,6 +2,7 @@ const ADMIN_SYSTEM_API = "/api/admin/system";
 const adminSystemToken = localStorage.getItem("token");
 const adminSystemPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const adminSystemLoginPath = `${adminSystemPathBase}/auth/login.html`;
+const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
 
 const feedbackEl = document.getElementById("admin-system-feedback");
 const strongPasswordsEl = document.getElementById("systemStrongPasswords");
@@ -17,6 +18,18 @@ const saveBtnEl = document.getElementById("system-save-btn");
 let savedSettings = null;
 let latestAuditLogs = [];
 let isSaving = false;
+
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(path, options);
+    if (res.status !== 404 || window.location.port === "5000") {
+      return res;
+    }
+  } catch (error) {
+    // Try backend fallback when local frontend is on another port.
+  }
+  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
+}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -124,7 +137,7 @@ async function loadSystemData() {
 
   setFeedback("info", "Loading system settings...");
   try {
-    const res = await fetch(ADMIN_SYSTEM_API, {
+    const res = await apiFetch(ADMIN_SYSTEM_API, {
       headers: { Authorization: `Bearer ${adminSystemToken}` },
     });
 
@@ -166,7 +179,7 @@ async function saveSystemSettings() {
   setFeedback("", "");
 
   try {
-    const res = await fetch(ADMIN_SYSTEM_API, {
+    const res = await apiFetch(ADMIN_SYSTEM_API, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${adminSystemToken}`,
@@ -225,3 +238,5 @@ discardBtnEl?.addEventListener("click", discardSystemSettings);
 exportBtnEl?.addEventListener("click", exportAuditLogs);
 
 loadSystemData();
+
+
