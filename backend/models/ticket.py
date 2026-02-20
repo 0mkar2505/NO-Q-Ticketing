@@ -274,3 +274,59 @@ class Ticket:
             }
         )
         return Ticket._serialize(ticket)
+
+    @staticmethod
+    def customer_reply(ticket_id, customer_email, message):
+        ticket = ticket_collection.find_one(
+            {
+                "_id": Ticket._coerce_object_id(ticket_id),
+                "customer_email": (customer_email or "").strip().lower(),
+            }
+        )
+        if not ticket:
+            return None, "not_found"
+
+        if (ticket.get("status") or "").lower() == "resolved":
+            return None, "resolved"
+
+        now = datetime.utcnow()
+        update = {
+            "$push": {
+                "messages": {
+                    "sender": "customer",
+                    "text": message,
+                    "timestamp": now,
+                }
+            },
+            "$set": {"updated_at": now},
+        }
+
+        ticket_collection.update_one({"_id": ticket["_id"]}, update)
+        updated = ticket_collection.find_one({"_id": ticket["_id"]})
+        return Ticket._serialize(updated), None
+
+    @staticmethod
+    def customer_reopen(ticket_id, customer_email):
+        ticket = ticket_collection.find_one(
+            {
+                "_id": Ticket._coerce_object_id(ticket_id),
+                "customer_email": (customer_email or "").strip().lower(),
+            }
+        )
+        if not ticket:
+            return None, "not_found"
+
+        if (ticket.get("status") or "").lower() != "resolved":
+            # Idempotent: if it's already open/pending, just return it.
+            return Ticket._serialize(ticket), None
+
+        now = datetime.utcnow()
+        ticket_collection.update_one(
+            {"_id": ticket["_id"]},
+            {
+                "$set": {"status": "open", "updated_at": now},
+                "$inc": {"reopened_count": 1},
+            },
+        )
+        updated = ticket_collection.find_one({"_id": ticket["_id"]})
+        return Ticket._serialize(updated), None

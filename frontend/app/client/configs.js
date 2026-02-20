@@ -1,4 +1,5 @@
 const CONFIGS_API_BASE = "/api/client/configs";
+const TENANT_API = "/api/client/tenant";
 const configsToken = localStorage.getItem("token");
 const configsPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const configsLoginPath = `${configsPathBase}/auth/login.html`;
@@ -14,11 +15,14 @@ const signatureEl = document.getElementById("signatureText");
 const notifyNewTicketsEl = document.getElementById("notifyNewTickets");
 const notifyDailySummaryEl = document.getElementById("notifyDailySummary");
 const notifyEscalationsEl = document.getElementById("notifyEscalations");
+const settingsSupportLinkEl = document.getElementById("settingsSupportLink");
+const copySettingsSupportLinkBtn = document.getElementById("copySettingsSupportLinkBtn");
 const resetBtnEl = document.getElementById("resetConfigsBtn");
 const saveBtnEl = document.getElementById("saveConfigsBtn");
 
 let lastLoadedConfig = null;
 let isSaving = false;
+let tenantInfo = null;
 
 function setConfigsFeedback(type, text) {
   if (!configsFeedbackEl) return;
@@ -36,6 +40,43 @@ function setSavingState(saving) {
   if (saveBtnEl) saveBtnEl.disabled = saving;
   if (resetBtnEl) resetBtnEl.disabled = saving;
   if (saveBtnEl) saveBtnEl.textContent = saving ? "Saving..." : "Save Changes";
+}
+
+function buildSupportLink() {
+  const origin = window.location.origin;
+  const slug = tenantInfo?.company_slug || "";
+  // Static servers (ex: :5500/:5400) cannot serve /support/<slug> without rewrite rules.
+  // Query param link works everywhere (static hosting and backend-served frontend).
+  if (!slug) return `${origin}${configsPathBase}/public/support.html`;
+  return `${origin}${configsPathBase}/public/support.html?tenant=${encodeURIComponent(slug)}`;
+}
+
+async function loadTenantInfo() {
+  if (!configsToken) return;
+  try {
+    const res = await apiFetch(TENANT_API, {
+      headers: { Authorization: `Bearer ${configsToken}` },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return;
+    tenantInfo = data;
+    if (settingsSupportLinkEl) settingsSupportLinkEl.value = buildSupportLink();
+  } catch (error) {
+    // Non-fatal.
+  }
+}
+
+async function copySupportLink() {
+  const value = (settingsSupportLinkEl?.value || "").trim();
+  if (!value) return;
+  try {
+    await navigator.clipboard.writeText(value);
+    setConfigsFeedback("success", "Support link copied.");
+    setTimeout(() => setConfigsFeedback("", ""), 1200);
+  } catch (error) {
+    settingsSupportLinkEl?.focus();
+    settingsSupportLinkEl?.select();
+  }
 }
 
 function normalizeConfig(config) {
@@ -98,6 +139,7 @@ async function loadConfigs() {
     return;
   }
 
+  loadTenantInfo();
   setConfigsFeedback("info", "Loading settings...");
 
   try {
@@ -179,5 +221,6 @@ function resetConfigs() {
 
 if (saveBtnEl) saveBtnEl.addEventListener("click", saveConfigs);
 if (resetBtnEl) resetBtnEl.addEventListener("click", resetConfigs);
+copySettingsSupportLinkBtn?.addEventListener("click", copySupportLink);
 
 loadConfigs();

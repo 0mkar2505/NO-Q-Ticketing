@@ -24,6 +24,17 @@
             <p class="settings-copy">Header identity shown to customers.</p>
 
             <div class="settings-field">
+              <label for="supportLink">Public Support Link</label>
+              <div class="branding-link-row">
+                <input id="supportLink" type="text" readonly />
+                <button id="copySupportLinkBtn" class="btn btn-secondary" type="button">Copy</button>
+              </div>
+              <p class="settings-copy" style="margin-top: 8px;">
+                Share this link with customers. The tenant is automatic from the URL, so customers only enter their email.
+              </p>
+            </div>
+
+            <div class="settings-field">
               <label for="brandName">Brand Name</label>
               <input id="brandName" type="text" maxlength="60" placeholder="Acme Support" />
             </div>

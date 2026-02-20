@@ -9,6 +9,8 @@ const supportAssistantTitleEl = document.getElementById("support-assistant-title
 const supportAssistantSubtitleEl = document.getElementById("support-assistant-subtitle");
 const supportBrandNameEl = document.getElementById("support-brand-name");
 const supportBrandLogoEl = document.getElementById("support-brand-logo");
+const supportPageEl = document.querySelector(".support-page");
+const supportTenantWrapEl = document.getElementById("support-tenant-wrap");
 const supportCompanySlugEl = document.getElementById("support-company-slug");
 const supportEmailEl = document.getElementById("support-email");
 const supportStartBtn = document.getElementById("support-start");
@@ -33,6 +35,53 @@ let sessionId = null;
 let currentStep = null;
 let ticketCreated = false;
 let isCreatingTicket = false;
+let tenantSlug = "";
+let statusContext = { ticket_id: "", email: "" };
+
+function getTenantSlugFromUrl() {
+  const params = new URLSearchParams(window.location.search || "");
+  const fromQuery = (params.get("tenant") || params.get("t") || "").trim().toLowerCase();
+  if (fromQuery) return fromQuery;
+
+  // Support canonical: /support/<tenant_slug>
+  const path = String(window.location.pathname || "");
+  const match = path.match(/\/support\/([^\/?#]+)/i);
+  if (match && match[1]) {
+    return String(match[1] || "").trim().toLowerCase();
+  }
+  return "";
+}
+
+function initTenant() {
+  tenantSlug = getTenantSlugFromUrl();
+
+  if (tenantSlug) {
+    if (supportCompanySlugEl) supportCompanySlugEl.value = tenantSlug;
+    if (supportTenantWrapEl) supportTenantWrapEl.style.display = "none";
+    loadTenantBranding();
+    return;
+  }
+
+  // No tenant in the URL. Keep the field visible for internal testing, but guide users.
+  if (supportTenantWrapEl) supportTenantWrapEl.style.display = "block";
+  setFeedback(
+    supportFeedbackEl,
+    "info",
+    "This support link is missing a tenant. Ask the company for their support link, or enter a tenant slug for testing."
+  );
+}
+
+async function loadTenantBranding() {
+  if (!tenantSlug) return;
+  try {
+    const res = await apiFetch(`${SUPPORT_API_BASE}/config?company_slug=${encodeURIComponent(tenantSlug)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return;
+    applyCustomerChatUi(data.customer_chat_ui || {});
+  } catch (error) {
+    // Non-fatal.
+  }
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -79,12 +128,13 @@ function applyCustomerChatUi(chatUi = {}) {
     supportAssistantSubtitleEl.textContent = chatUi.assistant_subtitle;
   }
 
-  const root = document.documentElement;
-  if (chatUi.primary_color) root.style.setProperty("--support-primary-color", chatUi.primary_color);
-  if (chatUi.assistant_bubble_color) root.style.setProperty("--support-assistant-bubble-color", chatUi.assistant_bubble_color);
-  if (chatUi.assistant_text_color) root.style.setProperty("--support-assistant-text-color", chatUi.assistant_text_color);
-  if (chatUi.customer_bubble_color) root.style.setProperty("--support-customer-bubble-color", chatUi.customer_bubble_color);
-  if (chatUi.customer_text_color) root.style.setProperty("--support-customer-text-color", chatUi.customer_text_color);
+  // CSS defines these variables on `.support-page`, so set them there to override defaults.
+  const scope = supportPageEl || document.documentElement;
+  if (chatUi.primary_color) scope.style.setProperty("--support-primary-color", chatUi.primary_color);
+  if (chatUi.assistant_bubble_color) scope.style.setProperty("--support-assistant-bubble-color", chatUi.assistant_bubble_color);
+  if (chatUi.assistant_text_color) scope.style.setProperty("--support-assistant-text-color", chatUi.assistant_text_color);
+  if (chatUi.customer_bubble_color) scope.style.setProperty("--support-customer-bubble-color", chatUi.customer_bubble_color);
+  if (chatUi.customer_text_color) scope.style.setProperty("--support-customer-text-color", chatUi.customer_text_color);
 }
 
 function clearOptions() {
@@ -127,10 +177,14 @@ function applyAssistantState(payload) {
 }
 
 async function startAssistant() {
-  const company_slug = supportCompanySlugEl.value.trim().toLowerCase();
+  const company_slug = (tenantSlug || supportCompanySlugEl?.value || "").trim().toLowerCase();
   const customer_email = supportEmailEl.value.trim().toLowerCase();
-  if (!company_slug || !customer_email) {
-    setFeedback(supportFeedbackEl, "error", "Tenant slug and customer email are required.");
+  if (!company_slug) {
+    setFeedback(supportFeedbackEl, "error", "This support link is missing a tenant.");
+    return;
+  }
+  if (!customer_email) {
+    setFeedback(supportFeedbackEl, "error", "Customer email is required.");
     return;
   }
 
@@ -238,6 +292,7 @@ async function checkStatus() {
     return;
   }
 
+  statusContext = { ticket_id: ticketId, email };
   setFeedback(statusFeedbackEl, "info", "Checking status...");
   try {
     const res = await apiFetch(`${SUPPORT_API_BASE}/ticket-status?ticket_id=${encodeURIComponent(ticketId)}&email=${encodeURIComponent(email)}`);
@@ -250,18 +305,134 @@ async function checkStatus() {
 
     const ticket = data.ticket || {};
     statusResultEl.classList.remove("hidden");
-    statusResultEl.innerHTML = `
-      <h4>${escapeHtml(ticket.subject || "Ticket")}</h4>
-      <p>Status: <strong>${escapeHtml(ticket.status || "-")}</strong></p>
-      <p>Category: ${escapeHtml(ticket.category || "-")}</p>
-      <p>Priority: ${escapeHtml(ticket.priority || "-")}</p>
-      <p>Severity: ${escapeHtml(ticket.severity || "-")}</p>
-    `;
+    renderStatusResult(ticket);
     setFeedback(statusFeedbackEl, "", "");
   } catch (error) {
     console.error("Status check error:", error);
     setFeedback(statusFeedbackEl, "error", "Unable to fetch ticket status right now.");
   }
+}
+
+function normalizeSender(sender) {
+  const s = String(sender || "").toLowerCase();
+  if (s === "customer") return "customer";
+  if (s === "assistant" || s === "client") return "assistant";
+  return "assistant";
+}
+
+function renderStatusResult(ticket) {
+  const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
+  const status = String(ticket.status || "").toLowerCase();
+  const isResolved = status === "resolved";
+
+  const messagesHtml = messages.length
+    ? messages
+      .map((m) => {
+        const role = normalizeSender(m.sender);
+        return `<div class="support-msg ${role}"><p>${escapeHtml(m.text || "")}</p></div>`;
+      })
+      .join("")
+    : `<div class="support-msg assistant"><p>No messages yet.</p></div>`;
+
+  statusResultEl.innerHTML = `
+    <h4>${escapeHtml(ticket.subject || "Ticket")}</h4>
+    <p>Status: <strong>${escapeHtml(ticket.status || "-")}</strong></p>
+    <p>Category: ${escapeHtml(ticket.category || "-")}</p>
+    <p>Priority: ${escapeHtml(ticket.priority || "-")}</p>
+    <p>Severity: ${escapeHtml(ticket.severity || "-")}</p>
+    <div class="support-chat" style="margin-top: 12px;">
+      ${messagesHtml}
+    </div>
+    <div style="margin-top: 10px;">
+      ${isResolved ? `
+        <p class="support-subtitle" style="margin: 10px 0 0;">
+          This ticket is resolved. Re-open it to send a new message.
+        </p>
+        <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+          <button id="status-reopen" class="btn btn-secondary" type="button">Re-open Ticket</button>
+        </div>
+        <p id="status-reopen-feedback" class="tickets-feedback hidden" aria-live="polite" style="margin-top:10px;"></p>
+      ` : `
+        <label for="status-reply" style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;">Reply</label>
+        <textarea id="status-reply" style="width:100%;border:1px solid #d6dff0;border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;min-height:86px;resize:vertical;" placeholder="Type your reply..."></textarea>
+        <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+          <button id="status-reply-send" class="btn btn-primary" type="button">Send Reply</button>
+        </div>
+        <p id="status-reply-feedback" class="tickets-feedback hidden" aria-live="polite" style="margin-top:10px;"></p>
+      `}
+    </div>
+  `;
+
+  if (isResolved) {
+    const reopenBtn = document.getElementById("status-reopen");
+    const reopenFeedbackEl = document.getElementById("status-reopen-feedback");
+
+    reopenBtn?.addEventListener("click", async () => {
+      reopenBtn.disabled = true;
+      setFeedback(reopenFeedbackEl, "info", "Re-opening...");
+      try {
+        const res = await apiFetch(`${SUPPORT_API_BASE}/ticket-reopen`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ticket_id: statusContext.ticket_id,
+            email: statusContext.email,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setFeedback(reopenFeedbackEl, "error", data.error || "Unable to re-open ticket.");
+          reopenBtn.disabled = false;
+          return;
+        }
+        setFeedback(reopenFeedbackEl, "success", "Ticket reopened.");
+        await checkStatus();
+      } catch (error) {
+        console.error("Ticket reopen error:", error);
+        setFeedback(reopenFeedbackEl, "error", "Unable to re-open ticket right now.");
+        reopenBtn.disabled = false;
+      }
+    });
+    return;
+  }
+
+  const sendBtn = document.getElementById("status-reply-send");
+  const replyEl = document.getElementById("status-reply");
+  const replyFeedbackEl = document.getElementById("status-reply-feedback");
+
+  sendBtn?.addEventListener("click", async () => {
+    const message = (replyEl?.value || "").trim();
+    if (!message) {
+      setFeedback(replyFeedbackEl, "error", "Message is required.");
+      return;
+    }
+    sendBtn.disabled = true;
+    setFeedback(replyFeedbackEl, "info", "Sending...");
+    try {
+      const res = await apiFetch(`${SUPPORT_API_BASE}/ticket-reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ticket_id: statusContext.ticket_id,
+          email: statusContext.email,
+          message,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setFeedback(replyFeedbackEl, "error", data.error || "Unable to send reply.");
+        sendBtn.disabled = false;
+        return;
+      }
+      replyEl.value = "";
+      setFeedback(replyFeedbackEl, "success", "Reply sent.");
+      await checkStatus();
+    } catch (error) {
+      console.error("Ticket reply error:", error);
+      setFeedback(replyFeedbackEl, "error", "Unable to send reply right now.");
+      sendBtn.disabled = false;
+    }
+  });
 }
 
 supportStartBtn?.addEventListener("click", startAssistant);
@@ -275,5 +446,7 @@ supportDetailsSubmitBtn?.addEventListener("click", () => {
 });
 supportCreateTicketBtn?.addEventListener("click", createTicket);
 statusCheckBtn?.addEventListener("click", checkStatus);
+
+initTenant();
 
 

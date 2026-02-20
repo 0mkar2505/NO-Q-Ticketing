@@ -41,6 +41,12 @@ def protected():
         "user": request.user
     }
 
+@app.route("/support", defaults={"company_slug": ""})
+@app.route("/support/<company_slug>")
+def serve_support(company_slug):
+    # Tenant is derived client-side from the URL path (/support/<slug>) so customers never type it.
+    return send_from_directory(FRONTEND_DIR, "public/support.html")
+
 @app.route("/", defaults={"path": "public/index.html"})
 @app.route("/<path:path>")
 def serve_frontend(path):

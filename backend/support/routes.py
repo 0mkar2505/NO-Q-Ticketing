@@ -20,14 +20,18 @@ EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 MAX_EMAIL_LENGTH = 320
 MAX_SUBJECT_LENGTH = 200
 MAX_DETAILS_LENGTH = 4000
+MAX_REPLY_LENGTH = 2000
 
 # Simple in-memory rate limiter for public support APIs.
 # Keyed by "route_key:ip" and enforced with a sliding window.
 _RATE_WINDOWS = {
+    "config": (60, 60),        # 60 requests / 60s
     "start": (10, 60),         # 10 requests / 60s
     "step": (60, 60),          # 60 requests / 60s
     "create_ticket": (10, 60), # 10 requests / 60s
     "ticket_status": (30, 60), # 30 requests / 60s
+    "ticket_reply": (20, 60),  # 20 requests / 60s
+    "ticket_reopen": (10, 60), # 10 requests / 60s
 }
 _RATE_STATE = defaultdict(deque)
 
@@ -73,6 +77,26 @@ def _review_payload(answers):
         "severity": severity,
         "details": (answers.get("details") or "").strip(),
     }
+
+@support_bp.route("/api/support/config", methods=["GET"])
+def support_config():
+    allowed, retry_after = _check_rate_limit("config")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
+    company_slug = (request.args.get("company_slug") or "").strip().lower()
+    if not company_slug:
+        return jsonify({"error": "company_slug is required"}), 400
+    if not SLUG_PATTERN.match(company_slug):
+        return jsonify({"error": "company_slug format is invalid"}), 400
+
+    company = _find_company_by_slug(company_slug)
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    client_config = ClientConfig.get_by_company(company["_id"])
+    customer_chat_ui = (client_config or {}).get("customer_chat_ui") or {}
+    return jsonify({"customer_chat_ui": customer_chat_ui}), 200
 
 
 @support_bp.route("/api/support/start", methods=["POST"])
@@ -313,3 +337,62 @@ def support_ticket_status():
             }
         }
     ), 200
+
+
+@support_bp.route("/api/support/ticket-reply", methods=["POST"])
+def support_ticket_reply():
+    allowed, retry_after = _check_rate_limit("ticket_reply")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
+    data = request.get_json(silent=True) or {}
+    ticket_id = (data.get("ticket_id") or "").strip()
+    customer_email = (data.get("email") or "").strip().lower()
+    message = (data.get("message") or "").strip()
+
+    if not ticket_id:
+        return jsonify({"error": "ticket_id is required"}), 400
+    if not customer_email:
+        return jsonify({"error": "email is required"}), 400
+    if len(customer_email) > MAX_EMAIL_LENGTH:
+        return jsonify({"error": "email is too long"}), 400
+    if not EMAIL_PATTERN.match(customer_email):
+        return jsonify({"error": "email format is invalid"}), 400
+    if not message:
+        return jsonify({"error": "message is required"}), 400
+    if len(message) > MAX_REPLY_LENGTH:
+        return jsonify({"error": f"message is too long (max {MAX_REPLY_LENGTH} characters)"}), 400
+
+    updated, err = Ticket.customer_reply(ticket_id, customer_email, message)
+    if err == "resolved":
+        return jsonify({"error": "Ticket is resolved. Re-open the ticket to reply."}), 409
+    if err == "not_found" or not updated:
+        return jsonify({"error": "Ticket not found"}), 404
+
+    return jsonify({"message": "Reply sent", "ticket": updated}), 200
+
+
+@support_bp.route("/api/support/ticket-reopen", methods=["POST"])
+def support_ticket_reopen():
+    allowed, retry_after = _check_rate_limit("ticket_reopen")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
+    data = request.get_json(silent=True) or {}
+    ticket_id = (data.get("ticket_id") or "").strip()
+    customer_email = (data.get("email") or "").strip().lower()
+
+    if not ticket_id:
+        return jsonify({"error": "ticket_id is required"}), 400
+    if not customer_email:
+        return jsonify({"error": "email is required"}), 400
+    if len(customer_email) > MAX_EMAIL_LENGTH:
+        return jsonify({"error": "email is too long"}), 400
+    if not EMAIL_PATTERN.match(customer_email):
+        return jsonify({"error": "email format is invalid"}), 400
+
+    updated, err = Ticket.customer_reopen(ticket_id, customer_email)
+    if err == "not_found" or not updated:
+        return jsonify({"error": "Ticket not found"}), 404
+
+    return jsonify({"message": "Ticket reopened", "ticket": updated}), 200

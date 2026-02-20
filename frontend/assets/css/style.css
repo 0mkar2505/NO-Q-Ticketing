@@ -1454,6 +1454,17 @@ body.page-transition.is-leaving {
   border-color: #c4b5fd;
 }
 
+.branding-link-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.branding-link-row input[readonly] {
+  background: #f8fafc;
+}
+
 .support-preview {
   border: 1px solid #e6ecf6;
   border-radius: 14px;

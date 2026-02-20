@@ -1,4 +1,5 @@
 const CONFIGS_API_BASE = "/api/client/configs";
+const TENANT_API = "/api/client/tenant";
 const token = localStorage.getItem("token");
 const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const loginPath = `${pathBase}/auth/login.html`;
@@ -10,6 +11,9 @@ const apiFetch = (path, options = {}) =>
 const feedbackEl = document.getElementById("branding-feedback");
 const saveBtn = document.getElementById("brandingSaveBtn");
 const resetBtn = document.getElementById("brandingResetBtn");
+
+const supportLinkEl = document.getElementById("supportLink");
+const copySupportLinkBtn = document.getElementById("copySupportLinkBtn");
 
 const brandNameEl = document.getElementById("brandName");
 const logoUrlEl = document.getElementById("logoUrl");
@@ -35,6 +39,7 @@ const previewSubtitle = document.getElementById("preview-subtitle");
 
 let isSaving = false;
 let loadedConfig = null;
+let tenantInfo = null;
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -169,6 +174,44 @@ function wirePreviewInputs() {
   wireColorPair(customerTextPicker, customerTextText);
 }
 
+function buildSupportLink() {
+  const origin = window.location.origin;
+  const slug = tenantInfo?.company_slug || "";
+  // Static servers (ex: :5500/:5400) cannot serve /support/<slug> without rewrite rules.
+  // Query param link works everywhere (static hosting and backend-served frontend).
+  if (!slug) return `${origin}${pathBase}/public/support.html`;
+  return `${origin}${pathBase}/public/support.html?tenant=${encodeURIComponent(slug)}`;
+}
+
+async function loadTenantInfo() {
+  if (!token) return;
+  try {
+    const res = await apiFetch(TENANT_API, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return;
+    tenantInfo = data;
+    if (supportLinkEl) supportLinkEl.value = buildSupportLink();
+  } catch (error) {
+    // Non-fatal.
+  }
+}
+
+async function copySupportLink() {
+  const value = (supportLinkEl?.value || "").trim();
+  if (!value) return;
+  try {
+    await navigator.clipboard.writeText(value);
+    setFeedback("success", "Support link copied.");
+    setTimeout(() => setFeedback("", ""), 1200);
+  } catch (error) {
+    // Clipboard might be blocked; select text as fallback.
+    supportLinkEl?.focus();
+    supportLinkEl?.select();
+  }
+}
+
 async function loadBranding() {
   if (!token) {
     window.location.href = loginPath;
@@ -177,6 +220,7 @@ async function loadBranding() {
 
   setFeedback("info", "Loading branding...");
   try {
+    await loadTenantInfo();
     const res = await apiFetch(CONFIGS_API_BASE, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -262,6 +306,7 @@ function resetBranding() {
 
 saveBtn?.addEventListener("click", saveBranding);
 resetBtn?.addEventListener("click", resetBranding);
+copySupportLinkBtn?.addEventListener("click", copySupportLink);
 
 wirePreviewInputs();
 loadBranding();
