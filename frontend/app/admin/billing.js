@@ -3,7 +3,10 @@ const ADMIN_BILLING_RULES_API = "/api/admin/billing/rules";
 const adminBillingToken = localStorage.getItem("token");
 const adminBillingPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const adminBillingLoginPath = `${adminBillingPathBase}/auth/login.html`;
-const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
+const apiFetch = (path, options = {}) =>
+  (window.NOQ && typeof window.NOQ.apiFetch === "function")
+    ? window.NOQ.apiFetch(path, options)
+    : fetch(path, options);
 
 const feedbackEl = document.getElementById("admin-billing-feedback");
 const totalClientsEl = document.getElementById("billing-total-clients");
@@ -16,19 +19,6 @@ const saveBtnEl = document.getElementById("billing-save-btn");
 
 let savedRules = { grace_days: 7, currency: "USD" };
 let isSaving = false;
-
-async function apiFetch(path, options = {}) {
-  try {
-    const res = await fetch(path, options);
-    const shouldFallback =
-      window.location.port !== "5000" &&
-      (res.status === 404 || res.status === 405 || res.status === 501);
-    if (!shouldFallback) return res;
-  } catch (error) {
-    // Try backend fallback when local frontend is on another port.
-  }
-  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
-}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;

@@ -2,7 +2,10 @@ const API_BASE = "/api/client";
 const token = localStorage.getItem("token");
 const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const loginPath = `${pathBase}/auth/login.html`;
-const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
+const apiFetch = (path, options = {}) =>
+  (window.NOQ && typeof window.NOQ.apiFetch === "function")
+    ? window.NOQ.apiFetch(path, options)
+    : fetch(path, options);
 
 const ticketList = document.getElementById("ticket-list");
 const ticketView = document.getElementById("ticket-view");
@@ -28,19 +31,6 @@ let isSubmitting = false;
 let isAiRunning = false;
 let currentPage = 1;
 const PAGE_SIZE = 12;
-
-async function apiFetch(path, options = {}) {
-  try {
-    const res = await fetch(path, options);
-    const shouldFallback =
-      window.location.port !== "5000" &&
-      (res.status === 404 || res.status === 405 || res.status === 501);
-    if (!shouldFallback) return res;
-  } catch (error) {
-    // Try backend fallback when local frontend is on another port.
-  }
-  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
-}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;

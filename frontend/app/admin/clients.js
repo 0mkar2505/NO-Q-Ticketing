@@ -2,7 +2,10 @@ const ADMIN_CLIENTS_API = "/api/admin/clients";
 const adminToken = localStorage.getItem("token");
 const adminPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const adminLoginPath = `${adminPathBase}/auth/login.html`;
-const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
+const apiFetch = (path, options = {}) =>
+  (window.NOQ && typeof window.NOQ.apiFetch === "function")
+    ? window.NOQ.apiFetch(path, options)
+    : fetch(path, options);
 
 const feedbackEl = document.getElementById("admin-clients-feedback");
 const countBadgeEl = document.getElementById("admin-clients-count");
@@ -11,19 +14,6 @@ const filterBtnEl = document.getElementById("admin-clients-filter");
 const tableBodyEl = document.getElementById("admin-clients-body");
 
 let isLoading = false;
-
-async function apiFetch(path, options = {}) {
-  try {
-    const res = await fetch(path, options);
-    const shouldFallback =
-      window.location.port !== "5000" &&
-      (res.status === 404 || res.status === 405 || res.status === 501);
-    if (!shouldFallback) return res;
-  } catch (error) {
-    // Try backend fallback when local frontend is on another port.
-  }
-  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
-}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;

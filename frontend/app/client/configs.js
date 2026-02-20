@@ -2,7 +2,10 @@ const CONFIGS_API_BASE = "/api/client/configs";
 const configsToken = localStorage.getItem("token");
 const configsPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const configsLoginPath = `${configsPathBase}/auth/login.html`;
-const BACKEND_FALLBACK_ORIGIN = "http://127.0.0.1:5000";
+const apiFetch = (path, options = {}) =>
+  (window.NOQ && typeof window.NOQ.apiFetch === "function")
+    ? window.NOQ.apiFetch(path, options)
+    : fetch(path, options);
 
 const configsFeedbackEl = document.getElementById("configs-feedback");
 const defaultPriorityEl = document.getElementById("defaultPriority");
@@ -16,19 +19,6 @@ const saveBtnEl = document.getElementById("saveConfigsBtn");
 
 let lastLoadedConfig = null;
 let isSaving = false;
-
-async function apiFetch(path, options = {}) {
-  try {
-    const res = await fetch(path, options);
-    const shouldFallback =
-      window.location.port !== "5000" &&
-      (res.status === 404 || res.status === 405 || res.status === 501);
-    if (!shouldFallback) return res;
-  } catch (error) {
-    // Try backend fallback when local frontend is on another port.
-  }
-  return fetch(`${BACKEND_FALLBACK_ORIGIN}${path}`, options);
-}
 
 function setConfigsFeedback(type, text) {
   if (!configsFeedbackEl) return;

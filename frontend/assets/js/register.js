@@ -133,7 +133,8 @@ form.addEventListener("submit", async (e) => {
 document
   .getElementById("goToLoginBtn")
   .addEventListener("click", () => {
-    window.location.href = "/auth/login.html";
+    const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
+    window.location.href = `${pathBase}/auth/login.html`;
   });
 
 // Password toggle functionality
@@ -143,9 +144,10 @@ togglePasswordBtns.forEach((btn) => {
   btn.addEventListener("click", () => {
     const input = btn.previousElementSibling;
     const isHidden = input.type === "password";
-okay
     input.type = isHidden ? "text" : "password";
-    btn.textContent = isHidden ? "🙈" : "👁";
-    btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");1
+    // Keep button text ASCII-safe to avoid encoding issues on Windows.
+    btn.textContent = isHidden ? "Hide" : "Show";
+    btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
   });
 });
+211

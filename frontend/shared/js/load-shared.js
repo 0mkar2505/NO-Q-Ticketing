@@ -7,6 +7,9 @@
     }, duration);
   }
 
+  // Enable consistent page-enter animation (CSS: body.page-transition).
+  document.body.classList.add("page-transition");
+
   async function loadHTML(id, path) {
     const res = await fetch(path);
     const html = await res.text();
@@ -51,6 +54,28 @@
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       navigateWithFade(toAppPath("/public/index.html"));
+    }
+  });
+
+  // Smooth transitions for in-app links (sidebar, navbar, etc.).
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (!link) return;
+    if (link.hasAttribute("download")) return;
+    if (link.target && link.target !== "_self") return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    const href = link.getAttribute("href") || "";
+    if (!href || href === "#" || href.startsWith("#")) return;
+    if (link.dataset && link.dataset.noTransition === "true") return;
+
+    try {
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+      e.preventDefault();
+      navigateWithFade(url.href);
+    } catch (err) {
+      // Ignore malformed href.
     }
   });
 })();
