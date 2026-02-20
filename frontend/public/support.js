@@ -28,8 +28,16 @@ const supportCreateTicketBtn = document.getElementById("support-create-ticket");
 const statusTicketIdEl = document.getElementById("status-ticket-id");
 const statusEmailEl = document.getElementById("status-email");
 const statusCheckBtn = document.getElementById("status-check");
+const statusAutoRefreshEl = document.getElementById("status-auto-refresh");
 const statusFeedbackEl = document.getElementById("status-feedback");
 const statusResultEl = document.getElementById("status-result");
+
+const supportAssistantBodyEl = document.getElementById("support-assistant-body");
+const supportCreatedOverlayEl = document.getElementById("support-created-overlay");
+const supportCreatedIdEl = document.getElementById("support-created-id");
+const supportCreatedCopyBtn = document.getElementById("support-created-copy");
+const supportCreatedStatusBtn = document.getElementById("support-created-status");
+const supportCreatedNewBtn = document.getElementById("support-created-new");
 
 let sessionId = null;
 let currentStep = null;
@@ -37,6 +45,12 @@ let ticketCreated = false;
 let isCreatingTicket = false;
 let tenantSlug = "";
 let statusContext = { ticket_id: "", email: "" };
+let statusAutoRefreshTimer = null;
+
+function scrollToBottom(el) {
+  if (!el) return;
+  el.scrollTop = el.scrollHeight;
+}
 
 function getTenantSlugFromUrl() {
   const params = new URLSearchParams(window.location.search || "");
@@ -108,7 +122,7 @@ function appendChat(role, text) {
   bubble.className = `support-msg ${role}`;
   bubble.innerHTML = `<p>${escapeHtml(text)}</p>`;
   supportChatEl.appendChild(bubble);
-  supportChatEl.scrollTop = supportChatEl.scrollHeight;
+  scrollToBottom(supportChatEl);
 }
 
 function applyCustomerChatUi(chatUi = {}) {
@@ -262,19 +276,26 @@ async function createTicket() {
     const ticket = data.ticket || {};
     const isAlreadyCreated = (data.message || "").toLowerCase().includes("already created");
 
-    if (!isAlreadyCreated && ticket._id) {
-      appendChat("assistant", `Ticket created: ${ticket._id}. Current status is ${ticket.status}.`);
+    const ticketId = ticket._id || "";
+    const customerEmail = supportEmailEl.value.trim().toLowerCase();
+
+    if (ticketId) {
       setFeedback(supportFeedbackEl, "success", "Ticket created successfully.");
-      ticketCreated = true;
-      supportCreateTicketBtn.disabled = true;
     } else {
       setFeedback(supportFeedbackEl, "info", "This session already has a ticket.");
-      ticketCreated = true;
-      supportCreateTicketBtn.disabled = true;
     }
 
-    statusTicketIdEl.value = ticket._id || "";
-    statusEmailEl.value = supportEmailEl.value.trim();
+    ticketCreated = true;
+    supportCreateTicketBtn.disabled = true;
+    supportStartBtn.disabled = true;
+    if (supportAssistantBodyEl) supportAssistantBodyEl.style.opacity = "0.25";
+    if (supportCreatedIdEl) supportCreatedIdEl.value = ticketId;
+    if (supportCreatedOverlayEl) supportCreatedOverlayEl.classList.remove("hidden");
+
+    statusTicketIdEl.value = ticketId;
+    statusEmailEl.value = customerEmail;
+    statusContext = { ticket_id: ticketId, email: customerEmail };
+    startStatusAutoRefresh();
   } catch (error) {
     console.error("Create ticket error:", error);
     setFeedback(supportFeedbackEl, "error", "Unable to create ticket right now.");
@@ -311,6 +332,33 @@ async function checkStatus() {
     console.error("Status check error:", error);
     setFeedback(statusFeedbackEl, "error", "Unable to fetch ticket status right now.");
   }
+}
+
+function stopStatusAutoRefresh() {
+  if (statusAutoRefreshTimer) {
+    clearInterval(statusAutoRefreshTimer);
+    statusAutoRefreshTimer = null;
+  }
+}
+
+function startStatusAutoRefresh() {
+  stopStatusAutoRefresh();
+  if (!statusAutoRefreshEl?.checked) return;
+  if (!statusContext.ticket_id || !statusContext.email) return;
+
+  statusAutoRefreshTimer = setInterval(() => {
+    if (document.visibilityState !== "visible") return;
+    // Refresh without spamming the feedback bar.
+    apiFetch(`${SUPPORT_API_BASE}/ticket-status?ticket_id=${encodeURIComponent(statusContext.ticket_id)}&email=${encodeURIComponent(statusContext.email)}`)
+      .then((res) => res.json().catch(() => ({})).then((data) => ({ res, data })))
+      .then(({ res, data }) => {
+        if (!res.ok) return;
+        const ticket = data.ticket || {};
+        statusResultEl.classList.remove("hidden");
+        renderStatusResult(ticket);
+      })
+      .catch(() => {});
+  }, 3000);
 }
 
 function normalizeSender(sender) {
@@ -363,6 +411,9 @@ function renderStatusResult(ticket) {
     </div>
   `;
 
+  const chatEl = statusResultEl.querySelector(".support-chat");
+  scrollToBottom(chatEl);
+
   if (isResolved) {
     const reopenBtn = document.getElementById("status-reopen");
     const reopenFeedbackEl = document.getElementById("status-reopen-feedback");
@@ -387,6 +438,7 @@ function renderStatusResult(ticket) {
         }
         setFeedback(reopenFeedbackEl, "success", "Ticket reopened.");
         await checkStatus();
+        startStatusAutoRefresh();
       } catch (error) {
         console.error("Ticket reopen error:", error);
         setFeedback(reopenFeedbackEl, "error", "Unable to re-open ticket right now.");
@@ -427,12 +479,15 @@ function renderStatusResult(ticket) {
       replyEl.value = "";
       setFeedback(replyFeedbackEl, "success", "Reply sent.");
       await checkStatus();
+      startStatusAutoRefresh();
     } catch (error) {
       console.error("Ticket reply error:", error);
       setFeedback(replyFeedbackEl, "error", "Unable to send reply right now.");
       sendBtn.disabled = false;
     }
   });
+
+  startStatusAutoRefresh();
 }
 
 supportStartBtn?.addEventListener("click", startAssistant);
@@ -446,6 +501,51 @@ supportDetailsSubmitBtn?.addEventListener("click", () => {
 });
 supportCreateTicketBtn?.addEventListener("click", createTicket);
 statusCheckBtn?.addEventListener("click", checkStatus);
+statusAutoRefreshEl?.addEventListener("change", () => {
+  if (statusAutoRefreshEl.checked) startStatusAutoRefresh();
+  else stopStatusAutoRefresh();
+});
+
+supportCreatedCopyBtn?.addEventListener("click", async () => {
+  const value = (supportCreatedIdEl?.value || "").trim();
+  if (!value) return;
+  try {
+    await navigator.clipboard.writeText(value);
+    setFeedback(supportFeedbackEl, "success", "Ticket ID copied.");
+    setTimeout(() => setFeedback(supportFeedbackEl, "", ""), 1200);
+  } catch (error) {
+    supportCreatedIdEl?.focus();
+    supportCreatedIdEl?.select();
+  }
+});
+
+supportCreatedStatusBtn?.addEventListener("click", () => {
+  // Scroll to the status panel on the right.
+  statusTicketIdEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+  checkStatus();
+});
+
+supportCreatedNewBtn?.addEventListener("click", () => {
+  // Reset assistant UI to start a new session (same tenant + email).
+  sessionId = null;
+  currentStep = null;
+  ticketCreated = false;
+  isCreatingTicket = false;
+  if (supportCreatedOverlayEl) supportCreatedOverlayEl.classList.add("hidden");
+  if (supportAssistantBodyEl) supportAssistantBodyEl.style.opacity = "1";
+  if (supportStartBtn) supportStartBtn.disabled = false;
+  if (supportChatEl) supportChatEl.innerHTML = "";
+  if (supportOptionsEl) supportOptionsEl.innerHTML = "";
+  showDetailsInput(false);
+  showReview(false);
+  setFeedback(supportFeedbackEl, "", "");
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  // If user enabled auto-refresh, resume.
+  if (statusAutoRefreshEl?.checked) startStatusAutoRefresh();
+});
 
 initTenant();
 

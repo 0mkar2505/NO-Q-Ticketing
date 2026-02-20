@@ -78,6 +78,19 @@ body.page-transition.is-leaving {
   border-bottom: 1px solid #eee;
 }
 
+/* App navbar should never move while scrolling. */
+.navbar--app {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+}
+
+body.has-fixed-navbar .page-wrapper {
+  padding-top: 64px;
+}
+
 /* CENTER NAV */
 .nav-center {
   display: flex;
@@ -1010,6 +1023,31 @@ body.page-transition.is-leaving {
   color: #111;
 }
 
+.ticket-view-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.ticket-view-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ticket-refresh-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+  user-select: none;
+}
+
 .ticket-status {
   font-size: 13px;
   margin-bottom: 16px;
@@ -1739,6 +1777,66 @@ body.page-transition.is-leaving {
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+}
+
+.support-card--assistant {
+  position: relative;
+}
+
+.support-created-overlay {
+  position: absolute;
+  inset: 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.support-created-overlay.hidden {
+  display: none;
+}
+
+.support-created-card {
+  width: 100%;
+  max-width: 520px;
+  border: 1px solid #e6ecf6;
+  border-radius: 14px;
+  padding: 18px;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.support-created-card h3 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.support-created-row {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.support-created-row input[readonly] {
+  width: 100%;
+  border: 1px solid #d6dff0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #f8fafc;
+}
+
+.support-created-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .support-title {

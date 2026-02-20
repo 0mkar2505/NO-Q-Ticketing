@@ -19,7 +19,7 @@
     </header>
 
     <main class="support-main">
-      <section class="support-card">
+      <section class="support-card support-card--assistant" id="support-assistant-card">
         <h1 id="support-assistant-title" class="support-title">Guided Support Assistant</h1>
         <p id="support-assistant-subtitle" class="support-subtitle">Answer a few guided prompts and we will create a support ticket for you.</p>
         <p id="support-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
@@ -37,22 +37,39 @@
 
         <button id="support-start" class="btn btn-primary" type="button">Start Assistant</button>
 
-        <div id="support-chat" class="support-chat"></div>
+        <div id="support-assistant-body">
+          <div id="support-chat" class="support-chat"></div>
 
-        <div id="support-options" class="support-options"></div>
+          <div id="support-options" class="support-options"></div>
 
-        <div id="support-details-wrap" class="support-details-wrap hidden">
-          <label for="support-details">Describe your issue</label>
-          <textarea id="support-details" placeholder="Add key details to help support resolve faster..."></textarea>
-          <button id="support-details-submit" class="btn btn-primary" type="button">Continue</button>
+          <div id="support-details-wrap" class="support-details-wrap hidden">
+            <label for="support-details">Describe your issue</label>
+            <textarea id="support-details" placeholder="Add key details to help support resolve faster..."></textarea>
+            <button id="support-details-submit" class="btn btn-primary" type="button">Continue</button>
+          </div>
+
+          <div id="support-review" class="support-review hidden">
+            <h3>Issue Review</h3>
+            <p id="review-category">Category: -</p>
+            <p id="review-priority">Priority: -</p>
+            <p id="review-severity">Severity: -</p>
+            <button id="support-create-ticket" class="btn btn-primary" type="button">Create Ticket</button>
+          </div>
         </div>
 
-        <div id="support-review" class="support-review hidden">
-          <h3>Issue Review</h3>
-          <p id="review-category">Category: -</p>
-          <p id="review-priority">Priority: -</p>
-          <p id="review-severity">Severity: -</p>
-          <button id="support-create-ticket" class="btn btn-primary" type="button">Create Ticket</button>
+        <div id="support-created-overlay" class="support-created-overlay hidden" role="dialog" aria-live="polite">
+          <div class="support-created-card">
+            <h3>Ticket created successfully</h3>
+            <p class="support-subtitle">Save your ticket ID. You can reply and see updates from the status panel.</p>
+            <div class="support-created-row">
+              <input id="support-created-id" type="text" readonly />
+              <button id="support-created-copy" class="btn btn-secondary" type="button">Copy</button>
+            </div>
+            <div class="support-created-actions">
+              <button id="support-created-status" class="btn btn-primary" type="button">Open Ticket Status</button>
+              <button id="support-created-new" class="btn btn-secondary" type="button">Start New Ticket</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -72,6 +89,10 @@
         </div>
 
         <button id="status-check" class="btn btn-secondary" type="button">Check Status</button>
+        <label style="display:inline-flex;align-items:center;gap:8px;margin-left:10px;font-size:13px;color:#475569;">
+          <input id="status-auto-refresh" type="checkbox" checked />
+          Auto refresh (3s)
+        </label>
         <p id="status-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
         <div id="status-result" class="status-result hidden"></div>
       </section>

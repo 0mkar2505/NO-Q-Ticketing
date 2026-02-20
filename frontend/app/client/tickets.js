@@ -24,6 +24,8 @@ const sortEl = document.getElementById("ticket-sort");
 const prevPageBtn = document.getElementById("ticket-prev-page");
 const nextPageBtn = document.getElementById("ticket-next-page");
 const pageInfoEl = document.getElementById("ticket-page-info");
+const ticketRefreshBtn = document.getElementById("ticket-refresh");
+const ticketAutoRefreshEl = document.getElementById("ticket-auto-refresh");
 
 let currentTicketId = null;
 let ticketCache = [];
@@ -31,6 +33,12 @@ let isSubmitting = false;
 let isAiRunning = false;
 let currentPage = 1;
 const PAGE_SIZE = 12;
+let ticketAutoRefreshTimer = null;
+
+function scrollToBottom(el) {
+  if (!el) return;
+  el.scrollTop = el.scrollHeight;
+}
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -66,6 +74,46 @@ function setAiState(isBusy) {
   if (!runAiAssistBtn) return;
   runAiAssistBtn.disabled = isBusy || !currentTicketId;
   runAiAssistBtn.textContent = isBusy ? "Generating..." : "Generate";
+}
+
+function startTicketAutoRefresh() {
+  stopTicketAutoRefresh();
+  if (!ticketAutoRefreshEl?.checked) return;
+  if (!currentTicketId) return;
+
+  ticketAutoRefreshTimer = setInterval(() => {
+    if (document.visibilityState !== "visible") return;
+    refreshOpenTicket({ silent: true });
+  }, 3000);
+}
+
+function stopTicketAutoRefresh() {
+  if (ticketAutoRefreshTimer) {
+    clearInterval(ticketAutoRefreshTimer);
+    ticketAutoRefreshTimer = null;
+  }
+}
+
+async function refreshOpenTicket({ silent = false } = {}) {
+  if (!currentTicketId) return;
+  try {
+    const res = await apiFetch(`${API_BASE}/tickets/${currentTicketId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return;
+
+    const ticket = data.ticket || null;
+    if (!ticket) return;
+
+    const idx = ticketCache.findIndex((t) => t._id === currentTicketId);
+    if (idx >= 0) ticketCache[idx] = ticket;
+
+    renderTicketView(ticket);
+    if (!silent) setFeedback("info", "Updated.");
+  } catch (error) {
+    if (!silent) console.error("Ticket refresh error:", error);
+  }
 }
 
 function getErrorMessage(res, fallback) {
@@ -281,24 +329,7 @@ function openTicket(ticket) {
   currentTicketId = ticket._id;
   markActiveTicket();
   ticketView.classList.remove("hidden");
-
-  document.getElementById("ticket-subject").textContent = ticket.subject;
-  const statusEl = document.getElementById("ticket-status");
-  statusEl.textContent = ticket.status;
-  statusEl.className = `ticket-status ${ticket.status}`;
-
-  messagesDiv.innerHTML = "";
-
-  if (ticket.messages && ticket.messages.length > 0) {
-    ticket.messages.forEach(msg => {
-      const m = document.createElement("div");
-      m.className = `message ${msg.sender}`;
-      m.innerHTML = `<strong>${msg.sender}</strong>: ${msg.text}<br><small>${new Date(msg.timestamp).toLocaleString()}</small>`;
-      messagesDiv.appendChild(m);
-    });
-  } else {
-    messagesDiv.innerHTML = "<p class=\"no-messages\">No messages yet</p>";
-  }
+  renderTicketView(ticket);
 
   const isResolved = ticket.status === "resolved";
   resolveBtn.style.display = isResolved ? "none" : "block";
@@ -310,6 +341,42 @@ function openTicket(ticket) {
   const summary = ticket.ai_summary || "Summary will appear here after generation.";
   aiPriorityEl.textContent = `Priority Suggestion: ${suggestedPriority}`;
   aiSummaryEl.textContent = summary;
+
+  if (ticketRefreshBtn) ticketRefreshBtn.disabled = false;
+  startTicketAutoRefresh();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function renderTicketView(ticket) {
+  document.getElementById("ticket-subject").textContent = ticket.subject || "";
+  const statusEl = document.getElementById("ticket-status");
+  const status = String(ticket.status || "open").toLowerCase();
+  statusEl.textContent = status;
+  statusEl.className = `ticket-status ${status}`;
+
+  messagesDiv.innerHTML = "";
+  const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
+  if (messages.length > 0) {
+    messages.forEach((msg) => {
+      const m = document.createElement("div");
+      m.className = `message ${msg.sender}`;
+      const ts = msg.timestamp ? new Date(msg.timestamp).toLocaleString() : "";
+      m.innerHTML = `<strong>${escapeHtml(msg.sender || "")}</strong>: ${escapeHtml(msg.text || "")}<br><small>${escapeHtml(ts)}</small>`;
+      messagesDiv.appendChild(m);
+    });
+  } else {
+    messagesDiv.innerHTML = "<p class=\"no-messages\">No messages yet</p>";
+  }
+
+  scrollToBottom(messagesDiv);
 }
 
 // Reply to Ticket
@@ -338,6 +405,7 @@ sendReplyBtn.onclick = async () => {
 
     replyBox.value = "";
     setFeedback("success", "Reply sent");
+    await refreshOpenTicket({ silent: true });
     await loadTickets();
   } catch (error) {
     console.error("Reply error:", error);
@@ -369,6 +437,7 @@ resolveBtn.onclick = async () => {
     }
 
     setFeedback("success", "Ticket marked as resolved");
+    await refreshOpenTicket({ silent: true });
     await loadTickets();
   } catch (error) {
     console.error("Resolve error:", error);
@@ -402,6 +471,7 @@ runAiAssistBtn.onclick = async () => {
     aiPriorityEl.textContent = `Priority Suggestion: ${data.ai_priority_suggestion || "-"}`;
     aiSummaryEl.textContent = data.ai_summary || "Summary unavailable.";
     setFeedback("success", "AI assist generated");
+    await refreshOpenTicket({ silent: true });
     await loadTickets();
   } catch (error) {
     console.error("AI assist error:", error);
@@ -430,4 +500,17 @@ prevPageBtn?.addEventListener("click", () => {
 nextPageBtn?.addEventListener("click", () => {
   currentPage += 1;
   refreshTicketList();
+});
+
+ticketRefreshBtn?.addEventListener("click", () => {
+  refreshOpenTicket({ silent: false });
+});
+
+ticketAutoRefreshEl?.addEventListener("change", () => {
+  startTicketAutoRefresh();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  startTicketAutoRefresh();
 });

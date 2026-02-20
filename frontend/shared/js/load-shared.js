@@ -9,6 +9,8 @@
 
   // Enable consistent page-enter animation (CSS: body.page-transition).
   document.body.classList.add("page-transition");
+  // App pages load a fixed navbar; reserve space so content doesn't slide under it.
+  document.body.classList.add("has-fixed-navbar");
 
   async function loadHTML(id, path) {
     const res = await fetch(path);

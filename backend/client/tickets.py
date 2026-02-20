@@ -12,6 +12,15 @@ def get_tickets():
     return jsonify(tickets), 200
 
 
+@client_tickets_bp.route("/api/client/tickets/<ticket_id>", methods=["GET"])
+@require_auth(required_role="client")
+def get_ticket(ticket_id):
+    ticket = Ticket.get_by_id(ticket_id, request.user["company_id"])
+    if not ticket:
+        return jsonify({"error": "Ticket not found"}), 404
+    return jsonify({"ticket": ticket}), 200
+
+
 @client_tickets_bp.route("/api/client/tickets", methods=["POST"])
 @require_auth(required_role="client")
 def create_ticket():
