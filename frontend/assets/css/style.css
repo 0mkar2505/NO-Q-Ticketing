@@ -1926,6 +1926,46 @@ body.has-fixed-navbar #navbar {
   font-size: 13px;
 }
 
+.admin-activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-activity-item {
+  border: 1px solid #e6ecf6;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-activity-main strong {
+  display: block;
+  font-size: 13px;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.admin-activity-detail {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.admin-activity-time {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
 .admin-toolbar {
   display: flex;
   gap: 10px;

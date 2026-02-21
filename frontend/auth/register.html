@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NO-Q | Register</title>
+  <title>NO-Q | Onboarding</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,9 +33,9 @@
     <!-- REGISTER FORM -->
     <main class="auth-page">
       <div class="auth-card">
-        <h1 class="auth-title">Create your account</h1>
+        <h1 class="auth-title">Onboarding</h1>
         <p class="auth-subtitle">
-          Start managing customer support with NO-Q
+          Create your NO-Q workspace and continue to pricing.
         </p>
 
         <form id="registerForm">
@@ -51,17 +51,6 @@
           </div>
 
           <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="you@company.com"
-              required
-            />
-          </div>
-
-          <div class="form-group">
             <label for="company">Company name</label>
             <input
               type="text"
@@ -70,6 +59,55 @@
               placeholder="Your company name"
               required
             />
+          </div>
+
+          <div class="form-group">
+            <label for="industry">Industry</label>
+            <input
+              type="text"
+              id="industry"
+              name="industry"
+              placeholder="SaaS, E-commerce, FinTech..."
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="website">Company website</label>
+            <input
+              type="text"
+              id="website"
+              name="website"
+              placeholder="https://example.com"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="companySize">Company size</label>
+            <select id="companySize" name="companySize">
+              <option value="">Select...</option>
+              <option value="1-10">1-10</option>
+              <option value="11-50">11-50</option>
+              <option value="51-200">51-200</option>
+              <option value="201-1000">201-1000</option>
+              <option value="1000+">1000+</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="handle">NO-Q email</label>
+            <div class="password-wrapper">
+              <input
+                type="text"
+                id="handle"
+                name="handle"
+                placeholder="your-company-admin"
+                required
+              />
+              <span style="padding: 0 10px; color: #64748b; font-weight: 700;">@noq.com</span>
+            </div>
+            <p class="settings-copy" style="margin-top: 8px;">
+              This becomes your sign-in email. Example: <strong>your-company-admin@noq.com</strong>
+            </p>
           </div>
 
           <div class="form-group password-group">
@@ -113,13 +151,13 @@
             </div>
           </div>
 
-          <button type="submit" class="auth-btn" id="submitBtn">Create account</button>
+          <button type="submit" class="auth-btn" id="submitBtn">Continue to Pricing</button>
         </form>
 
         <p id="error" class="form-error"></p>
 
         <p class="auth-switch">
-          Already have an account?
+          Already onboarded?
           <a href="/auth/login.html">Sign in</a>
         </p>
       </div>
@@ -151,12 +189,12 @@
   <div id="successModal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
-      <h2>Account created</h2>
+      <h2>Onboarding started</h2>
       <p class="modal-subtext">
-        Your account is ready. Sign in to continue.
+        Next: choose a plan and complete checkout.
       </p>
       <button id="goToLoginBtn" class="auth-btn">
-        Sign in
+        Continue to Pricing
       </button>
     </div>
   </div>

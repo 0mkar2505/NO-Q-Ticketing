@@ -77,8 +77,10 @@ def _openai_compat_chat_json(base_url, api_key, model, messages, timeout=20):
         "model": model,
         "messages": messages,
         "temperature": 0.2,
-        # Keep responses short to avoid token/rate limits on free tiers.
-        "max_tokens": 320,
+        # Groq free tier can be tight on total tokens (~6k). Allow richer output but keep a safety buffer:
+        # target <= ~4k total tokens, leaving ~2k headroom.
+        # We can't count tokens precisely here, so we cap output tokens and keep the input prompt bounded.
+        "max_tokens": 1100,
         "response_format": {"type": "json_object"},
     }
     body = json.dumps(payload).encode("utf-8")
@@ -159,7 +161,8 @@ def triage_support(company_id, company_name, customer_email, transcript, user_me
 
     policy_text = str(taxonomy.get("policy_text") or "").strip()
 
-    snippets = retrieve_snippets(company_id, f"{user_message} {company_name}", k=4)
+    # Slightly more context for less "static" answers, but keep prompt bounded.
+    snippets = retrieve_snippets(company_id, f"{user_message} {company_name}", k=6)
 
     llm = _get_llm_config()
 
@@ -183,14 +186,14 @@ def triage_support(company_id, company_name, customer_email, transcript, user_me
 
     # Build a compact transcript for the prompt.
     turns = transcript or []
-    last_turns = turns[-8:]
+    last_turns = turns[-14:]
     transcript_text = "\n".join(
         f"{(t.get('speaker') or 'unknown')}: {(t.get('text') or '').strip()}"
         for t in last_turns
         if (t.get("text") or "").strip()
     )
-    if len(transcript_text) > 1200:
-        transcript_text = transcript_text[-1200:]
+    if len(transcript_text) > 2200:
+        transcript_text = transcript_text[-2200:]
 
     # Heuristics to prevent the assistant from endlessly asking for "more context".
     # If the customer has already provided a meaningful description, allow ticket creation.
@@ -207,6 +210,14 @@ def triage_support(company_id, company_name, customer_email, transcript, user_me
         f"[{i+1}] {s['title']}\nTags: {', '.join(s.get('tags') or [])}\n{s['content']}"
         for i, s in enumerate(snippets)
     ).strip()
+
+    # Global prompt size guardrail (approx, since we don't tokenize here).
+    # Keeps us comfortably under Groq's ~6k total token ceiling.
+    def _clip(text, limit):
+        text = str(text or "")
+        return text if len(text) <= limit else text[-limit:]
+
+    sources_text = _clip(sources_text, 6000)
 
     system = (
         "You are a customer support intake assistant for a SaaS helpdesk. "

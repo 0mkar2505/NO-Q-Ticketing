@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Activity | NO-Q Admin</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Platform Activity</h1>
+        <p class="page-subtitle">Recent events across clients, tickets, chats, and admin actions.</p>
+        <p id="admin-activity-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="admin-section-card">
+          <div class="admin-section-head">
+            <h2>Activity Feed</h2>
+            <span class="admin-badge" id="admin-activity-count">-</span>
+          </div>
+          <ul class="admin-activity-list" id="admin-activity-feed">
+            <li class="admin-empty-copy">Loading...</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="/shared/js/api.js"></script>
+  <script src="./activity.js"></script>
+</body>
+</html>
+

@@ -48,3 +48,14 @@ def generate_token(user) -> str:
         "exp": datetime.utcnow() + timedelta(hours=6)
     }
     return jwt.encode(payload, os.getenv("JWT_SECRET"), algorithm="HS256")
+
+
+def generate_onboarding_token(company_id: str, email: str) -> str:
+    """Short-lived token used during onboarding (pricing/checkout) before the account is approved."""
+    payload = {
+        "company_id": str(company_id),
+        "email": (email or "").strip().lower(),
+        "purpose": "onboarding",
+        "exp": datetime.utcnow() + timedelta(minutes=30),
+    }
+    return jwt.encode(payload, os.getenv("JWT_SECRET"), algorithm="HS256")

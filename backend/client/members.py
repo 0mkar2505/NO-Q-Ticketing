@@ -89,3 +89,28 @@ def create_member():
     result = user_collection.insert_one(doc)
     created = user_collection.find_one({"_id": result.inserted_id}) or doc
     return jsonify({"member": _serialize_user(created), "message": "Member created"}), 201
+
+
+@client_members_bp.route("/api/client/members/<user_id>", methods=["DELETE"])
+@require_auth(required_role="client", required_company_role="supervisor")
+def remove_member(user_id):
+    company_id = request.user.get("company_id")
+    if not company_id:
+        return jsonify({"error": "Company not found"}), 404
+
+    # Prevent removing yourself.
+    if str(request.user.get("user_id")) == str(user_id):
+        return jsonify({"error": "You cannot remove your own account."}), 400
+
+    target = user_collection.find_one({"_id": _to_object_id(user_id), "company_id": _to_object_id(company_id)})
+    if not target:
+        return jsonify({"error": "Member not found"}), 404
+
+    if (target.get("company_role") or "").strip().lower() != "agent":
+        return jsonify({"error": "Only agents can be removed by supervisors."}), 403
+
+    user_collection.update_one(
+        {"_id": target["_id"]},
+        {"$set": {"is_active": False, "removed_at": datetime.utcnow()}},
+    )
+    return jsonify({"message": "Agent removed"}), 200

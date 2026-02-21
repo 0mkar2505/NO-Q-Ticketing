@@ -1,4 +1,5 @@
 const ADMIN_CLIENTS_API = "/api/admin/clients";
+const ADMIN_APPROVE_API = "/api/admin/clients";
 const adminToken = localStorage.getItem("token");
 const adminPathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
 const adminLoginPath = `${adminPathBase}/auth/login.html`;
@@ -47,7 +48,7 @@ function renderRows(clients) {
   if (!Array.isArray(clients) || clients.length === 0) {
     tableBodyEl.innerHTML = `
       <tr>
-        <td colspan="5" class="admin-table-empty">No clients found.</td>
+        <td colspan="7" class="admin-table-empty">No clients found.</td>
       </tr>
     `;
     return;
@@ -56,6 +57,28 @@ function renderRows(clients) {
   tableBodyEl.innerHTML = clients
     .map((client) => {
       const statusClass = client.status === "active" ? "admin-status-active" : "admin-status-inactive";
+      const approval = String(client.approval_status || "").toLowerCase();
+      const billing = String(client.billing_status || "").toLowerCase();
+      const isPendingApproval = approval === "pending_admin_approval" || approval === "pending_payment";
+      const canApprove = approval === "pending_admin_approval" && billing === "paid";
+
+      const badgeText = approval && approval !== "active"
+        ? `${client.status} (${approval.replaceAll("_", " ")})`
+        : (client.status || "unknown");
+
+      const approveBtn = canApprove
+        ? `<button class="btn btn-secondary admin-approve-btn" data-company-id="${escapeHtml(client.company_id)}" type="button">Approve</button>`
+        : "";
+
+      const removeBtn = `<button class="btn btn-secondary admin-remove-btn" data-company-id="${escapeHtml(client.company_id)}" type="button">Remove</button>`;
+      const viewBtn = `<button class="btn btn-secondary admin-view-btn" data-company-id="${escapeHtml(client.company_id)}" type="button">View</button>`;
+
+      const actions = `${approveBtn} ${viewBtn} ${removeBtn}`.trim() || `<span class="settings-copy">-</span>`;
+
+      const daysLeft = client.billing_days_left === 0 || client.billing_days_left
+        ? `${Number(client.billing_days_left)}d left`
+        : "-";
+      const billingCell = billing === "paid" ? `${daysLeft}` : (billing || "-");
       return `
         <tr>
           <td>
@@ -66,11 +89,81 @@ function renderRows(clients) {
           <td>${escapeHtml(client.plan || "N/A")}</td>
           <td>${Number(client.members) || 0}</td>
           <td>${Number(client.tickets) || 0}</td>
-          <td><span class="admin-status-pill ${statusClass}">${escapeHtml(client.status || "unknown")}</span></td>
+          <td><span class="admin-status-pill ${statusClass}">${escapeHtml(badgeText)}</span></td>
+          <td>${escapeHtml(billingCell)}</td>
+          <td>${actions}</td>
         </tr>
       `;
     })
     .join("");
+
+  tableBodyEl.querySelectorAll(".admin-approve-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const companyId = btn.getAttribute("data-company-id");
+      if (!companyId) return;
+      btn.disabled = true;
+      btn.textContent = "Approving...";
+      setFeedback("info", "Approving client...");
+      try {
+        const res = await apiFetch(`${ADMIN_APPROVE_API}/${encodeURIComponent(companyId)}/approve`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${adminToken}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setFeedback("error", data.error || "Unable to approve client.");
+          btn.disabled = false;
+          btn.textContent = "Approve";
+          return;
+        }
+        setFeedback("success", "Client approved.");
+        loadClients();
+      } catch (e) {
+        setFeedback("error", "Unable to approve client right now.");
+        btn.disabled = false;
+        btn.textContent = "Approve";
+      }
+    });
+  });
+
+  tableBodyEl.querySelectorAll(".admin-remove-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const companyId = btn.getAttribute("data-company-id");
+      if (!companyId) return;
+      const ok = confirm("Remove this client? This disables the company and all its users.");
+      if (!ok) return;
+      btn.disabled = true;
+      btn.textContent = "Removing...";
+      setFeedback("info", "Removing client...");
+      try {
+        const res = await apiFetch(`${ADMIN_APPROVE_API}/${encodeURIComponent(companyId)}/remove`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${adminToken}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setFeedback("error", data.error || "Unable to remove client.");
+          btn.disabled = false;
+          btn.textContent = "Remove";
+          return;
+        }
+        setFeedback("success", "Client removed.");
+        loadClients();
+      } catch (e) {
+        setFeedback("error", "Unable to remove client right now.");
+        btn.disabled = false;
+        btn.textContent = "Remove";
+      }
+    });
+  });
+
+  tableBodyEl.querySelectorAll(".admin-view-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const companyId = btn.getAttribute("data-company-id");
+      if (!companyId) return;
+      window.location.href = `./client-details.html?company_id=${encodeURIComponent(companyId)}`;
+    });
+  });
 }
 
 function updateCount(count) {

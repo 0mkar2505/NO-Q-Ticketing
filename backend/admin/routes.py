@@ -1,20 +1,258 @@
 from flask import Blueprint, jsonify, request
 from auth.middleware import require_auth
 from models.db import company_collection, user_collection, db
-from datetime import datetime
+from datetime import datetime, timedelta
+from bson import ObjectId
+import os
 
 tickets_collection = db["tickets"]
+chat_sessions_collection = db["chat_sessions"]
 admin_settings_collection = db["admin_settings"]
 admin_audit_collection = db["admin_audit_logs"]
+team_chat_collection = db["team_chat_messages"]
 
 admin_bp = Blueprint("admin", __name__)
+
+def _to_object_id(value):
+    try:
+        return ObjectId(value)
+    except Exception:
+        return value
 
 @admin_bp.route("/dashboard", methods=["GET"])
 @require_auth("admin")
 def admin_dashboard():
-    return jsonify({
-        "message": "Admin dashboard access granted"
-    }), 200
+    now = datetime.utcnow()
+
+    total_clients = company_collection.count_documents({})
+    total_tickets = tickets_collection.count_documents({})
+    active_users = user_collection.count_documents({"is_active": True})
+
+    pending_payment = company_collection.count_documents({"approval_status": "pending_payment"})
+    pending_approval = company_collection.count_documents({"approval_status": "pending_admin_approval"})
+
+    mongo_ok = True
+    mongo_error = None
+    try:
+        db.command("ping")
+    except Exception as e:
+        mongo_ok = False
+        mongo_error = str(e)
+
+    llm_provider = (os.getenv("LLM_PROVIDER") or "").strip().lower() or "openai"
+    llm_model = (os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL") or "").strip()
+    llm_configured = bool((os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "").strip())
+
+    # System status heuristic: DB must be up; LLM is optional (degraded if missing).
+    if not mongo_ok:
+        system_status = "down"
+    elif not llm_configured:
+        system_status = "degraded"
+    else:
+        system_status = "ok"
+
+    recent_activity = _build_platform_activity(limit=12)
+
+    health = _build_operational_health()
+    # Keep health compact for dashboard; full health page calls /api/admin/health.
+    health_compact = {
+        "mongo_ok": health.get("mongo_ok"),
+        "llm_configured": health.get("llm_configured"),
+        "pending_payment": health.get("pending_payment"),
+        "pending_approval": health.get("pending_approval"),
+        "tickets_24h": health.get("tickets_24h"),
+        "support_chats_24h": health.get("support_chats_24h"),
+    }
+
+    return jsonify(
+        {
+            "summary": {
+                "total_clients": total_clients,
+                "total_tickets": total_tickets,
+                "active_users": active_users,
+                "pending_payment": pending_payment,
+                "pending_approval": pending_approval,
+                "system_status": system_status,
+                "mongo_ok": mongo_ok,
+                "mongo_error": mongo_error,
+                "llm_provider": llm_provider,
+                "llm_model": llm_model,
+                "llm_configured": llm_configured,
+                "server_time": now.isoformat(),
+            },
+            "recent_activity": recent_activity,
+            "health": health_compact,
+        }
+    ), 200
+
+
+def _build_platform_activity(limit=20):
+    """
+    Best-effort platform activity feed. Uses existing collections instead of requiring a new event bus.
+    """
+    events = []
+
+    def add(ts, kind, title, detail, scope=None):
+        if not ts:
+            return
+        events.append(
+            {
+                "timestamp": ts.isoformat() if hasattr(ts, "isoformat") else str(ts),
+                "kind": kind,
+                "title": title,
+                "detail": detail,
+                "scope": scope or "",
+            }
+        )
+
+    # Admin audit logs (approvals, system updates, removals).
+    for row in list(admin_audit_collection.find({}).sort("timestamp", -1).limit(limit)):
+        add(
+            row.get("timestamp"),
+            "admin",
+            (row.get("action") or "admin_action").replace("_", " ").title(),
+            f"{row.get('actor') or 'admin'} • {row.get('scope') or ''}".strip(" •"),
+            scope=row.get("scope") or "",
+        )
+
+    # Companies created / approved / removed.
+    for c in list(company_collection.find({}).sort("created_at", -1).limit(limit)):
+        add(
+            c.get("created_at"),
+            "company",
+            "Company Created",
+            f"{c.get('name') or 'Company'} • {c.get('slug') or ''}".strip(" •"),
+            scope=f"company/{c.get('slug') or str(c.get('_id'))}",
+        )
+        if c.get("approved_at"):
+            add(
+                c.get("approved_at"),
+                "company",
+                "Company Approved",
+                f"{c.get('name') or 'Company'}",
+                scope=f"company/{c.get('slug') or str(c.get('_id'))}",
+            )
+        if c.get("removed_at"):
+            add(
+                c.get("removed_at"),
+                "company",
+                "Company Removed",
+                f"{c.get('name') or 'Company'}",
+                scope=f"company/{c.get('slug') or str(c.get('_id'))}",
+            )
+
+    # User lifecycle (agents added/removed).
+    for u in list(user_collection.find({"company_id": {"$ne": None}}).sort("created_at", -1).limit(limit)):
+        role = (u.get("company_role") or "user").strip().lower()
+        add(
+            u.get("created_at"),
+            "user",
+            f"{role.title()} Created",
+            f"{u.get('name') or u.get('email') or 'User'}",
+            scope=f"user/{str(u.get('_id'))}",
+        )
+        if u.get("removed_at"):
+            add(
+                u.get("removed_at"),
+                "user",
+                f"{role.title()} Removed",
+                f"{u.get('name') or u.get('email') or 'User'}",
+                scope=f"user/{str(u.get('_id'))}",
+            )
+
+    # Ticket + chat volume.
+    for t in list(tickets_collection.find({}).sort("updated_at", -1).limit(limit)):
+        add(
+            t.get("updated_at") or t.get("created_at"),
+            "ticket",
+            "Ticket Updated",
+            (t.get("subject") or "Ticket").strip()[:120],
+            scope=f"ticket/{str(t.get('_id'))}",
+        )
+
+    for s in list(chat_sessions_collection.find({}).sort("updated_at", -1).limit(limit)):
+        add(
+            s.get("updated_at") or s.get("created_at"),
+            "support",
+            "Support Chat Updated",
+            f"{(s.get('company_name') or 'Company')} • {s.get('customer_email') or ''}".strip(" •")[:140],
+            scope=f"chat_session/{str(s.get('_id'))}",
+        )
+
+    for m in list(team_chat_collection.find({}).sort("created_at", -1).limit(limit)):
+        add(
+            m.get("created_at"),
+            "team_chat",
+            "Team Chat Message",
+            f"{m.get('sender_name') or 'User'}: {(m.get('text') or '')[:90]}",
+            scope=f"team_chat/{str(m.get('_id'))}",
+        )
+
+    # Sort and return.
+    def _ts(e):
+        try:
+            return datetime.fromisoformat(str(e.get("timestamp")).replace("Z", "+00:00"))
+        except Exception:
+            return datetime.min
+
+    events.sort(key=_ts, reverse=True)
+    return events[:limit]
+
+
+def _build_operational_health():
+    now = datetime.utcnow()
+    since_24h = now - timedelta(hours=24)
+
+    mongo_ok = True
+    mongo_error = None
+    try:
+        db.command("ping")
+    except Exception as e:
+        mongo_ok = False
+        mongo_error = str(e)
+
+    llm_provider = (os.getenv("LLM_PROVIDER") or "").strip().lower() or "openai"
+    llm_model = (os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL") or "").strip()
+    llm_configured = bool((os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "").strip())
+
+    pending_payment = company_collection.count_documents({"approval_status": "pending_payment"})
+    pending_approval = company_collection.count_documents({"approval_status": "pending_admin_approval"})
+
+    tickets_24h = tickets_collection.count_documents({"updated_at": {"$gte": since_24h}})
+    support_chats_24h = chat_sessions_collection.count_documents({"updated_at": {"$gte": since_24h}})
+
+    return {
+        "server_time": now.isoformat(),
+        "mongo_ok": mongo_ok,
+        "mongo_error": mongo_error,
+        "llm_provider": llm_provider,
+        "llm_model": llm_model,
+        "llm_configured": llm_configured,
+        "pending_payment": pending_payment,
+        "pending_approval": pending_approval,
+        "tickets_24h": tickets_24h,
+        "support_chats_24h": support_chats_24h,
+    }
+
+
+@admin_bp.route("/activity", methods=["GET"])
+@require_auth("admin")
+def admin_activity():
+    try:
+        limit = int(request.args.get("limit") or 30)
+    except (TypeError, ValueError):
+        limit = 30
+    if limit < 10:
+        limit = 10
+    if limit > 100:
+        limit = 100
+    return jsonify({"events": _build_platform_activity(limit=limit)}), 200
+
+
+@admin_bp.route("/health", methods=["GET"])
+@require_auth("admin")
+def admin_health():
+    return jsonify(_build_operational_health()), 200
 
 
 @admin_bp.route("/clients", methods=["GET"])
@@ -31,11 +269,39 @@ def admin_clients():
         ])
     }
 
-    tickets_by_company = {
-        row["_id"]: row.get("count", 0)
+    now = datetime.utcnow()
+    since_7d = now.replace(microsecond=0)
+    since_30d = now.replace(microsecond=0)
+    # Approx windows (demo-safe).
+    from datetime import timedelta as _td
+    since_7d = now - _td(days=7)
+    since_30d = now - _td(days=30)
+
+    tickets_stats = {
+        row["_id"]: row
         for row in tickets_collection.aggregate([
             {"$match": {"company_id": {"$ne": None}}},
-            {"$group": {"_id": "$company_id", "count": {"$sum": 1}}}
+            {"$group": {
+                "_id": "$company_id",
+                "count": {"$sum": 1},
+                "last_ticket_at": {"$max": "$updated_at"},
+                "tickets_7d": {"$sum": {"$cond": [{"$gte": ["$updated_at", since_7d]}, 1, 0]}},
+                "tickets_30d": {"$sum": {"$cond": [{"$gte": ["$updated_at", since_30d]}, 1, 0]}},
+            }}
+        ])
+    }
+
+    chat_stats = {
+        row["_id"]: row
+        for row in chat_sessions_collection.aggregate([
+            {"$match": {"company_id": {"$ne": None}}},
+            {"$group": {
+                "_id": "$company_id",
+                "count": {"$sum": 1},
+                "last_chat_at": {"$max": "$updated_at"},
+                "chats_7d": {"$sum": {"$cond": [{"$gte": ["$updated_at", since_7d]}, 1, 0]}},
+                "chats_30d": {"$sum": {"$cond": [{"$gte": ["$updated_at", since_30d]}, 1, 0]}},
+            }}
         ])
     }
 
@@ -51,20 +317,132 @@ def admin_clients():
                 continue
 
         company_id = company.get("_id")
+        approval_status = (company.get("approval_status") or ("active" if company.get("is_active", True) else "pending_admin_approval")).strip()
+        billing_status = (company.get("billing_status") or "unpaid").strip()
+
+        billing_started_at = company.get("billing_started_at")
+        billing_renew_at = company.get("billing_renew_at")
+        days_left = None
+        try:
+            if billing_renew_at:
+                delta = billing_renew_at - now
+                days_left = max(0, int(delta.total_seconds() // 86400))
+        except Exception:
+            days_left = None
+
+        tstat = tickets_stats.get(company_id, {}) or {}
+        cstat = chat_stats.get(company_id, {}) or {}
+
         client_rows.append({
             "company_id": str(company_id),
             "company_name": company_name,
             "company_email": company_email,
             "company_slug": company_slug,
             "plan": company.get("plan", "N/A"),
+            "billing_status": billing_status,
+            "approval_status": approval_status,
             "members": int(users_by_company.get(company_id, 0)),
-            "tickets": int(tickets_by_company.get(company_id, 0)),
+            "tickets": int(tstat.get("count", 0)),
+            "tickets_7d": int(tstat.get("tickets_7d", 0)),
+            "tickets_30d": int(tstat.get("tickets_30d", 0)),
+            "last_ticket_at": (tstat.get("last_ticket_at").isoformat() if tstat.get("last_ticket_at") else None),
+            "support_chats": int(cstat.get("count", 0)),
+            "support_chats_7d": int(cstat.get("chats_7d", 0)),
+            "support_chats_30d": int(cstat.get("chats_30d", 0)),
+            "last_support_chat_at": (cstat.get("last_chat_at").isoformat() if cstat.get("last_chat_at") else None),
+            "billing_started_at": billing_started_at.isoformat() if billing_started_at else None,
+            "billing_renew_at": billing_renew_at.isoformat() if billing_renew_at else None,
+            "billing_days_left": days_left,
             "status": "active" if company.get("is_active", True) else "inactive",
             "created_at": company.get("created_at").isoformat() if company.get("created_at") else None,
         })
 
     client_rows.sort(key=lambda row: row["company_name"].lower())
     return jsonify({"clients": client_rows, "count": len(client_rows)}), 200
+
+
+@admin_bp.route("/clients/<company_id>/approve", methods=["POST"])
+@require_auth("admin")
+def approve_client(company_id):
+    company = company_collection.find_one({"_id": _to_object_id(company_id)})
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    company_collection.update_one(
+        {"_id": company["_id"]},
+        {
+            "$set": {
+                "is_active": True,
+                "approval_status": "active",
+                "approved_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+            }
+        },
+    )
+
+    # Activate company users (supervisor + agents).
+    user_collection.update_many(
+        {"company_id": company["_id"]},
+        {"$set": {"is_active": True}},
+    )
+
+    _append_audit_log(
+        actor=(request.user.get("email") or request.user.get("name") or "admin"),
+        action="approved_client",
+        scope=f"admin/clients/{company_id}",
+    )
+
+    return jsonify({"message": "Client approved"}), 200
+
+
+@admin_bp.route("/clients/<company_id>/remove", methods=["POST"])
+@require_auth("admin")
+def remove_client(company_id):
+    company = company_collection.find_one({"_id": _to_object_id(company_id)})
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    company_collection.update_one(
+        {"_id": company["_id"]},
+        {
+            "$set": {
+                "is_active": False,
+                "approval_status": "removed",
+                "removed_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+            }
+        },
+    )
+    user_collection.update_many({"company_id": company["_id"]}, {"$set": {"is_active": False}})
+
+    _append_audit_log(
+        actor=(request.user.get("email") or request.user.get("name") or "admin"),
+        action="removed_client",
+        scope=f"admin/clients/{company_id}",
+    )
+    return jsonify({"message": "Client removed"}), 200
+
+
+@admin_bp.route("/clients/<company_id>/members", methods=["GET"])
+@require_auth("admin")
+def admin_client_members(company_id):
+    company = company_collection.find_one({"_id": _to_object_id(company_id)})
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    rows = list(user_collection.find({"company_id": company["_id"]}).sort("created_at", -1))
+    out = []
+    for u in rows:
+        out.append({
+            "id": str(u.get("_id")),
+            "name": u.get("name") or "",
+            "email": u.get("email") or "",
+            "company_role": u.get("company_role") or "",
+            "platform_role": u.get("platform_role") or "",
+            "is_active": bool(u.get("is_active", True)),
+            "created_at": u.get("created_at").isoformat() if u.get("created_at") else None,
+        })
+    return jsonify({"company_id": str(company["_id"]), "members": out, "count": len(out)}), 200
 
 
 def _get_billing_rules():

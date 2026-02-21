@@ -32,17 +32,17 @@
       <!-- CENTER -->
       <div class="nav-center">
         <a href="./support.html" class="nav-center-link">Live Support</a>
-        <a href="#" class="nav-center-link">Pricing</a>
+        <a href="./pricing.html" class="nav-center-link">Pricing</a>
         <a href="#" class="nav-center-link">Features</a>
         <a href="#" class="nav-center-link">About</a>
       </div>
 
       <!-- RIGHT -->
-      <div class="nav-right">
-        <a href="/auth/login.html" class="nav-link">Login</a>
-        <button class="nav-btn" id="getStartedBtn">Try Demo</button>
-      </div>
-    </nav>
+        <div class="nav-right">
+          <a href="/auth/login.html" class="nav-link">Login</a>
+          <a class="nav-btn" href="/auth/register.html" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Get Started</a>
+        </div>
+      </nav>
 
     <!-- LANDING PAGE -->
     <main class="landing">
@@ -79,7 +79,7 @@
         <div class="footer-links-group">
           <h4>OZU Technologies</h4>
           <a href="#">About us</a>
-          <a href="#">Pricing</a>
+          <a href="./pricing.html">Pricing</a>
           <a href="#">Security</a>
         </div>
       </div>
@@ -120,7 +120,6 @@
       }
     }
 
-    document.getElementById("getStartedBtn")?.addEventListener("click", routeUser);
     document.getElementById("heroGetStartedBtn")?.addEventListener("click", routeUser);
   </script>
 

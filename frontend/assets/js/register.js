@@ -3,6 +3,12 @@ const errorEl = document.getElementById("error");
 const submitBtn = document.getElementById("submitBtn");
 const successModalSubtextEl = document.querySelector("#successModal .modal-subtext");
 
+function isValidHandle(handle) {
+  const value = String(handle || "").trim().toLowerCase();
+  if (value.length < 3 || value.length > 32) return false;
+  return /^[a-z0-9._-]+$/.test(value);
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -10,14 +16,20 @@ form.addEventListener("submit", async (e) => {
   clearError(errorEl);
 
   const nameInput = document.getElementById("name");
-  const emailInput = document.getElementById("email");
   const companyInput = document.getElementById("company");
+  const industryInput = document.getElementById("industry");
+  const websiteInput = document.getElementById("website");
+  const companySizeInput = document.getElementById("companySize");
+  const handleInput = document.getElementById("handle");
   const passwordInput = document.getElementById("password");
   const confirmPasswordInput = document.getElementById("confirmPassword");
 
   const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
   const company = companyInput.value.trim();
+  const industry = (industryInput?.value || "").trim();
+  const website = (websiteInput?.value || "").trim();
+  const company_size = (companySizeInput?.value || "").trim();
+  const handle = (handleInput?.value || "").trim().toLowerCase();
   const password = passwordInput.value;
   const confirmPassword = confirmPasswordInput.value;
 
@@ -30,23 +42,22 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  // Email validation
-  if (!email) {
-    showError(errorEl, "Email is required");
-    emailInput.focus();
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    showError(errorEl, "Email is invalid");
-    emailInput.focus();
-    return;
-  }
-
   // Company validation
   if (!company) {
     showError(errorEl, "Company name is required");
     companyInput.focus();
+    return;
+  }
+
+  if (!handle) {
+    showError(errorEl, "NO-Q email handle is required");
+    handleInput?.focus();
+    return;
+  }
+
+  if (!isValidHandle(handle)) {
+    showError(errorEl, "Handle must be 3-32 chars: letters, numbers, dot, underscore, hyphen");
+    handleInput?.focus();
     return;
   }
 
@@ -78,17 +89,20 @@ form.addEventListener("submit", async (e) => {
 
   // Button loading state
   const originalBtnText = submitBtn.textContent;
-  submitBtn.textContent = "Creating account...";
+  submitBtn.textContent = "Continuing...";
   submitBtn.disabled = true;
 
   try {
-    // Build payload - always client role for public registration
+    // Build payload - onboarding creates a supervisor identity under @noq.com
     const payload = {
       name: name,
-      email: email,
       password: password,
       role: "client",
-      company_name: company
+      company_name: company,
+      industry,
+      website,
+      company_size,
+      handle,
     };
 
     const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.register}`, {
@@ -101,15 +115,20 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (!res.ok) {
-      showError(errorEl, data.error || "Registration failed");
+      showError(errorEl, data.error || "Onboarding failed");
       submitBtn.textContent = originalBtnText;
       submitBtn.disabled = false;
       return;
     }
 
-    // Registration successful - show success modal
+    // Save onboarding token for pricing/checkout step.
+    if (data.onboarding_token) {
+      sessionStorage.setItem("onboarding_token", data.onboarding_token);
+    }
+
+    // Onboarding successful - show success modal
     if (successModalSubtextEl && data.company_slug) {
-      successModalSubtextEl.textContent = `Your account is ready. Your tenant slug is "${data.company_slug}". Use it on the support page.`;
+      successModalSubtextEl.textContent = `Workspace created. Next: choose a plan for "${data.company_slug}".`;
     }
     document.getElementById("successModal").classList.remove("hidden");
 
@@ -134,7 +153,7 @@ document
   .getElementById("goToLoginBtn")
   .addEventListener("click", () => {
     const pathBase = window.location.pathname.startsWith("/frontend/") ? "/frontend" : "";
-    window.location.href = `${pathBase}/auth/login.html`;
+    window.location.href = `${pathBase}/public/pricing.html`;
   });
 
 // Password toggle functionality

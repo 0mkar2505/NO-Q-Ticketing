@@ -65,7 +65,7 @@ function renderMembers(members) {
   if (countEl) countEl.textContent = String(list.length);
 
   if (!list.length) {
-    bodyEl.innerHTML = `<tr><td colspan="5">No members yet.</td></tr>`;
+    bodyEl.innerHTML = `<tr><td colspan="6">No members yet.</td></tr>`;
     return;
   }
 
@@ -73,6 +73,11 @@ function renderMembers(members) {
     .map((m) => {
       const active = m.is_active ? "active" : "inactive";
       const role = (m.company_role || "-").toString();
+      const isAgent = role.toLowerCase() === "agent";
+      const canRemove = isAgent && m.is_active;
+      const removeBtn = canRemove
+        ? `<button class="btn btn-secondary member-remove" data-id="${escapeHtml(m.id)}" type="button">Remove</button>`
+        : `<span class="settings-copy">-</span>`;
       return `
         <tr>
           <td>${escapeHtml(m.name || "-")}</td>
@@ -80,10 +85,43 @@ function renderMembers(members) {
           <td><span class="member-chip member-chip--${escapeHtml(role.toLowerCase())}">${escapeHtml(role)}</span></td>
           <td><span class="member-chip member-chip--${active}">${active}</span></td>
           <td>${escapeHtml(fmtDate(m.created_at))}</td>
+          <td>${removeBtn}</td>
         </tr>
       `;
     })
     .join("");
+
+  bodyEl.querySelectorAll(".member-remove").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      if (!id) return;
+      const ok = confirm("Remove this agent? They will no longer be able to sign in.");
+      if (!ok) return;
+      btn.disabled = true;
+      btn.textContent = "Removing...";
+      setFeedback("info", "Removing agent...");
+      try {
+        const res = await apiFetch(`${API_BASE}/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (handleAuthFailure(res)) return;
+          setFeedback("error", data.error || "Unable to remove agent.");
+          btn.disabled = false;
+          btn.textContent = "Remove";
+          return;
+        }
+        setFeedback("success", "Agent removed.");
+        loadMembers({ silent: true });
+      } catch (e) {
+        setFeedback("error", "Unable to remove agent right now.");
+        btn.disabled = false;
+        btn.textContent = "Remove";
+      }
+    });
+  });
 }
 
 async function loadMembers({ silent = false } = {}) {

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operational Health | NO-Q Admin</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Operational Health</h1>
+        <p class="page-subtitle">Service checks and platform-level health signals.</p>
+        <p id="admin-health-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="admin-section-card">
+          <div class="admin-section-head">
+            <h2>Health</h2>
+            <span class="admin-badge" id="admin-health-status">-</span>
+          </div>
+
+          <div class="admin-kv-list" id="admin-health-kv">
+            <div class="admin-empty-copy">Loading...</div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="/shared/js/api.js"></script>
+  <script src="./health.js"></script>
+</body>
+</html>
+

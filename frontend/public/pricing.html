@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pricing | NO-Q</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="page-transition">
+  <div class="page-wrapper">
+    <header class="navbar navbar--auth">
+      <div class="navbar-left">
+        <img src="/assets/images/NO-Q logo 1.png" alt="NO-Q Logo" class="navbar-logo" />
+        <span class="navbar-brand">NO-Q</span>
+      </div>
+      <div class="navbar-right">
+        <a href="/public/index.html" class="btn btn-secondary">Home</a>
+      </div>
+    </header>
+
+    <main class="auth-page">
+      <div class="auth-card" style="max-width: 980px;">
+        <h1 class="auth-title">Choose a plan</h1>
+        <p class="auth-subtitle">
+          Complete checkout to submit your workspace for admin approval.
+        </p>
+
+        <p id="pricing-error" class="form-error"></p>
+
+        <div class="pricing-grid" style="margin-top: 18px;">
+          <div class="settings-card" style="border-radius: 14px;">
+            <h2 style="margin-bottom: 6px;">Starter</h2>
+            <p class="settings-copy">For small teams getting started.</p>
+            <ul class="settings-copy" style="margin-top: 10px; line-height: 1.6;">
+              <li>Ticket inbox</li>
+              <li>Agent + supervisor roles</li>
+              <li>Customer support assistant</li>
+            </ul>
+            <button class="btn btn-primary" type="button" data-plan="starter" style="margin-top: 14px;">Checkout Starter</button>
+          </div>
+
+          <div class="settings-card" style="border-radius: 14px; border-color: #c4b5fd;">
+            <h2 style="margin-bottom: 6px;">Growth</h2>
+            <p class="settings-copy">Best for teams scaling support.</p>
+            <ul class="settings-copy" style="margin-top: 10px; line-height: 1.6;">
+              <li>Everything in Starter</li>
+              <li>Branding + customization</li>
+              <li>Knowledge base for AI</li>
+            </ul>
+            <button class="btn btn-primary" type="button" data-plan="growth" style="margin-top: 14px;">Checkout Growth</button>
+          </div>
+
+          <div class="settings-card" style="border-radius: 14px;">
+            <h2 style="margin-bottom: 6px;">Enterprise</h2>
+            <p class="settings-copy">For advanced controls and reporting.</p>
+            <ul class="settings-copy" style="margin-top: 10px; line-height: 1.6;">
+              <li>Everything in Growth</li>
+              <li>Advanced analytics</li>
+              <li>Custom policies</li>
+            </ul>
+            <button class="btn btn-primary" type="button" data-plan="enterprise" style="margin-top: 14px;">Checkout Enterprise</button>
+          </div>
+        </div>
+
+        <p class="settings-copy" style="margin-top: 14px;">
+          Note: This project uses a demo checkout. After checkout, your account stays locked until an admin approves the company.
+        </p>
+      </div>
+    </main>
+
+    <footer class="site-footer site-footer--auth">
+      <div class="footer-divider"></div>
+      <div class="footer-bottom auth-footer-content">
+        <p class="footer-quote"><strong>NO-Q</strong> - because waiting is not support.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/public/pricing.js"></script>
+  <script src="/shared/js/page-transition.js"></script>
+</body>
+</html>
+

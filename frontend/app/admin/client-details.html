@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Details | NO-Q Admin</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h1 class="page-title">Client Details</h1>
+            <p class="page-subtitle" id="client-details-subtitle">Usage, billing, and members.</p>
+          </div>
+          <a class="btn btn-secondary" href="./clients.html">Back to Clients</a>
+        </div>
+
+        <p id="client-details-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="settings-grid" style="margin-top: 12px;">
+          <article class="settings-card">
+            <h2>Billing</h2>
+            <p class="settings-copy" id="client-billing"></p>
+          </article>
+
+          <article class="settings-card">
+            <h2>Usage</h2>
+            <p class="settings-copy" id="client-usage"></p>
+          </article>
+
+          <article class="settings-card settings-card-wide">
+            <h2>Members</h2>
+            <div class="members-table-wrap" style="margin-top: 8px;">
+              <table class="members-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Company Role</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody id="client-members-body">
+                  <tr><td colspan="5">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="/shared/js/api.js"></script>
+  <script src="./client-details.js"></script>
+</body>
+</html>
+

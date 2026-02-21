@@ -48,7 +48,7 @@ class User:
         }
 
 
-def create_user(name, email, password, role, company_id=None, platform_role=None, company_role=None):
+def create_user(name, email, password, role, company_id=None, platform_role=None, company_role=None, is_active=True):
     user = {
         "name": name,
         "email": email,
@@ -58,7 +58,7 @@ def create_user(name, email, password, role, company_id=None, platform_role=None
         "company_role": company_role,
         "company_id": company_id,  # ObjectId or None
         "created_at": datetime.utcnow(),
-        "is_active": True
+        "is_active": bool(is_active)
     }
     user_collection.insert_one(user)
     return user

@@ -22,22 +22,22 @@
         <div class="stats-grid dashboard-stats-grid">
           <div class="stat-card stat-card--open">
             <h3>Total Clients</h3>
-            <p class="stat-number">-</p>
+            <p class="stat-number" id="admin-total-clients">-</p>
           </div>
 
           <div class="stat-card stat-card--pending">
             <h3>Total Tickets</h3>
-            <p class="stat-number">-</p>
+            <p class="stat-number" id="admin-total-tickets">-</p>
           </div>
 
           <div class="stat-card stat-card--resolved">
             <h3>Active Users</h3>
-            <p class="stat-number">-</p>
+            <p class="stat-number" id="admin-active-users">-</p>
           </div>
 
           <div class="stat-card stat-card--ai">
             <h3>System Status</h3>
-            <p class="stat-number">Pending</p>
+            <p class="stat-number" id="admin-system-status">-</p>
           </div>
         </div>
 
@@ -45,17 +45,21 @@
           <article class="admin-section-card">
             <div class="admin-section-head">
               <h2>Recent Platform Activity</h2>
-              <span class="admin-badge">Skeleton</span>
+              <a class="admin-badge" href="./activity.html">View all</a>
             </div>
-            <p class="admin-empty-copy">Activity feed UI is ready. Data binding will be added in the next phase.</p>
+            <ul class="admin-activity-list" id="admin-activity-list">
+              <li class="admin-empty-copy">Loading activity...</li>
+            </ul>
           </article>
 
           <article class="admin-section-card">
             <div class="admin-section-head">
               <h2>Operational Health</h2>
-              <span class="admin-badge">Skeleton</span>
+              <a class="admin-badge" href="./health.html">Details</a>
             </div>
-            <p class="admin-empty-copy">System checks and service metrics will appear here after backend integration.</p>
+            <div class="admin-kv-list" id="admin-health-kv">
+              <div class="admin-empty-copy">Loading health...</div>
+            </div>
           </article>
         </section>
       </main>
@@ -68,5 +72,7 @@
 
   <script src="/shared/js/auth-guard.js"></script>
   <script src="/shared/js/load-shared.js"></script>
+  <script src="/shared/js/api.js"></script>
+  <script src="./dashboard.js"></script>
 </body>
 </html>
