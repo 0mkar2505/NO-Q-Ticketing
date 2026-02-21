@@ -17,6 +17,16 @@ const notifyEscalationsEl = document.getElementById("notifyEscalations");
 const resetBtnEl = document.getElementById("resetConfigsBtn");
 const saveBtnEl = document.getElementById("saveConfigsBtn");
 
+const taxCategoriesEl = document.getElementById("taxCategories");
+const taxPriorityHighEl = document.getElementById("taxPriorityHigh");
+const taxPriorityNormalEl = document.getElementById("taxPriorityNormal");
+const taxPriorityLowEl = document.getElementById("taxPriorityLow");
+const taxSeverityCriticalEl = document.getElementById("taxSeverityCritical");
+const taxSeverityHighEl = document.getElementById("taxSeverityHigh");
+const taxSeverityMediumEl = document.getElementById("taxSeverityMedium");
+const taxSeverityLowEl = document.getElementById("taxSeverityLow");
+const taxPolicyTextEl = document.getElementById("taxPolicyText");
+
 let lastLoadedConfig = null;
 let isSaving = false;
 
@@ -41,6 +51,9 @@ function setSavingState(saving) {
 function normalizeConfig(config) {
   const notifications = config?.notifications || {};
   const chat = config?.customer_chat_ui || {};
+  const taxonomy = config?.taxonomy || {};
+  const priorityLabels = taxonomy?.priority_labels || {};
+  const severityLabels = taxonomy?.severity_labels || {};
   return {
     default_priority: config?.default_priority || "normal",
     sla_response_hours: Number(config?.sla_response_hours || 4),
@@ -49,6 +62,32 @@ function normalizeConfig(config) {
       email_new_tickets: Boolean(notifications.email_new_tickets),
       daily_summary_report: Boolean(notifications.daily_summary_report),
       manager_escalation_alerts: Boolean(notifications.manager_escalation_alerts),
+    },
+    taxonomy: {
+      categories: Array.isArray(taxonomy.categories) && taxonomy.categories.length
+        ? taxonomy.categories
+        : [
+          "Billing & Payments",
+          "Login & Access",
+          "Bug / Crash",
+          "Integrations",
+          "Performance",
+          "Account & Subscription",
+          "Feature Request",
+          "Other",
+        ],
+      priority_labels: {
+        high: String(priorityLabels.high || "High"),
+        normal: String(priorityLabels.normal || "Normal"),
+        low: String(priorityLabels.low || "Low"),
+      },
+      severity_labels: {
+        critical: String(severityLabels.critical || "Critical"),
+        high: String(severityLabels.high || "High"),
+        medium: String(severityLabels.medium || "Medium"),
+        low: String(severityLabels.low || "Low"),
+      },
+      policy_text: String(taxonomy.policy_text || ""),
     },
     customer_chat_ui: {
       brand_name: chat.brand_name || "NO-Q Support",
@@ -73,6 +112,16 @@ function applyConfigToForm(config) {
   notifyNewTicketsEl.checked = normalized.notifications.email_new_tickets;
   notifyDailySummaryEl.checked = normalized.notifications.daily_summary_report;
   notifyEscalationsEl.checked = normalized.notifications.manager_escalation_alerts;
+
+  if (taxCategoriesEl) taxCategoriesEl.value = (normalized.taxonomy.categories || []).join("\n");
+  if (taxPriorityHighEl) taxPriorityHighEl.value = normalized.taxonomy.priority_labels.high || "High";
+  if (taxPriorityNormalEl) taxPriorityNormalEl.value = normalized.taxonomy.priority_labels.normal || "Normal";
+  if (taxPriorityLowEl) taxPriorityLowEl.value = normalized.taxonomy.priority_labels.low || "Low";
+  if (taxSeverityCriticalEl) taxSeverityCriticalEl.value = normalized.taxonomy.severity_labels.critical || "Critical";
+  if (taxSeverityHighEl) taxSeverityHighEl.value = normalized.taxonomy.severity_labels.high || "High";
+  if (taxSeverityMediumEl) taxSeverityMediumEl.value = normalized.taxonomy.severity_labels.medium || "Medium";
+  if (taxSeverityLowEl) taxSeverityLowEl.value = normalized.taxonomy.severity_labels.low || "Low";
+  if (taxPolicyTextEl) taxPolicyTextEl.value = normalized.taxonomy.policy_text || "";
 }
 
 function readFormConfig() {
@@ -80,6 +129,18 @@ function readFormConfig() {
   // Settings no longer edits branding, so preserve whatever was last loaded.
   const fallbackChat = normalizeConfig({}).customer_chat_ui;
   const preservedChat = lastLoadedConfig?.customer_chat_ui || fallbackChat;
+
+  const rawCategories = (taxCategoriesEl?.value || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  const unique = [];
+  const seen = new Set();
+  for (const c of rawCategories) {
+    const key = c.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(c);
+  }
+  if (!unique.some((c) => c.toLowerCase() === "other")) unique.push("Other");
+
   return {
     default_priority: defaultPriorityEl.value,
     sla_response_hours: Number(slaWindowEl.value),
@@ -88,6 +149,21 @@ function readFormConfig() {
       email_new_tickets: notifyNewTicketsEl.checked,
       daily_summary_report: notifyDailySummaryEl.checked,
       manager_escalation_alerts: notifyEscalationsEl.checked,
+    },
+    taxonomy: {
+      categories: unique,
+      priority_labels: {
+        high: (taxPriorityHighEl?.value || "High").trim(),
+        normal: (taxPriorityNormalEl?.value || "Normal").trim(),
+        low: (taxPriorityLowEl?.value || "Low").trim(),
+      },
+      severity_labels: {
+        critical: (taxSeverityCriticalEl?.value || "Critical").trim(),
+        high: (taxSeverityHighEl?.value || "High").trim(),
+        medium: (taxSeverityMediumEl?.value || "Medium").trim(),
+        low: (taxSeverityLowEl?.value || "Low").trim(),
+      },
+      policy_text: (taxPolicyTextEl?.value || "").trim(),
     },
     customer_chat_ui: preservedChat,
   };

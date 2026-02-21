@@ -9,6 +9,9 @@ ALLOWED_SLA_HOURS = {2, 4, 8}
 HEX_COLOR_LENGTH = 7
 MAX_BRAND_NAME_LENGTH = 60
 MAX_LOGO_URL_LENGTH = 500
+MAX_TAXONOMY_CATEGORIES = 30
+MAX_TAXONOMY_LABEL_LENGTH = 40
+MAX_TAXONOMY_POLICY_LENGTH = 600
 
 
 def _coerce_bool(value):
@@ -50,6 +53,11 @@ def _validate_payload(data):
     notifications = data.get("notifications") or {}
     if not isinstance(notifications, dict):
         return None, "notifications must be an object"
+
+    taxonomy_in_payload = "taxonomy" in data
+    taxonomy = data.get("taxonomy") or {}
+    if taxonomy_in_payload and not isinstance(taxonomy, dict):
+        return None, "taxonomy must be an object"
 
     customer_chat_ui = data.get("customer_chat_ui") or {}
     if not isinstance(customer_chat_ui, dict):
@@ -120,6 +128,61 @@ def _validate_payload(data):
             "customer_text_color": customer_text_color,
         },
     }
+
+    # Only update taxonomy if it was sent (so branding/settings PATCHes don't overwrite it).
+    if taxonomy_in_payload:
+        categories = taxonomy.get("categories") or []
+        if not isinstance(categories, list):
+            return None, "taxonomy.categories must be a list"
+
+        normalized_categories = []
+        seen = set()
+        for item in categories:
+            name = str(item or "").strip()
+            if not name:
+                continue
+            if len(name) > 60:
+                return None, "taxonomy.categories entries must be <= 60 characters"
+            key = name.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized_categories.append(name)
+
+        if not normalized_categories:
+            return None, "taxonomy.categories must include at least 1 category"
+        if len(normalized_categories) > MAX_TAXONOMY_CATEGORIES:
+            return None, f"taxonomy.categories must be <= {MAX_TAXONOMY_CATEGORIES} entries"
+        if not any(c.lower() == "other" for c in normalized_categories):
+            normalized_categories.append("Other")
+
+        priority_labels = taxonomy.get("priority_labels") or {}
+        severity_labels = taxonomy.get("severity_labels") or {}
+        if not isinstance(priority_labels, dict):
+            return None, "taxonomy.priority_labels must be an object"
+        if not isinstance(severity_labels, dict):
+            return None, "taxonomy.severity_labels must be an object"
+
+        def _label(value, fallback):
+            text = str(value or fallback).strip()
+            return text[:MAX_TAXONOMY_LABEL_LENGTH] if text else fallback
+
+        config["taxonomy"] = {
+            "categories": normalized_categories,
+            "priority_labels": {
+                "high": _label(priority_labels.get("high"), "High"),
+                "normal": _label(priority_labels.get("normal"), "Normal"),
+                "low": _label(priority_labels.get("low"), "Low"),
+            },
+            "severity_labels": {
+                "critical": _label(severity_labels.get("critical"), "Critical"),
+                "high": _label(severity_labels.get("high"), "High"),
+                "medium": _label(severity_labels.get("medium"), "Medium"),
+                "low": _label(severity_labels.get("low"), "Low"),
+            },
+            "policy_text": str(taxonomy.get("policy_text") or "").strip()[:MAX_TAXONOMY_POLICY_LENGTH],
+        }
+
     return config, None
 
 

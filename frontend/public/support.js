@@ -16,6 +16,8 @@ const supportEmailEl = document.getElementById("support-email");
 const supportStartBtn = document.getElementById("support-start");
 const supportChatEl = document.getElementById("support-chat");
 const supportOptionsEl = document.getElementById("support-options");
+const supportFreeChatInputEl = document.getElementById("support-freechat-input");
+const supportFreeChatSendBtn = document.getElementById("support-freechat-send");
 const supportDetailsWrapEl = document.getElementById("support-details-wrap");
 const supportDetailsEl = document.getElementById("support-details");
 const supportDetailsSubmitBtn = document.getElementById("support-details-submit");
@@ -43,8 +45,10 @@ let currentStep = null;
 let ticketCreated = false;
 let isCreatingTicket = false;
 let tenantSlug = "";
+let lastAiTriage = null;
 let statusContext = { ticket_id: "", email: "" };
 let statusAutoRefreshTimer = null;
+let readyPromptShown = false;
 
 function scrollToBottom(el) {
   if (!el) return;
@@ -176,6 +180,73 @@ function renderOptions(options = []) {
   });
 }
 
+async function sendAiMessage() {
+  if (!sessionId || ticketCreated || isCreatingTicket) return;
+
+  const text = (supportFreeChatInputEl?.value || "").trim();
+  if (!text) return;
+
+  appendChat("customer", text);
+  supportFreeChatInputEl.value = "";
+  supportFreeChatSendBtn.disabled = true;
+  supportFreeChatInputEl.disabled = true;
+  setFeedback(supportFeedbackEl, "", "");
+
+  try {
+    const res = await apiFetch(`${SUPPORT_API_BASE}/ai-message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, message: text }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setFeedback(supportFeedbackEl, "error", data.error || "Unable to send message.");
+      return;
+    }
+
+    const assistantText = (data.message || "").trim();
+
+    const triage = data.triage || null;
+    const wasReady = Boolean(lastAiTriage?.should_create_ticket);
+    lastAiTriage = triage;
+    if (triage) {
+      reviewCategoryEl.textContent = `Category: ${triage.category || "-"}`;
+      reviewPriorityEl.textContent = `Priority: ${triage.priority || "-"}`;
+      reviewSeverityEl.textContent = `Severity: ${triage.severity || "-"}`;
+      showReview(true);
+
+      const ready = Boolean(triage.should_create_ticket);
+      if (supportCreateTicketBtn) {
+        supportCreateTicketBtn.disabled = !ready;
+        supportCreateTicketBtn.textContent = ready ? "Create Ticket" : "Keep Chatting...";
+      }
+
+      // Avoid spamming the same "press create ticket" prompt every message once ready.
+      if (ready && wasReady) readyPromptShown = true;
+    }
+
+    // Slow down AI responses slightly to feel more natural.
+    const delayMs = 520;
+    const shouldShowAssistant =
+      assistantText &&
+      !(readyPromptShown && assistantText.toLowerCase().includes("press create ticket"));
+
+    if (shouldShowAssistant) {
+      setTimeout(() => appendChat("assistant", assistantText), delayMs);
+    }
+
+    if (triage?.should_create_ticket) {
+      readyPromptShown = true;
+    }
+  } catch (error) {
+    console.error("Support AI message error:", error);
+    setFeedback(supportFeedbackEl, "error", "Support assistant is unavailable right now.");
+  } finally {
+    supportFreeChatSendBtn.disabled = false;
+    supportFreeChatInputEl.disabled = false;
+  }
+}
+
 function applyAssistantState(payload) {
   currentStep = payload.step;
   if (payload.message) appendChat("assistant", payload.message);
@@ -208,10 +279,14 @@ async function startAssistant() {
   showDetailsInput(false);
   showReview(false);
   ticketCreated = false;
-  supportCreateTicketBtn.disabled = false;
+  lastAiTriage = null;
+  readyPromptShown = false;
+  currentStep = "ai";
+  supportCreateTicketBtn.disabled = true;
+  if (supportCreateTicketBtn) supportCreateTicketBtn.textContent = "Keep Chatting...";
 
   try {
-    const res = await apiFetch(`${SUPPORT_API_BASE}/start`, {
+    const res = await apiFetch(`${SUPPORT_API_BASE}/ai-start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ company_slug, customer_email }),
@@ -223,8 +298,9 @@ async function startAssistant() {
     }
     sessionId = data.session_id;
     applyCustomerChatUi(data.customer_chat_ui || {});
-    applyAssistantState(data);
+    if (data.message) appendChat("assistant", data.message);
     setFeedback(supportFeedbackEl, "", "");
+    supportFreeChatInputEl?.focus();
   } catch (error) {
     console.error("Support start error:", error);
     setFeedback(supportFeedbackEl, "error", "Support assistant is unavailable right now.");
@@ -262,7 +338,15 @@ async function createTicket() {
   setFeedback(supportFeedbackEl, "info", "Creating ticket...");
 
   try {
-    const res = await apiFetch(`${SUPPORT_API_BASE}/create-ticket`, {
+    const url = currentStep === "ai" ? `${SUPPORT_API_BASE}/ai-create-ticket` : `${SUPPORT_API_BASE}/create-ticket`;
+    if (currentStep === "ai" && !lastAiTriage?.should_create_ticket) {
+      setFeedback(supportFeedbackEl, "error", "Please answer the assistant's questions first.");
+      supportCreateTicketBtn.disabled = false;
+      isCreatingTicket = false;
+      return;
+    }
+
+    const res = await apiFetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: sessionId }),
@@ -380,11 +464,19 @@ function renderStatusResult(ticket) {
   const status = String(ticket.status || "").toLowerCase();
   const isResolved = status === "resolved";
 
+  let agentJoinedInserted = false;
   const messagesHtml = messages.length
     ? messages
       .map((m) => {
-        const role = normalizeSender(m.sender);
-        return `<div class="support-msg ${role}"><p>${escapeHtml(m.text || "")}</p></div>`;
+        const sender = String(m.sender || "").toLowerCase();
+        const role = normalizeSender(sender);
+        const bubble = `<div class="support-msg ${role}"><p>${escapeHtml(m.text || "")}</p></div>`;
+
+        if (!agentJoinedInserted && sender === "client") {
+          agentJoinedInserted = true;
+          return `<div class="support-msg system"><p>Agent has joined this chat.</p></div>${bubble}`;
+        }
+        return bubble;
       })
       .join("")
     : `<div class="support-msg assistant"><p>No messages yet.</p></div>`;
@@ -514,6 +606,13 @@ function renderStatusResult(ticket) {
 }
 
 supportStartBtn?.addEventListener("click", startAssistant);
+supportFreeChatSendBtn?.addEventListener("click", sendAiMessage);
+supportFreeChatInputEl?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    sendAiMessage();
+  }
+});
 supportDetailsSubmitBtn?.addEventListener("click", () => {
   const details = supportDetailsEl.value.trim();
   if (!details) {
@@ -550,6 +649,7 @@ supportCreatedNewBtn?.addEventListener("click", () => {
   currentStep = null;
   ticketCreated = false;
   isCreatingTicket = false;
+  lastAiTriage = null;
   if (supportCreatedOverlayEl) supportCreatedOverlayEl.classList.add("hidden");
   if (supportAssistantBodyEl) supportAssistantBodyEl.style.opacity = "1";
   if (supportStartBtn) supportStartBtn.disabled = false;

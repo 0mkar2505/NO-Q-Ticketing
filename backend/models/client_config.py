@@ -15,6 +15,30 @@ class ClientConfig:
             "daily_summary_report": True,
             "manager_escalation_alerts": False,
         },
+        "taxonomy": {
+            "categories": [
+                "Billing & Payments",
+                "Login & Access",
+                "Bug / Crash",
+                "Integrations",
+                "Performance",
+                "Account & Subscription",
+                "Feature Request",
+                "Other",
+            ],
+            "priority_labels": {
+                "high": "High",
+                "normal": "Normal",
+                "low": "Low",
+            },
+            "severity_labels": {
+                "critical": "Critical",
+                "high": "High",
+                "medium": "Medium",
+                "low": "Low",
+            },
+            "policy_text": "Collect missing details, then create a ticket with the right priority and category.",
+        },
         "customer_chat_ui": {
             "brand_name": "NO-Q Support",
             "logo_url": "",
@@ -61,6 +85,10 @@ class ClientConfig:
         merged = dict(ClientConfig.DEFAULTS)
         merged["notifications"] = dict(ClientConfig.DEFAULTS["notifications"])
         merged["customer_chat_ui"] = dict(ClientConfig.DEFAULTS["customer_chat_ui"])
+        merged["taxonomy"] = dict(ClientConfig.DEFAULTS["taxonomy"])
+        merged["taxonomy"]["categories"] = list(ClientConfig.DEFAULTS["taxonomy"]["categories"])
+        merged["taxonomy"]["priority_labels"] = dict(ClientConfig.DEFAULTS["taxonomy"]["priority_labels"])
+        merged["taxonomy"]["severity_labels"] = dict(ClientConfig.DEFAULTS["taxonomy"]["severity_labels"])
 
         if not config:
             return merged
@@ -73,6 +101,28 @@ class ClientConfig:
         for key, value in incoming_notifications.items():
             if key in merged["notifications"]:
                 merged["notifications"][key] = bool(value)
+
+        incoming_taxonomy = config.get("taxonomy") or {}
+        if isinstance(incoming_taxonomy, dict):
+            categories = incoming_taxonomy.get("categories")
+            if isinstance(categories, list) and categories:
+                merged["taxonomy"]["categories"] = categories
+
+            priority_labels = incoming_taxonomy.get("priority_labels") or {}
+            if isinstance(priority_labels, dict):
+                for key, value in priority_labels.items():
+                    if key in merged["taxonomy"]["priority_labels"]:
+                        merged["taxonomy"]["priority_labels"][key] = str(value)
+
+            severity_labels = incoming_taxonomy.get("severity_labels") or {}
+            if isinstance(severity_labels, dict):
+                for key, value in severity_labels.items():
+                    if key in merged["taxonomy"]["severity_labels"]:
+                        merged["taxonomy"]["severity_labels"][key] = str(value)
+
+            policy_text = incoming_taxonomy.get("policy_text")
+            if isinstance(policy_text, str) and policy_text.strip():
+                merged["taxonomy"]["policy_text"] = policy_text.strip()
 
         incoming_chat_ui = config.get("customer_chat_ui") or {}
         for key, value in incoming_chat_ui.items():

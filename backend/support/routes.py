@@ -13,6 +13,7 @@ from support.rules import (
     get_option_label,
     get_step,
 )
+from ai.triage import triage_support
 
 support_bp = Blueprint("support", __name__)
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -29,6 +30,9 @@ _RATE_WINDOWS = {
     "start": (10, 60),         # 10 requests / 60s
     "step": (60, 60),          # 60 requests / 60s
     "create_ticket": (10, 60), # 10 requests / 60s
+    "ai_start": (10, 60),      # 10 requests / 60s
+    "ai_message": (60, 60),    # 60 requests / 60s
+    "ai_create": (10, 60),     # 10 requests / 60s
     "ticket_status": (30, 60), # 30 requests / 60s
     "ticket_reply": (20, 60),  # 20 requests / 60s
     "ticket_reopen": (10, 60), # 10 requests / 60s
@@ -77,6 +81,183 @@ def _review_payload(answers):
         "severity": severity,
         "details": (answers.get("details") or "").strip(),
     }
+
+
+@support_bp.route("/api/support/ai-start", methods=["POST"])
+def support_ai_start():
+    allowed, retry_after = _check_rate_limit("ai_start")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
+    data = request.get_json(silent=True) or {}
+    company_slug = (data.get("company_slug") or "").strip().lower()
+    customer_email = (data.get("customer_email") or "").strip().lower()
+
+    if not company_slug:
+        return jsonify({"error": "company_slug is required"}), 400
+    if not SLUG_PATTERN.match(company_slug):
+        return jsonify({"error": "company_slug format is invalid"}), 400
+    if not customer_email:
+        return jsonify({"error": "customer_email is required"}), 400
+    if len(customer_email) > MAX_EMAIL_LENGTH:
+        return jsonify({"error": "customer_email is too long"}), 400
+    if not EMAIL_PATTERN.match(customer_email):
+        return jsonify({"error": "customer_email format is invalid"}), 400
+
+    company = _find_company_by_slug(company_slug)
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    client_config = ClientConfig.get_by_company(company["_id"])
+    customer_chat_ui = (client_config or {}).get("customer_chat_ui") or {}
+
+    session = ChatSession.create(
+        company_id=company["_id"],
+        company_name=company.get("name") or company_slug,
+        customer_email=customer_email,
+        mode="ai",
+        current_step="ai",
+    )
+
+    greeting = "Hi. Tell me what's going on and I'll ask a couple quick questions before creating your ticket."
+    ChatSession.append_turn(session["_id"], "assistant", greeting)
+
+    return jsonify(
+        {
+            "session_id": session["_id"],
+            "message": greeting,
+            "customer_chat_ui": customer_chat_ui,
+        }
+    ), 200
+
+
+@support_bp.route("/api/support/ai-message", methods=["POST"])
+def support_ai_message():
+    allowed, retry_after = _check_rate_limit("ai_message")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
+    data = request.get_json(silent=True) or {}
+    session_id = (data.get("session_id") or "").strip()
+    message = (data.get("message") or "").strip()
+    if not session_id:
+        return jsonify({"error": "session_id is required"}), 400
+    if not message:
+        return jsonify({"error": "message is required"}), 400
+    if len(message) > MAX_DETAILS_LENGTH:
+        return jsonify({"error": f"message is too long (max {MAX_DETAILS_LENGTH} characters)"}), 400
+
+    session = ChatSession.get_by_id(session_id)
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+    if session.get("status") != "active":
+        return jsonify({"error": "Session is not active"}), 409
+    if session.get("mode") != "ai":
+        return jsonify({"error": "Session mode is not ai"}), 409
+
+    ChatSession.append_turn(session_id, "customer", message)
+
+    result = triage_support(
+        company_id=session.get("company_id"),
+        company_name=session.get("company_name"),
+        customer_email=session.get("customer_email"),
+        transcript=session.get("transcript") or [],
+        user_message=message,
+    )
+
+    assistant_message = (result.get("assistant_message") or "").strip()
+    triage = result.get("triage") or {}
+    sources = result.get("sources") or []
+
+    if assistant_message:
+        ChatSession.append_turn(session_id, "assistant", assistant_message)
+
+    ChatSession.set_ai_triage(session_id, triage, sources)
+
+    return jsonify(
+        {
+            "message": assistant_message,
+            "triage": triage,
+            "sources": sources,
+        }
+    ), 200
+
+
+@support_bp.route("/api/support/ai-create-ticket", methods=["POST"])
+def support_ai_create_ticket():
+    allowed, retry_after = _check_rate_limit("ai_create")
+    if not allowed:
+        return jsonify({"error": "Too many requests. Please try again shortly."}), 429, {"Retry-After": str(retry_after)}
+
+    data = request.get_json(silent=True) or {}
+    session_id = (data.get("session_id") or "").strip()
+    if not session_id:
+        return jsonify({"error": "session_id is required"}), 400
+
+    session = ChatSession.get_by_id(session_id)
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+    if session.get("status") != "active":
+        # Idempotent-ish
+        if session.get("ticket_id"):
+            return jsonify({"message": "Ticket already created", "ticket": {"_id": session.get("ticket_id")}}), 200
+        return jsonify({"error": "Session is not active"}), 409
+    if session.get("mode") != "ai":
+        return jsonify({"error": "Session mode is not ai"}), 409
+
+    triage = session.get("ai_triage") or {}
+    if not triage or not triage.get("should_create_ticket"):
+        return jsonify({"error": "AI is not ready to create a ticket yet"}), 409
+
+    subject = (triage.get("proposed_subject") or "").strip()
+    if not subject:
+        subject = "Support request"
+    if len(subject) > MAX_SUBJECT_LENGTH:
+        subject = subject[:MAX_SUBJECT_LENGTH]
+
+    category_label = (triage.get("category") or "Other").strip()
+    priority = (triage.get("priority") or "normal").strip().lower()
+    severity = (triage.get("severity") or "medium").strip().lower()
+
+    transcript = []
+    for turn in session.get("transcript") or []:
+        speaker = (turn.get("speaker") or "").lower()
+        if speaker not in {"assistant", "customer"}:
+            speaker = "assistant"
+        sender = "customer" if speaker == "customer" else "assistant"
+        transcript.append(
+            {
+                "sender": sender,
+                "text": (turn.get("text") or "").strip(),
+                "timestamp": turn.get("timestamp"),
+            }
+        )
+
+    ticket = Ticket.create_from_support(
+        company_id=session["company_id"],
+        customer_email=session["customer_email"],
+        subject=subject,
+        transcript=transcript,
+        category=category_label,
+        severity=severity,
+        priority=priority,
+        chat_session_id=session["_id"],
+    )
+    ChatSession.complete(session_id, ticket["_id"])
+
+    return jsonify(
+        {
+            "message": "Ticket created",
+            "ticket": {
+                "_id": ticket["_id"],
+                "subject": ticket["subject"],
+                "status": ticket["status"],
+                "category": ticket.get("category"),
+                "severity": ticket.get("severity"),
+                "priority": ticket.get("priority"),
+            },
+        }
+    ), 201
 
 @support_bp.route("/api/support/config", methods=["GET"])
 def support_config():

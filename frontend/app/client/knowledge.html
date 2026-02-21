@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Base | NO-Q</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Knowledge Base</h1>
+        <p class="page-subtitle">Docs and runbooks your AI assistant can reference when helping customers.</p>
+        <p id="knowledge-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="knowledge-layout">
+          <article class="settings-card knowledge-list">
+            <div class="knowledge-toolbar">
+              <input id="knowledge-search" type="text" placeholder="Search titles, tags, or content..." />
+              <button id="knowledge-new" class="btn btn-secondary" type="button">New</button>
+            </div>
+            <div id="knowledge-items" class="knowledge-items"></div>
+          </article>
+
+          <article class="settings-card knowledge-editor">
+            <h2 style="margin-bottom: 6px;">Entry</h2>
+            <p class="settings-copy" style="margin-bottom: 12px;">Keep entries short and practical. The AI will pull the most relevant snippets.</p>
+
+            <div class="settings-field">
+              <label for="knowledge-title">Title</label>
+              <input id="knowledge-title" type="text" maxlength="120" placeholder="Refund policy, Login troubleshooting, Integration checklist..." />
+            </div>
+
+            <div class="settings-field">
+              <label for="knowledge-tags">Tags (comma separated)</label>
+              <input id="knowledge-tags" type="text" placeholder="billing, refund, stripe" />
+            </div>
+
+            <div class="settings-field">
+              <label for="knowledge-content">Content</label>
+              <textarea id="knowledge-content" maxlength="8000" placeholder="Write the steps, rules, or answers the AI should use..."></textarea>
+            </div>
+
+            <div class="settings-actions" style="margin-top: 12px;">
+              <button id="knowledge-delete" class="btn btn-secondary" type="button" disabled>Delete</button>
+              <button id="knowledge-save" class="btn btn-primary" type="button">Save</button>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="/shared/js/api.js"></script>
+  <script src="/app/client/knowledge.js"></script>
+</body>
+</html>
+

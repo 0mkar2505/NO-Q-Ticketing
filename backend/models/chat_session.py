@@ -27,15 +27,18 @@ class ChatSession:
         return data
 
     @staticmethod
-    def create(company_id, customer_email, company_name):
+    def create(company_id, customer_email, company_name, mode="guided", current_step="category"):
         now = datetime.utcnow()
         doc = {
             "company_id": company_id,
             "company_name": company_name,
             "customer_email": customer_email.lower().strip(),
-            "current_step": "category",
+            "mode": mode,
+            "current_step": current_step,
             "answers": {},
             "transcript": [],
+            "ai_triage": None,
+            "ai_sources": [],
             "status": "active",
             "ticket_id": None,
             "created_at": now,
@@ -90,6 +93,19 @@ class ChatSession:
                 "$set": {
                     "status": "completed",
                     "ticket_id": ChatSession._to_object_id(ticket_id),
+                    "updated_at": datetime.utcnow(),
+                }
+            },
+        )
+
+    @staticmethod
+    def set_ai_triage(session_id, triage, sources=None):
+        chat_session_collection.update_one(
+            {"_id": ChatSession._to_object_id(session_id)},
+            {
+                "$set": {
+                    "ai_triage": triage,
+                    "ai_sources": sources or [],
                     "updated_at": datetime.utcnow(),
                 }
             },

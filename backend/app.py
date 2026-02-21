@@ -8,6 +8,7 @@ from client.routes import client_bp
 from client.tickets import client_tickets_bp
 from client.analytics import client_analytics_bp
 from client.configs import client_configs_bp
+from client.knowledge import client_knowledge_bp
 from support.routes import support_bp
 from routes.ai_routes import ai_bp
 import os
@@ -25,6 +26,7 @@ app.register_blueprint(client_bp, url_prefix="/api/client")
 app.register_blueprint(client_tickets_bp)
 app.register_blueprint(client_analytics_bp)
 app.register_blueprint(client_configs_bp)
+app.register_blueprint(client_knowledge_bp)
 app.register_blueprint(support_bp)
 
 @app.route("/health")
