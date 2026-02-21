@@ -25,7 +25,6 @@ const prevPageBtn = document.getElementById("ticket-prev-page");
 const nextPageBtn = document.getElementById("ticket-next-page");
 const pageInfoEl = document.getElementById("ticket-page-info");
 const ticketRefreshBtn = document.getElementById("ticket-refresh");
-const ticketAutoRefreshEl = document.getElementById("ticket-auto-refresh");
 
 let currentTicketId = null;
 let ticketCache = [];
@@ -78,12 +77,10 @@ function setAiState(isBusy) {
 
 function startTicketAutoRefresh() {
   stopTicketAutoRefresh();
-  if (!ticketAutoRefreshEl?.checked) return;
-  if (!currentTicketId) return;
 
   ticketAutoRefreshTimer = setInterval(() => {
     if (document.visibilityState !== "visible") return;
-    refreshOpenTicket({ silent: true });
+    pollTickets({ silent: true });
   }, 3000);
 }
 
@@ -322,7 +319,34 @@ async function loadTickets() {
   }
 }
 
+async function pollTickets({ silent = true } = {}) {
+  if (!token) return;
+  try {
+    const res = await apiFetch(`${API_BASE}/tickets`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = loginPath;
+        return;
+      }
+      return;
+    }
+
+    const tickets = await res.json().catch(() => ([]));
+    ticketCache = Array.isArray(tickets) ? tickets : [];
+    refreshTicketList();
+    if (!silent) setFeedback("info", "Updated.");
+  } catch (error) {
+    // Polling is best-effort; avoid spamming the UI on transient failures.
+  }
+}
+
 loadTickets();
+startTicketAutoRefresh();
 
 // Open Ticket & Render Conversation
 function openTicket(ticket) {
@@ -361,6 +385,13 @@ function renderTicketView(ticket) {
   const status = String(ticket.status || "open").toLowerCase();
   statusEl.textContent = status;
   statusEl.className = `ticket-status ${status}`;
+
+  const metaEl = document.getElementById("ticket-meta");
+  if (metaEl) {
+    const id = ticket._id || "-";
+    const email = ticket.customer_email || "-";
+    metaEl.textContent = `Ticket ID: ${id} | Customer: ${email}`;
+  }
 
   messagesDiv.innerHTML = "";
   const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
@@ -503,11 +534,8 @@ nextPageBtn?.addEventListener("click", () => {
 });
 
 ticketRefreshBtn?.addEventListener("click", () => {
-  refreshOpenTicket({ silent: false });
-});
-
-ticketAutoRefreshEl?.addEventListener("change", () => {
-  startTicketAutoRefresh();
+  // Manual refresh should refresh the full list (new tickets + latest messages).
+  pollTickets({ silent: false });
 });
 
 document.addEventListener("visibilitychange", () => {

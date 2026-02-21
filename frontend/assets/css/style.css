@@ -56,11 +56,9 @@ body.page-transition.is-leaving {
 @keyframes pageFadeIn {
   from {
     opacity: 0;
-    transform: translateY(2px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -88,7 +86,12 @@ body.page-transition.is-leaving {
 }
 
 body.has-fixed-navbar .page-wrapper {
-  padding-top: 64px;
+  padding-top: 0;
+}
+
+/* Reserve space for the fixed app navbar without adding mysterious extra top padding. */
+body.has-fixed-navbar #navbar {
+  min-height: 64px;
 }
 
 /* CENTER NAV */
@@ -302,8 +305,19 @@ body.has-fixed-navbar .page-wrapper {
 }
 
 .navbar-logo--app {
-  height: 28px;
+  height: 32px;
   width: auto;
+  display: block;
+}
+
+/* App navbar brand should align visually with the logo. */
+.navbar--app .navbar-brand {
+  display: block;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--brand-primary);
+  line-height: 32px;
 }
 
 .secondary-link {
@@ -639,6 +653,21 @@ body.has-fixed-navbar .page-wrapper {
   padding: 24px 16px;
 }
 
+.sidebar-section + .sidebar-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.sidebar-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 10px 10px;
+}
+
 .sidebar-nav a {
   display: block;
   padding: 10px 12px;
@@ -658,7 +687,11 @@ body.has-fixed-navbar .page-wrapper {
 .app-content {
   flex: 1;
   padding: 32px;
-  background: #f9fafb;
+  /* Global app "atmosphere" background used across client/admin pages. */
+  background:
+    radial-gradient(circle at 92% -10%, rgba(124, 58, 237, 0.1), transparent 42%),
+    radial-gradient(circle at -8% 115%, rgba(14, 165, 233, 0.08), transparent 36%),
+    #f8faff;
 }
 
 .page-title {
@@ -1052,6 +1085,13 @@ body.has-fixed-navbar .page-wrapper {
   font-size: 13px;
   margin-bottom: 16px;
   display: inline-block;
+}
+
+.ticket-meta {
+  margin-top: -8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #64748b;
 }
 
 .messages {
@@ -1755,11 +1795,21 @@ body.has-fixed-navbar .page-wrapper {
 
 .support-page {
   --support-primary-color: var(--brand-primary);
+  --support-brand-text-color: var(--support-primary-color);
   --support-assistant-bubble-color: #eef2ff;
   --support-assistant-text-color: #312e81;
   --support-customer-bubble-color: #dcfce7;
   --support-customer-text-color: #14532d;
   background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+}
+
+/* Allow branding to control the company name color in the support navbar. */
+.support-page .navbar--auth .navbar-brand {
+  color: var(--support-brand-text-color, var(--support-primary-color));
+}
+
+.support-preview .navbar--auth .navbar-brand {
+  color: var(--support-brand-text-color, var(--support-primary-color));
 }
 
 .support-main {

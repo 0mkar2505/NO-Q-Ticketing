@@ -28,7 +28,6 @@ const supportCreateTicketBtn = document.getElementById("support-create-ticket");
 const statusTicketIdEl = document.getElementById("status-ticket-id");
 const statusEmailEl = document.getElementById("status-email");
 const statusCheckBtn = document.getElementById("status-check");
-const statusAutoRefreshEl = document.getElementById("status-auto-refresh");
 const statusFeedbackEl = document.getElementById("status-feedback");
 const statusResultEl = document.getElementById("status-result");
 
@@ -144,6 +143,7 @@ function applyCustomerChatUi(chatUi = {}) {
 
   // CSS defines these variables on `.support-page`, so set them there to override defaults.
   const scope = supportPageEl || document.documentElement;
+  if (chatUi.brand_text_color) scope.style.setProperty("--support-brand-text-color", chatUi.brand_text_color);
   if (chatUi.primary_color) scope.style.setProperty("--support-primary-color", chatUi.primary_color);
   if (chatUi.assistant_bubble_color) scope.style.setProperty("--support-assistant-bubble-color", chatUi.assistant_bubble_color);
   if (chatUi.assistant_text_color) scope.style.setProperty("--support-assistant-text-color", chatUi.assistant_text_color);
@@ -343,7 +343,6 @@ function stopStatusAutoRefresh() {
 
 function startStatusAutoRefresh() {
   stopStatusAutoRefresh();
-  if (!statusAutoRefreshEl?.checked) return;
   if (!statusContext.ticket_id || !statusContext.email) return;
 
   statusAutoRefreshTimer = setInterval(() => {
@@ -369,6 +368,14 @@ function normalizeSender(sender) {
 }
 
 function renderStatusResult(ticket) {
+  // Preserve any in-progress customer reply draft while we refresh the status panel.
+  // Auto-refresh re-renders the status panel HTML, so without this the draft gets wiped mid-typing.
+  const prevReplyEl = document.getElementById("status-reply");
+  const prevDraft = prevReplyEl ? String(prevReplyEl.value || "") : "";
+  const hadFocus = prevReplyEl && document.activeElement === prevReplyEl;
+  const prevSelStart = prevReplyEl && typeof prevReplyEl.selectionStart === "number" ? prevReplyEl.selectionStart : null;
+  const prevSelEnd = prevReplyEl && typeof prevReplyEl.selectionEnd === "number" ? prevReplyEl.selectionEnd : null;
+
   const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
   const status = String(ticket.status || "").toLowerCase();
   const isResolved = status === "resolved";
@@ -413,6 +420,22 @@ function renderStatusResult(ticket) {
 
   const chatEl = statusResultEl.querySelector(".support-chat");
   scrollToBottom(chatEl);
+
+  // Restore draft text and caret position if the reply box still exists (not resolved view).
+  const nextReplyEl = document.getElementById("status-reply");
+  if (nextReplyEl && prevDraft && !nextReplyEl.value) {
+    nextReplyEl.value = prevDraft;
+    if (hadFocus) {
+      nextReplyEl.focus();
+      if (prevSelStart !== null && prevSelEnd !== null) {
+        try {
+          nextReplyEl.setSelectionRange(prevSelStart, prevSelEnd);
+        } catch (_) {
+          // Ignore selection restore failures.
+        }
+      }
+    }
+  }
 
   if (isResolved) {
     const reopenBtn = document.getElementById("status-reopen");
@@ -501,10 +524,6 @@ supportDetailsSubmitBtn?.addEventListener("click", () => {
 });
 supportCreateTicketBtn?.addEventListener("click", createTicket);
 statusCheckBtn?.addEventListener("click", checkStatus);
-statusAutoRefreshEl?.addEventListener("change", () => {
-  if (statusAutoRefreshEl.checked) startStatusAutoRefresh();
-  else stopStatusAutoRefresh();
-});
 
 supportCreatedCopyBtn?.addEventListener("click", async () => {
   const value = (supportCreatedIdEl?.value || "").trim();
@@ -543,8 +562,8 @@ supportCreatedNewBtn?.addEventListener("click", () => {
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") return;
-  // If user enabled auto-refresh, resume.
-  if (statusAutoRefreshEl?.checked) startStatusAutoRefresh();
+  // Resume polling if a ticket context exists.
+  startStatusAutoRefresh();
 });
 
 initTenant();

@@ -17,6 +17,7 @@ class ClientConfig:
         "customer_chat_ui": {
             "brand_name": "NO-Q Support",
             "logo_url": "",
+            "brand_text_color": "#7c3aed",
             "assistant_title": "Guided Support Assistant",
             "assistant_subtitle": "Answer a few guided prompts and we will create a support ticket for you.",
             "primary_color": "#7c3aed",

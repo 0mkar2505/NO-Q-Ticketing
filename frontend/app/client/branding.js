@@ -22,6 +22,8 @@ const assistantSubtitleEl = document.getElementById("assistantSubtitle");
 
 const primaryPicker = document.getElementById("primaryColorPicker");
 const primaryText = document.getElementById("primaryColorText");
+const brandTextPicker = document.getElementById("brandTextPicker");
+const brandTextText = document.getElementById("brandTextText");
 const assistantBubblePicker = document.getElementById("assistantBubblePicker");
 const assistantBubbleText = document.getElementById("assistantBubbleText");
 const assistantTextPicker = document.getElementById("assistantTextPicker");
@@ -74,6 +76,7 @@ function normalizeConfig(config) {
     customer_chat_ui: {
       brand_name: chat.brand_name || "NO-Q Support",
       logo_url: chat.logo_url || "",
+      brand_text_color: chat.brand_text_color || chat.primary_color || "#7c3aed",
       assistant_title: chat.assistant_title || "Guided Support Assistant",
       assistant_subtitle: chat.assistant_subtitle || "Answer a few guided prompts and we will create a support ticket for you.",
       primary_color: chat.primary_color || "#7c3aed",
@@ -100,6 +103,7 @@ function syncColorPair(pickerEl, textEl, value) {
 function applyToPreview(chat) {
   if (!previewRoot) return;
 
+  previewRoot.style.setProperty("--support-brand-text-color", chat.brand_text_color || chat.primary_color);
   previewRoot.style.setProperty("--support-primary-color", chat.primary_color);
   previewRoot.style.setProperty("--support-assistant-bubble-color", chat.assistant_bubble_color);
   previewRoot.style.setProperty("--support-assistant-text-color", chat.assistant_text_color);
@@ -121,6 +125,7 @@ function readChatUiFromForm() {
   return {
     brand_name: brandNameEl.value.trim(),
     logo_url: logoUrlEl.value.trim(),
+    brand_text_color: clampHex(brandTextText.value, clampHex(primaryText.value, "#7c3aed")),
     assistant_title: assistantTitleEl.value.trim(),
     assistant_subtitle: assistantSubtitleEl.value.trim(),
     primary_color: clampHex(primaryText.value, "#7c3aed"),
@@ -142,6 +147,7 @@ function applyConfigToForm(config) {
   assistantSubtitleEl.value = chat.assistant_subtitle || "";
 
   syncColorPair(primaryPicker, primaryText, chat.primary_color);
+  syncColorPair(brandTextPicker, brandTextText, chat.brand_text_color || chat.primary_color);
   syncColorPair(assistantBubblePicker, assistantBubbleText, chat.assistant_bubble_color);
   syncColorPair(assistantTextPicker, assistantTextText, chat.assistant_text_color);
   syncColorPair(customerBubblePicker, customerBubbleText, chat.customer_bubble_color);
@@ -168,6 +174,7 @@ function wirePreviewInputs() {
   });
 
   wireColorPair(primaryPicker, primaryText);
+  wireColorPair(brandTextPicker, brandTextText);
   wireColorPair(assistantBubblePicker, assistantBubbleText);
   wireColorPair(assistantTextPicker, assistantTextText);
   wireColorPair(customerBubblePicker, customerBubbleText);

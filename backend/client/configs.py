@@ -57,6 +57,7 @@ def _validate_payload(data):
 
     brand_name = (customer_chat_ui.get("brand_name") or "").strip()
     logo_url = (customer_chat_ui.get("logo_url") or "").strip()
+    brand_text_color = (customer_chat_ui.get("brand_text_color") or "").strip()
     assistant_title = (customer_chat_ui.get("assistant_title") or "").strip()
     assistant_subtitle = (customer_chat_ui.get("assistant_subtitle") or "").strip()
     primary_color = (customer_chat_ui.get("primary_color") or "").strip()
@@ -86,6 +87,7 @@ def _validate_payload(data):
         return None, "customer_chat_ui.assistant_subtitle is too long (max 240 characters)"
 
     color_fields = {
+        "brand_text_color": brand_text_color,
         "primary_color": primary_color,
         "assistant_bubble_color": assistant_bubble_color,
         "assistant_text_color": assistant_text_color,
@@ -108,6 +110,7 @@ def _validate_payload(data):
         "customer_chat_ui": {
             "brand_name": brand_name,
             "logo_url": logo_url,
+            "brand_text_color": brand_text_color,
             "assistant_title": assistant_title,
             "assistant_subtitle": assistant_subtitle,
             "primary_color": primary_color,
