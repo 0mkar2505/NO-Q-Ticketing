@@ -1,4 +1,5 @@
 from datetime import datetime
+from bson import ObjectId
 from models.db import db
 
 client_config_collection = db["client_configs"]
@@ -29,6 +30,20 @@ class ClientConfig:
     }
 
     @staticmethod
+    def _coerce_company_id(company_id):
+        try:
+            return ObjectId(company_id)
+        except Exception:
+            return company_id
+
+    @staticmethod
+    def _company_id_filters(company_id):
+        coerced = ClientConfig._coerce_company_id(company_id)
+        if isinstance(coerced, ObjectId):
+            return {"$in": [coerced, str(coerced)]}
+        return coerced
+
+    @staticmethod
     def _sanitize_document(doc):
         if not doc:
             return None
@@ -41,8 +56,11 @@ class ClientConfig:
 
     @staticmethod
     def _merge_with_defaults(config):
+        # Copy defaults deeply enough to avoid cross-tenant mutation.
+        # (Shallow copy would share nested dicts like customer_chat_ui between companies.)
         merged = dict(ClientConfig.DEFAULTS)
         merged["notifications"] = dict(ClientConfig.DEFAULTS["notifications"])
+        merged["customer_chat_ui"] = dict(ClientConfig.DEFAULTS["customer_chat_ui"])
 
         if not config:
             return merged
@@ -65,22 +83,23 @@ class ClientConfig:
 
     @staticmethod
     def get_by_company(company_id):
-        doc = client_config_collection.find_one({"company_id": company_id})
+        doc = client_config_collection.find_one({"company_id": ClientConfig._company_id_filters(company_id)})
         config = ClientConfig._sanitize_document(doc)
         return ClientConfig._merge_with_defaults(config)
 
     @staticmethod
     def update_by_company(company_id, config):
+        coerced_company_id = ClientConfig._coerce_company_id(company_id)
         now = datetime.utcnow()
         client_config_collection.update_one(
-            {"company_id": company_id},
+            {"company_id": ClientConfig._company_id_filters(company_id)},
             {
                 "$set": {
                     **config,
                     "updated_at": now,
                 },
                 "$setOnInsert": {
-                    "company_id": company_id,
+                    "company_id": coerced_company_id,
                     "created_at": now,
                 },
             },

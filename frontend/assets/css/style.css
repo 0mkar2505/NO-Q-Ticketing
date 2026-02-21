@@ -199,6 +199,10 @@ body.has-fixed-navbar #navbar {
 }
 
 .navbar--auth .navbar-brand {
+  /* Center brand text visually relative to the 32px logo. */
+  display: flex;
+  align-items: center;
+  height: 32px;
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.3px;
@@ -312,12 +316,14 @@ body.has-fixed-navbar #navbar {
 
 /* App navbar brand should align visually with the logo. */
 .navbar--app .navbar-brand {
-  display: block;
+  display: flex;
+  align-items: center;
+  height: 32px;
   font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: 0.3px;
   color: var(--brand-primary);
-  line-height: 32px;
+  line-height: 1;
 }
 
 .secondary-link {

@@ -6,6 +6,25 @@ ticket_collection = db["tickets"]
 
 class Ticket:
     @staticmethod
+    def _coerce_company_id(company_id):
+        """
+        JWT payloads carry company_id as a string, while Mongo may store it as an ObjectId.
+        Keep reads compatible with both and writes consistent (ObjectId when possible).
+        """
+        try:
+            return ObjectId(company_id)
+        except Exception:
+            return company_id
+
+    @staticmethod
+    def _company_id_filters(company_id):
+        coerced = Ticket._coerce_company_id(company_id)
+        # Support legacy string-stored company_id docs as well.
+        if isinstance(coerced, ObjectId):
+            return {"$in": [coerced, str(coerced)]}
+        return coerced
+
+    @staticmethod
     def _coerce_object_id(ticket_id):
         try:
             return ObjectId(ticket_id)
@@ -19,6 +38,11 @@ class Ticket:
         data = dict(ticket)
         if "_id" in data:
             data["_id"] = str(data["_id"])
+        # Prevent Flask JSON serialization errors (ObjectId is not JSON serializable).
+        if "company_id" in data and isinstance(data["company_id"], ObjectId):
+            data["company_id"] = str(data["company_id"])
+        if "chat_session_id" in data and isinstance(data["chat_session_id"], ObjectId):
+            data["chat_session_id"] = str(data["chat_session_id"])
         return data
 
     @staticmethod
@@ -40,8 +64,9 @@ class Ticket:
     @staticmethod
     def create(company_id, subject, customer_email, message):
         now = datetime.utcnow()
+        coerced_company_id = Ticket._coerce_company_id(company_id)
         ticket = {
-            "company_id": company_id,
+            "company_id": coerced_company_id,
             "subject": subject,
             "customer_email": customer_email.lower().strip(),
             "messages": [
@@ -61,13 +86,14 @@ class Ticket:
         }
         result = ticket_collection.insert_one(ticket)
         ticket["_id"] = str(result.inserted_id)
-        return ticket
+        return Ticket._serialize(ticket)
 
     @staticmethod
     def create_from_support(company_id, customer_email, subject, transcript, category, severity, priority, chat_session_id=None):
         now = datetime.utcnow()
+        coerced_company_id = Ticket._coerce_company_id(company_id)
         ticket = {
-            "company_id": company_id,
+            "company_id": coerced_company_id,
             "subject": subject,
             "customer_email": customer_email.lower().strip(),
             "messages": transcript or [],
@@ -86,24 +112,26 @@ class Ticket:
         }
         result = ticket_collection.insert_one(ticket)
         ticket["_id"] = str(result.inserted_id)
-        return ticket
+        return Ticket._serialize(ticket)
 
     @staticmethod
     def get_by_company(company_id):
-        tickets = ticket_collection.find({"company_id": company_id}).sort("updated_at", -1)
+        tickets = ticket_collection.find(
+            {"company_id": Ticket._company_id_filters(company_id)}
+        ).sort("updated_at", -1)
         return [Ticket._serialize(ticket) for ticket in tickets]
 
     @staticmethod
     def get_by_id(ticket_id, company_id):
         ticket = ticket_collection.find_one(
-            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id}
+            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": Ticket._company_id_filters(company_id)}
         )
         return Ticket._serialize(ticket)
 
     @staticmethod
     def reply(ticket_id, company_id, message):
         ticket = ticket_collection.find_one(
-            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id}
+            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": Ticket._company_id_filters(company_id)}
         )
         if not ticket:
             return False, "not_found"
@@ -112,7 +140,7 @@ class Ticket:
             return False, "already_resolved"
 
         result = ticket_collection.update_one(
-            {"_id": ticket["_id"], "company_id": company_id},
+            {"_id": ticket["_id"], "company_id": Ticket._company_id_filters(company_id)},
             {
                 "$push": {
                     "messages": {
@@ -129,7 +157,7 @@ class Ticket:
     @staticmethod
     def resolve(ticket_id, company_id):
         ticket = ticket_collection.find_one(
-            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id}
+            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": Ticket._company_id_filters(company_id)}
         )
         if not ticket:
             return False, "not_found"
@@ -138,7 +166,7 @@ class Ticket:
             return False, "already_resolved"
 
         result = ticket_collection.update_one(
-            {"_id": ticket["_id"], "company_id": company_id},
+            {"_id": ticket["_id"], "company_id": Ticket._company_id_filters(company_id)},
             {
                 "$set": {
                     "status": "resolved",
@@ -155,7 +183,7 @@ class Ticket:
         day_keys = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
         volume_map = {key: 0 for key in day_keys}
 
-        tickets = list(ticket_collection.find({"company_id": company_id}))
+        tickets = list(ticket_collection.find({"company_id": Ticket._company_id_filters(company_id)}))
         total_tickets = len(tickets)
         status_counts = {"open": 0, "pending": 0, "resolved": 0}
         resolved_tickets = 0
@@ -243,14 +271,14 @@ class Ticket:
     @staticmethod
     def update_ai_assist(ticket_id, company_id, ai_assist):
         ticket = ticket_collection.find_one(
-            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": company_id}
+            {"_id": Ticket._coerce_object_id(ticket_id), "company_id": Ticket._company_id_filters(company_id)}
         )
         if not ticket:
             return None, "not_found"
 
         now = datetime.utcnow()
         ticket_collection.update_one(
-            {"_id": ticket["_id"], "company_id": company_id},
+            {"_id": ticket["_id"], "company_id": Ticket._company_id_filters(company_id)},
             {
                 "$set": {
                     "ai_summary": ai_assist.get("ai_summary"),
@@ -262,7 +290,7 @@ class Ticket:
             }
         )
 
-        updated = ticket_collection.find_one({"_id": ticket["_id"], "company_id": company_id})
+        updated = ticket_collection.find_one({"_id": ticket["_id"], "company_id": Ticket._company_id_filters(company_id)})
         return Ticket._serialize(updated), None
 
     @staticmethod
