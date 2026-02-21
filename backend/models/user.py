@@ -11,6 +11,9 @@ class User:
         self.email = user_doc.get("email")
         self.password = user_doc.get("password")
         self.role = user_doc.get("role")
+        # New hierarchy fields (backwards compatible with legacy `role`).
+        self.platform_role = user_doc.get("platform_role")
+        self.company_role = user_doc.get("company_role")
         self.company_id = user_doc.get("company_id")
         self.created_at = user_doc.get("created_at")
         self.is_active = user_doc.get("is_active", True)
@@ -37,18 +40,22 @@ class User:
             "name": self.name,
             "email": self.email,
             "role": self.role,
+            "platform_role": self.platform_role,
+            "company_role": self.company_role,
             "company_id": str(self.company_id) if self.company_id else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "is_active": self.is_active
         }
 
 
-def create_user(name, email, password, role, company_id=None):
+def create_user(name, email, password, role, company_id=None, platform_role=None, company_role=None):
     user = {
         "name": name,
         "email": email,
         "password": password,      # already hashed
         "role": role,
+        "platform_role": platform_role,
+        "company_role": company_role,
         "company_id": company_id,  # ObjectId or None
         "created_at": datetime.utcnow(),
         "is_active": True

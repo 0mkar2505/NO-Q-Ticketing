@@ -183,10 +183,15 @@ async function loadConfigs() {
     });
 
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = configsLoginPath;
+        return;
+      }
+      if (res.status === 403) {
+        // Agent accounts are blocked from supervisor-only pages.
+        window.location.href = `${configsPathBase}/app/client/tickets.html`;
         return;
       }
       throw new Error("Failed to load settings");
@@ -227,10 +232,15 @@ async function saveConfigs() {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = configsLoginPath;
+        return;
+      }
+      if (res.status === 403) {
+        // Agent accounts are blocked from supervisor-only pages.
+        window.location.href = `${configsPathBase}/app/client/tickets.html`;
         return;
       }
       setConfigsFeedback("error", data.error || "Failed to save settings.");

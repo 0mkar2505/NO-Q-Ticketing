@@ -1656,6 +1656,156 @@ body.has-fixed-navbar #navbar {
   color: #64748b;
 }
 
+/* ===== MEMBERS ===== */
+
+.members-layout {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.members-table-wrap {
+  overflow: auto;
+  border: 1px solid #e6ecf6;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.members-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.members-table th,
+.members-table td {
+  text-align: left;
+  padding: 12px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #eef2f7;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.members-table th {
+  position: sticky;
+  top: 0;
+  background: #fbfcff;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #dbe7ff;
+  background: #f3f7ff;
+  color: #1e3a8a;
+}
+
+.member-chip--supervisor {
+  border-color: #e9d5ff;
+  background: #faf5ff;
+  color: #6d28d9;
+}
+
+.member-chip--agent {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.member-chip--active {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.member-chip--inactive {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* ===== TEAM CHAT ===== */
+
+.teamchat-card {
+  margin-top: 10px;
+  background: #fff;
+  border: 1px solid #e6ecf6;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+}
+
+.teamchat-messages {
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 12px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.teamchat-row + .teamchat-row {
+  margin-top: 10px;
+}
+
+.teamchat-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.teamchat-time {
+  margin-left: auto;
+  color: #94a3b8;
+}
+
+.teamchat-bubble {
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e6ecf6;
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.35;
+  width: fit-content;
+  max-width: 100%;
+  white-space: pre-wrap;
+}
+
+.teamchat-compose {
+  margin-top: 12px;
+}
+
+.teamchat-compose textarea {
+  width: 100%;
+  border: 1px solid #d6dff0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  min-height: 88px;
+  resize: vertical;
+}
+
+.teamchat-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 @media (max-width: 980px) {
   .analytics-grid,
   .settings-grid,
@@ -1674,6 +1824,14 @@ body.has-fixed-navbar #navbar {
 
   .knowledge-layout {
     grid-template-columns: 1fr;
+  }
+
+  .members-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .members-table {
+    min-width: 560px;
   }
 
   .panel-card-wide,

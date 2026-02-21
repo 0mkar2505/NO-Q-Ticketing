@@ -15,6 +15,15 @@ const createTicketBtn = document.getElementById("create-ticket-btn");
 
 let isCreating = false;
 
+// Supervisors manage the workspace; agents handle operational ticket creation.
+try {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const companyRole = String(user.company_role || "").toLowerCase();
+  if (companyRole === "supervisor") {
+    window.location.href = `${pathBase}/app/client/tickets.html`;
+  }
+} catch (_) {}
+
 function setFeedback(type, text) {
   if (!feedbackEl) return;
   if (!text) {
@@ -64,10 +73,14 @@ async function createTicket() {
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = loginPath;
+        return;
+      }
+      if (res.status === 403) {
+        window.location.href = `${pathBase}/app/client/tickets.html`;
         return;
       }
       setFeedback("error", data.error || "Unable to create ticket.");

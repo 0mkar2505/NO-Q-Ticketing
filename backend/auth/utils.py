@@ -28,10 +28,23 @@ def check_password(password: str, password_hash: str) -> bool:
 
 
 def generate_token(user) -> str:
+    platform_role = getattr(user, "platform_role", None) or ("platform_admin" if user.role == "admin" else "client_user")
+    company_role = getattr(user, "company_role", None)
+    if platform_role == "client_user" and not company_role:
+        # Backwards compatible default: existing client users are supervisors until you create agents.
+        company_role = "supervisor"
+
+    # Legacy compatibility: frontend and some backend code expect role=admin|client
+    legacy_role = "admin" if platform_role == "platform_admin" else "client"
+
     payload = {
         "user_id": str(user._id),
-        "role": user.role,
+        "role": legacy_role,
+        "platform_role": platform_role,
+        "company_role": company_role,
         "company_id": str(user.company_id) if user.company_id else None,
+        "email": getattr(user, "email", None),
+        "name": getattr(user, "name", None),
         "exp": datetime.utcnow() + timedelta(hours=6)
     }
     return jwt.encode(payload, os.getenv("JWT_SECRET"), algorithm="HS256")

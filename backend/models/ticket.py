@@ -129,7 +129,7 @@ class Ticket:
         return Ticket._serialize(ticket)
 
     @staticmethod
-    def reply(ticket_id, company_id, message):
+    def reply(ticket_id, company_id, message, actor=None):
         ticket = ticket_collection.find_one(
             {"_id": Ticket._coerce_object_id(ticket_id), "company_id": Ticket._company_id_filters(company_id)}
         )
@@ -139,6 +139,12 @@ class Ticket:
         if ticket.get("status") == "resolved":
             return False, "already_resolved"
 
+        actor = actor or {}
+        actor_name = (actor.get("name") or "").strip()
+        actor_email = (actor.get("email") or "").strip().lower()
+        actor_company_role = (actor.get("company_role") or "").strip().lower()
+        actor_user_id = (actor.get("user_id") or "").strip()
+
         result = ticket_collection.update_one(
             {"_id": ticket["_id"], "company_id": Ticket._company_id_filters(company_id)},
             {
@@ -146,7 +152,12 @@ class Ticket:
                     "messages": {
                         "sender": "client",
                         "text": message,
-                        "timestamp": datetime.utcnow()
+                        "timestamp": datetime.utcnow(),
+                        # Used by customer status chat to show who joined.
+                        "actor_name": actor_name or None,
+                        "actor_email": actor_email or None,
+                        "actor_company_role": actor_company_role or None,
+                        "actor_user_id": actor_user_id or None,
                     }
                 },
                 "$set": {"updated_at": datetime.utcnow()}

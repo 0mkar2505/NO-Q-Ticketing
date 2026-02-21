@@ -48,11 +48,17 @@ let tenantSlug = "";
 let lastAiTriage = null;
 let statusContext = { ticket_id: "", email: "" };
 let statusAutoRefreshTimer = null;
+let statusStickToBottom = true;
 let readyPromptShown = false;
 
 function scrollToBottom(el) {
   if (!el) return;
   el.scrollTop = el.scrollHeight;
+}
+
+function isNearBottom(el, thresholdPx = 28) {
+  if (!el) return true;
+  return (el.scrollTop + el.clientHeight) >= (el.scrollHeight - thresholdPx);
 }
 
 function getTenantSlugFromUrl() {
@@ -451,6 +457,12 @@ function normalizeSender(sender) {
   return "assistant";
 }
 
+function joinedLabelFromMessage(m) {
+  const role = String(m?.actor_company_role || "").toLowerCase();
+  if (role === "supervisor") return "Supervisor has joined this chat.";
+  return "Agent has joined this chat.";
+}
+
 function renderStatusResult(ticket) {
   // Preserve any in-progress customer reply draft while we refresh the status panel.
   // Auto-refresh re-renders the status panel HTML, so without this the draft gets wiped mid-typing.
@@ -459,6 +471,12 @@ function renderStatusResult(ticket) {
   const hadFocus = prevReplyEl && document.activeElement === prevReplyEl;
   const prevSelStart = prevReplyEl && typeof prevReplyEl.selectionStart === "number" ? prevReplyEl.selectionStart : null;
   const prevSelEnd = prevReplyEl && typeof prevReplyEl.selectionEnd === "number" ? prevReplyEl.selectionEnd : null;
+
+  const prevChatEl = statusResultEl.querySelector(".support-chat");
+  // If the user scrolls up to read older messages, don't yank them back down on every poll.
+  // "Stick to bottom" is a user-controlled state (updated by scroll events).
+  const shouldStickToBottom = !prevChatEl ? true : (statusStickToBottom && isNearBottom(prevChatEl, 4));
+  const prevScrollTop = prevChatEl ? prevChatEl.scrollTop : 0;
 
   const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
   const status = String(ticket.status || "").toLowerCase();
@@ -474,7 +492,7 @@ function renderStatusResult(ticket) {
 
         if (!agentJoinedInserted && sender === "client") {
           agentJoinedInserted = true;
-          return `<div class="support-msg system"><p>Agent has joined this chat.</p></div>${bubble}`;
+          return `<div class="support-msg system"><p>${escapeHtml(joinedLabelFromMessage(m))}</p></div>${bubble}`;
         }
         return bubble;
       })
@@ -511,7 +529,23 @@ function renderStatusResult(ticket) {
   `;
 
   const chatEl = statusResultEl.querySelector(".support-chat");
-  scrollToBottom(chatEl);
+  if (shouldStickToBottom) {
+    scrollToBottom(chatEl);
+  } else if (chatEl) {
+    // Keep the reader's position stable during polling refresh.
+    chatEl.scrollTop = Math.min(prevScrollTop, Math.max(0, chatEl.scrollHeight - chatEl.clientHeight));
+  }
+  if (chatEl) {
+    // Re-attach scroll handler after every re-render (the element is replaced).
+    statusStickToBottom = isNearBottom(chatEl, 4);
+    chatEl.addEventListener(
+      "scroll",
+      () => {
+        statusStickToBottom = isNearBottom(chatEl, 4);
+      },
+      { passive: true }
+    );
+  }
 
   // Restore draft text and caret position if the reply box still exists (not resolved view).
   const nextReplyEl = document.getElementById("status-reply");

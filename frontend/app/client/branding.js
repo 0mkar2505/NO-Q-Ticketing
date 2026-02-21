@@ -232,10 +232,14 @@ async function loadBranding() {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = loginPath;
+        return;
+      }
+      if (res.status === 403) {
+        window.location.href = `${pathBase}/app/client/tickets.html`;
         return;
       }
       throw new Error("Failed to load branding");
@@ -285,10 +289,14 @@ async function saveBranding() {
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = loginPath;
+        return;
+      }
+      if (res.status === 403) {
+        window.location.href = `${pathBase}/app/client/tickets.html`;
         return;
       }
       setFeedback("error", data.error || "Failed to save branding.");

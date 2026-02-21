@@ -41,11 +41,44 @@
       }
     });
 
-    // Set user email in navbar
+    // Set user label in navbar (prefer name over email).
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userEmailEl = document.getElementById("userEmail");
-    if (userEmailEl && user.email) {
-      userEmailEl.textContent = user.email;
+    if (userEmailEl) {
+      const label = String(user.name || "").trim() || String(user.email || "").trim() || "";
+      userEmailEl.textContent = label;
+    }
+
+    // Role-based UX: hide navigation links (backend also enforces this).
+    const companyRole = String(user.company_role || "").toLowerCase();
+    const isAgent = companyRole === "agent";
+    const isSupervisor = companyRole === "supervisor";
+    if (isAgent && !isAdmin) {
+      const supervisorOnlyHrefs = new Set([
+        "./analytics.html",
+        "./branding.html",
+        "./configs.html",
+        "./members.html",
+      ]);
+      document.querySelectorAll(".sidebar-nav a").forEach((a) => {
+        const href = (a.getAttribute("href") || "").trim();
+        if (supervisorOnlyHrefs.has(href)) {
+          a.style.display = "none";
+        }
+      });
+    }
+
+    if (isSupervisor && !isAdmin) {
+      // Supervisors manage, agents operate. Manual ticket creation is agent-only.
+      const agentOnly = new Set([
+        "./create-ticket.html",
+      ]);
+      document.querySelectorAll(".sidebar-nav a").forEach((a) => {
+        const href = (a.getAttribute("href") || "").trim();
+        if (agentOnly.has(href)) {
+          a.style.display = "none";
+        }
+      });
     }
   }, 100);
 

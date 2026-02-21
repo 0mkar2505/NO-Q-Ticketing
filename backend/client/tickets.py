@@ -22,7 +22,7 @@ def get_ticket(ticket_id):
 
 
 @client_tickets_bp.route("/api/client/tickets", methods=["POST"])
-@require_auth(required_role="client")
+@require_auth(required_role="client", required_company_role="agent")
 def create_ticket():
     data = request.get_json(silent=True) or {}
     subject = (data.get("subject") or "").strip()
@@ -53,7 +53,13 @@ def reply_ticket(ticket_id):
     if not message:
         return jsonify({"error": "Message is required"}), 400
 
-    success, error = Ticket.reply(ticket_id, request.user["company_id"], message)
+    actor = {
+        "name": request.user.get("name") or "",
+        "email": request.user.get("email") or "",
+        "company_role": request.user.get("company_role") or "",
+        "user_id": request.user.get("user_id") or "",
+    }
+    success, error = Ticket.reply(ticket_id, request.user["company_id"], message, actor=actor)
     if not success:
         if error == "not_found":
             return jsonify({"error": "Ticket not found"}), 404

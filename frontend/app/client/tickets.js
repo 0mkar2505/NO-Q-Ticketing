@@ -33,11 +33,26 @@ let isAiRunning = false;
 let currentPage = 1;
 const PAGE_SIZE = 12;
 let ticketAutoRefreshTimer = null;
+let messagesStickToBottom = true;
+let forceTicketScrollToBottom = false;
 
 function scrollToBottom(el) {
   if (!el) return;
   el.scrollTop = el.scrollHeight;
 }
+
+function isNearBottom(el, thresholdPx = 8) {
+  if (!el) return true;
+  return (el.scrollTop + el.clientHeight) >= (el.scrollHeight - thresholdPx);
+}
+
+messagesDiv?.addEventListener(
+  "scroll",
+  () => {
+    messagesStickToBottom = isNearBottom(messagesDiv, 4);
+  },
+  { passive: true }
+);
 
 function setFeedback(type, text) {
   if (!feedbackEl) return;
@@ -353,6 +368,8 @@ function openTicket(ticket) {
   currentTicketId = ticket._id;
   markActiveTicket();
   ticketView.classList.remove("hidden");
+  messagesStickToBottom = true;
+  forceTicketScrollToBottom = true;
   renderTicketView(ticket);
 
   const isResolved = ticket.status === "resolved";
@@ -393,6 +410,12 @@ function renderTicketView(ticket) {
     metaEl.textContent = `Ticket ID: ${id} | Customer: ${email}`;
   }
 
+  const shouldStickToBottom = forceTicketScrollToBottom
+    ? true
+    : (messagesStickToBottom && isNearBottom(messagesDiv, 4));
+  const prevScrollTop = messagesDiv ? messagesDiv.scrollTop : 0;
+  forceTicketScrollToBottom = false;
+
   messagesDiv.innerHTML = "";
   const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
   if (messages.length > 0) {
@@ -400,14 +423,22 @@ function renderTicketView(ticket) {
       const m = document.createElement("div");
       m.className = `message ${msg.sender}`;
       const ts = msg.timestamp ? new Date(msg.timestamp).toLocaleString() : "";
-      m.innerHTML = `<strong>${escapeHtml(msg.sender || "")}</strong>: ${escapeHtml(msg.text || "")}<br><small>${escapeHtml(ts)}</small>`;
+      const sender = String(msg.sender || "");
+      const label = sender === "client"
+        ? (msg.actor_name || (sender ? "Support" : ""))
+        : sender;
+      m.innerHTML = `<strong>${escapeHtml(label)}</strong>: ${escapeHtml(msg.text || "")}<br><small>${escapeHtml(ts)}</small>`;
       messagesDiv.appendChild(m);
     });
   } else {
     messagesDiv.innerHTML = "<p class=\"no-messages\">No messages yet</p>";
   }
 
-  scrollToBottom(messagesDiv);
+  if (shouldStickToBottom) {
+    scrollToBottom(messagesDiv);
+  } else if (messagesDiv) {
+    messagesDiv.scrollTop = Math.min(prevScrollTop, Math.max(0, messagesDiv.scrollHeight - messagesDiv.clientHeight));
+  }
 }
 
 // Reply to Ticket

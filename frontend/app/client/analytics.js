@@ -148,10 +148,15 @@ async function loadAnalytics() {
     });
 
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = loginPath;
+        return;
+      }
+      if (res.status === 403) {
+        // Agent accounts are blocked from supervisor-only pages.
+        window.location.href = `${pathBase}/app/client/tickets.html`;
         return;
       }
       throw new Error("Failed to load analytics");

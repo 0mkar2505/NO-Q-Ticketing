@@ -43,7 +43,7 @@ def list_knowledge():
 
 
 @client_knowledge_bp.route("/api/client/knowledge", methods=["POST"])
-@require_auth(required_role="client")
+@require_auth(required_role="client", required_company_role="supervisor")
 def create_knowledge():
     data = request.get_json(silent=True) or {}
     title = (data.get("title") or "").strip()
@@ -66,7 +66,7 @@ def create_knowledge():
 
 
 @client_knowledge_bp.route("/api/client/knowledge/<entry_id>", methods=["PATCH"])
-@require_auth(required_role="client")
+@require_auth(required_role="client", required_company_role="supervisor")
 def update_knowledge(entry_id):
     data = request.get_json(silent=True) or {}
     title = (data.get("title") or "").strip()
@@ -91,10 +91,9 @@ def update_knowledge(entry_id):
 
 
 @client_knowledge_bp.route("/api/client/knowledge/<entry_id>", methods=["DELETE"])
-@require_auth(required_role="client")
+@require_auth(required_role="client", required_company_role="supervisor")
 def delete_knowledge(entry_id):
     ok = Knowledge.delete(entry_id, request.user["company_id"])
     if not ok:
         return jsonify({"error": "Not found"}), 404
     return jsonify({"message": "Deleted"}), 200
-

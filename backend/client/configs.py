@@ -187,14 +187,14 @@ def _validate_payload(data):
 
 
 @client_configs_bp.route("/api/client/configs", methods=["GET"])
-@require_auth(required_role="client")
+@require_auth(required_role="client", required_company_role="supervisor")
 def get_client_configs():
     config = ClientConfig.get_by_company(request.user["company_id"])
     return jsonify(config), 200
 
 
 @client_configs_bp.route("/api/client/configs", methods=["PATCH"])
-@require_auth(required_role="client")
+@require_auth(required_role="client", required_company_role="supervisor")
 def update_client_configs():
     data = request.get_json(silent=True) or {}
     config, error = _validate_payload(data)

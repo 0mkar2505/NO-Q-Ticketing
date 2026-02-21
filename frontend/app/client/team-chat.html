@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Chat | NO-Q</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Team Chat</h1>
+        <p class="page-subtitle">Internal chat for agents and supervisors inside your company.</p>
+        <p id="teamchat-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="teamchat-card">
+          <div id="teamchat-messages" class="teamchat-messages"></div>
+
+          <div class="teamchat-compose">
+            <textarea id="teamchat-input" placeholder="Write a message to your team..."></textarea>
+            <div class="teamchat-actions">
+              <button id="teamchat-send" class="btn btn-primary" type="button">Send</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="/shared/js/api.js"></script>
+  <script src="./team-chat.js"></script>
+</body>
+</html>
+

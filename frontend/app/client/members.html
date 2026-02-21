@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Members | NO-Q</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header id="navbar"></header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <main class="app-content">
+        <h1 class="page-title">Team Members</h1>
+        <p class="page-subtitle">Add agents and supervisors to your company workspace.</p>
+        <p id="members-feedback" class="tickets-feedback hidden" aria-live="polite"></p>
+
+        <section class="members-layout">
+          <article class="settings-card">
+            <div class="panel-head">
+              <h2>Members</h2>
+              <span class="panel-tag" id="members-count">0</span>
+            </div>
+            <div class="members-table-wrap">
+              <table class="members-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Company Role</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody id="members-body">
+                  <tr><td colspan="5">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <h2>Add Member</h2>
+            <p class="settings-copy">Create a new agent account for your support team.</p>
+
+            <div class="settings-field">
+              <label for="memberName">Name</label>
+              <input id="memberName" type="text" maxlength="80" placeholder="Agent name" />
+            </div>
+
+            <div class="settings-field">
+              <label for="memberEmail">Email</label>
+              <input id="memberEmail" type="email" maxlength="160" placeholder="agent@company.com" />
+            </div>
+
+            <div class="settings-field">
+              <label for="memberPassword">Temporary Password</label>
+              <input id="memberPassword" type="text" minlength="8" placeholder="At least 8 characters" />
+            </div>
+
+            <p class="settings-copy" style="margin-top: 8px;">
+              Note: Supervisors can add agents. Platform admins control supervisor access.
+            </p>
+
+            <div class="settings-actions" style="justify-content: flex-end;">
+              <button id="memberCreateBtn" class="btn btn-primary" type="button">Create Member</button>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      &copy; 2026 NO-Q
+    </footer>
+  </div>
+
+  <script src="/shared/js/auth-guard.js"></script>
+  <script src="/shared/js/load-shared.js"></script>
+  <script src="/shared/js/api.js"></script>
+  <script src="./members.js"></script>
+</body>
+</html>
