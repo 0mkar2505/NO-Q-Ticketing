@@ -81,11 +81,27 @@ form.addEventListener("submit", async (e) => {
     nameInput.focus();
     return;
   }
+  if (typeof isValidPersonName === "function" && !isValidPersonName(name)) {
+    showError(errorEl, "Name must be 2-60 characters (letters only).");
+    nameInput.focus();
+    return;
+  }
 
   // Company validation
   if (!company) {
     showError(errorEl, "Company name is required");
     companyInput.focus();
+    return;
+  }
+  if (typeof isValidCompanyName === "function" && !isValidCompanyName(company)) {
+    showError(errorEl, "Company name must be letters only (no numbers).");
+    companyInput.focus();
+    return;
+  }
+
+  if (website && !/^https?:\\/\\//i.test(website)) {
+    showError(errorEl, "Company website must start with http:// or https://");
+    websiteInput?.focus();
     return;
   }
 
@@ -95,7 +111,8 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  if (!isValidHandle(handle)) {
+  const handleOk = (typeof isValidNoqHandle === "function") ? isValidNoqHandle(handle) : isValidHandle(handle);
+  if (!handleOk) {
     showError(errorEl, "Handle must be 3-32 chars: letters, numbers, dot, underscore, hyphen");
     handleInput?.focus();
     return;
@@ -109,7 +126,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   if (!isValidPassword(password)) {
-    showError(errorEl, "Password must be at least 8 characters with 1 letter and 1 number");
+    showError(errorEl, "Password must be 8+ chars with uppercase, lowercase, number, and symbol");
     passwordInput.focus();
     return;
   }

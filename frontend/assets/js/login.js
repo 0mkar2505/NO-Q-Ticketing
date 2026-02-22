@@ -114,7 +114,8 @@ if (togglePasswordBtn && passwordInput) {
     const isHidden = passwordInput.type === "password";
 
     passwordInput.type = isHidden ? "text" : "password";
-    togglePasswordBtn.textContent = isHidden ? "🙈" : "👁";
+    // Keep button text ASCII-safe to avoid encoding issues on Windows.
+    togglePasswordBtn.textContent = isHidden ? "Hide" : "Show";
     togglePasswordBtn.setAttribute(
       "aria-label",
       isHidden ? "Hide password" : "Show password"

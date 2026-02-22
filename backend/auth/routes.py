@@ -11,6 +11,48 @@ from datetime import datetime, timedelta
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
+def _is_valid_person_name(name: str) -> bool:
+    v = (name or "").strip()
+    if len(v) < 2 or len(v) > 60:
+        return False
+    allowed = set(" .'-")
+    saw_alpha = False
+    for ch in v:
+        if ch.isalpha():
+            saw_alpha = True
+            continue
+        if ch.isspace() or ch in allowed:
+            continue
+        return False
+    return saw_alpha
+
+def _is_valid_company_name(company_name: str) -> bool:
+    v = (company_name or "").strip()
+    if len(v) < 2 or len(v) > 80:
+        return False
+    allowed = set(" .&',-")
+    saw_alpha = False
+    for ch in v:
+        if ch.isdigit():
+            return False
+        if ch.isalpha():
+            saw_alpha = True
+            continue
+        if ch.isspace() or ch in allowed:
+            continue
+        return False
+    return saw_alpha
+
+def _is_valid_password(password: str) -> bool:
+    v = str(password or "")
+    if len(v) < 8 or len(v) > 128:
+        return False
+    has_lower = any(c.islower() for c in v)
+    has_upper = any(c.isupper() for c in v)
+    has_digit = any(c.isdigit() for c in v)
+    has_symbol = any((not c.isalnum()) for c in v)
+    return has_lower and has_upper and has_digit and has_symbol
+
 def _to_object_id(value):
     try:
         return ObjectId(value)
@@ -89,7 +131,8 @@ def register():
     # Onboarding fields
     name = (data.get("name") or "").strip()
     company_name = (data.get("company_name") or "").strip()
-    password = (data.get("password") or "").strip()
+    # Keep raw password (don't strip) so we don't mutate user intent.
+    password = (data.get("password") or "")
     handle = (data.get("handle") or "").strip().lower()
 
     industry = (data.get("industry") or "").strip()
@@ -99,12 +142,18 @@ def register():
 
     if not name:
         return jsonify({"error": "Name is required"}), 400
+    if not _is_valid_person_name(name):
+        return jsonify({"error": "Name must be 2-60 characters (letters only)."}), 400
     if not company_name:
         return jsonify({"error": "Company name is required"}), 400
+    if not _is_valid_company_name(company_name):
+        return jsonify({"error": "Company name must be letters only (no numbers)."}), 400
     if not handle:
         return jsonify({"error": "NO-Q email handle is required"}), 400
     if not password:
         return jsonify({"error": "Password is required"}), 400
+    if not _is_valid_password(password):
+        return jsonify({"error": "Password must be 8+ chars with uppercase, lowercase, number, and symbol"}), 400
 
     if len(handle) < 3 or len(handle) > 32:
         return jsonify({"error": "Handle must be 3-32 characters."}), 400
