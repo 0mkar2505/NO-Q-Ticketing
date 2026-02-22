@@ -33,6 +33,9 @@
     page.style.setProperty("--home-nav-r", `${radius}px`);
     page.style.setProperty("--home-nav-h", `${height}px`);
     page.style.setProperty("--home-nav-px", `${padX}px`);
+
+    // Keep a class for pointer-events + any "hard" state changes.
+    nav.classList.toggle("navbar--condensed", t > 0.55);
   }
 
   update();
