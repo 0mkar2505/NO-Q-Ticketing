@@ -859,6 +859,16 @@ body.has-fixed-navbar #navbar {
   gap: 12px;
 }
 
+.mk-shot-img {
+  width: 100%;
+  height: 100%;
+  min-height: 190px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  display: block;
+}
+
 .mk-shot--tickets .mk-shot-body {
   grid-template-columns: 0.7fr 1.3fr;
 }
@@ -883,6 +893,19 @@ body.has-fixed-navbar #navbar {
 
 .mk-shot--support .mk-shot-body {
   grid-template-columns: 1.2fr 0.8fr;
+}
+
+/* When a "shot" is a real screenshot, override the placeholder grid layout. */
+.mk-shot--image .mk-shot-body {
+  grid-template-columns: 1fr !important;
+  padding: 0;
+}
+
+.mk-shot--image .mk-shot-img {
+  border: 0;
+  border-radius: 0;
+  min-height: 260px;
+  object-position: center top;
 }
 
 .mk-shot-chat {
@@ -1121,6 +1144,105 @@ body.has-fixed-navbar #navbar {
   padding-top: 26px;
 }
 
+.mk-home .mk-section--collage {
+  /* Start clearly below the hero CTA row. */
+  padding-top: 34px;
+  padding-bottom: 22px;
+}
+
+.mk-collage {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  height: 680px; /* allow the full 1017x666 screenshot to render without cropping */
+  /* Keep everything inside this section so it doesn't collide with the carousel below. */
+  overflow: hidden;
+}
+
+/* Reference-style clean collage: no extra glow layer, just 5 overlapping tiles. */
+
+.mk-collage-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(980px, 100%);
+  height: auto; /* match the image's intrinsic aspect ratio */
+  max-height: 650px;
+  transform: translate(-50%, -50%);
+  /* Match the PNG edge exactly to avoid any halo/transparent line from clipping. */
+  border-radius: 0;
+  /* Don't add an extra "frame" around the screenshot. */
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(0 26px 70px rgba(0, 0, 0, 0.52));
+  display: block;
+  /* Let the image scale naturally; avoid any contain/cover letterboxing artifacts. */
+  object-fit: initial;
+  z-index: 4;
+}
+
+.mk-collage-side {
+  position: absolute;
+  top: 50%;
+  width: 270px;
+  height: 380px;
+  transform: translateY(-50%);
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  filter: drop-shadow(0 22px 58px rgba(0, 0, 0, 0.40));
+  overflow: hidden;
+  background: transparent;
+  object-fit: cover;
+}
+
+.mk-collage-side--l1 {
+  left: 40px;
+  width: 240px;
+  height: 340px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.mk-collage-side--l2 {
+  left: 140px;
+  width: 285px;
+  height: 400px;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.mk-collage-side--r1 {
+  right: 140px;
+  width: 285px;
+  height: 400px;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.mk-collage-side--r2 {
+  right: 40px;
+  width: 240px;
+  height: 340px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+@media (max-width: 980px) {
+  .mk-collage {
+    height: 420px;
+  }
+  .mk-collage-side {
+    display: none;
+  }
+  .mk-collage-center {
+    width: 100%;
+    border-radius: 18px;
+    max-height: 360px;
+  }
+}
+
 .mk-home .mk-hero {
   padding-bottom: 54px;
 }
@@ -1132,6 +1254,86 @@ body.has-fixed-navbar #navbar {
 .mk-home .mk-strip {
   gap: 16px;
 }
+
+.mk-cascade {
+  position: relative;
+}
+
+.mk-cascade-viewport {
+  overflow: hidden; /* avoid scroll-wheel hijacking on the landing page */
+  padding: 0;
+  border-radius: 22px;
+  background: radial-gradient(circle at 10% 0%, rgba(124, 58, 237, 0.08), transparent 38%);
+}
+
+.mk-cascade-viewport:focus-visible {
+  box-shadow: var(--ring);
+}
+
+.mk-cascade-viewport::-webkit-scrollbar {
+  height: 0;
+}
+
+.mk-cascade-track {
+  display: flex;
+  gap: 0;
+  padding: 0;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.mk-cascade .mk-card {
+  flex: 0 0 100%;
+  max-width: 100%;
+  min-height: 190px;
+  padding: 26px 26px 22px;
+  transform: none;
+  opacity: 1;
+  transition: none;
+}
+
+.mk-cascade .mk-card.is-active {
+  transform: none;
+  opacity: 1;
+}
+
+.mk-cascade .mk-card--icon .mk-ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.mk-cascade-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(11, 16, 32, 0.62);
+  color: rgba(226, 232, 240, 0.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.mk-cascade-btn:hover {
+  background: rgba(11, 16, 32, 0.78);
+  border-color: rgba(196, 181, 253, 0.22);
+  transform: translateY(-50%) scale(1.04);
+}
+
+.mk-cascade-btn--prev { left: 10px; }
+.mk-cascade-btn--next { right: 10px; }
 
 .mk-isolation {
   gap: 16px;
@@ -2000,6 +2202,14 @@ body.theme-dark .navbar:not(.support-preview-nav) {
   background: rgba(11, 16, 32, 0.78);
   border-bottom: 1px solid rgba(148, 163, 184, 0.14);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+}
+
+/* App nav should remain prominent while scrolling (client/admin/agent). */
+body.theme-dark .navbar--app {
+  background: rgba(7, 8, 24, 0.92);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(14px);
 }
 
 /* Keep branding preview (customer view) neutral/light so tenant colors are readable. */

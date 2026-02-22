@@ -67,6 +67,51 @@
     });
   }
 
+  // Feature cascade carousel (landing page only).
+  const cascade = document.getElementById("mkFeatureCascade");
+  if (cascade) {
+    const viewport = cascade.querySelector(".mk-cascade-viewport");
+    const track = cascade.querySelector(".mk-cascade-track");
+    const cards = Array.from(cascade.querySelectorAll(".mk-cascade-track .mk-card"));
+    const prevBtn = cascade.querySelector(".mk-cascade-btn--prev");
+    const nextBtn = cascade.querySelector(".mk-cascade-btn--next");
+
+    if (viewport && track && cards.length) {
+      let activeIndex = 0;
+
+      function updateButtons() {
+        if (prevBtn) prevBtn.disabled = activeIndex <= 0;
+        if (nextBtn) nextBtn.disabled = activeIndex >= cards.length - 1;
+      }
+
+      function applyTransform(animate = true) {
+        const w = viewport.clientWidth || 0;
+        track.style.transition = animate ? "transform 520ms cubic-bezier(0.22, 1, 0.36, 1)" : "none";
+        track.style.transform = `translateX(${-activeIndex * w}px)`;
+      }
+
+      function setActive(index, { animate = true } = {}) {
+        activeIndex = Math.max(0, Math.min(cards.length - 1, index));
+        cards.forEach((c, i) => c.classList.toggle("is-active", i === activeIndex));
+        applyTransform(animate);
+        updateButtons();
+      }
+
+      function prev() { setActive(activeIndex - 1); }
+      function next() { setActive(activeIndex + 1); }
+
+      prevBtn?.addEventListener("click", (e) => { e.preventDefault(); prev(); });
+      nextBtn?.addEventListener("click", (e) => { e.preventDefault(); next(); });
+
+      // Keyboard control when focused.
+      // Keep movement explicit via the arrow buttons (avoid accidental navigation).
+
+      // Initial state: show the first card centered.
+      requestAnimationFrame(() => setActive(0, { animate: false }));
+      window.addEventListener("resize", () => applyTransform(false), { passive: true });
+    }
+  }
+
   // "How it works" scroll highlight + sticky status text.
   const steps = Array.from(document.querySelectorAll(".mk-step[data-step]"));
   const statusEl = document.getElementById("mkFlowStatus");

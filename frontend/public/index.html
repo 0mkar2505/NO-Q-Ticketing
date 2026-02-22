@@ -55,28 +55,50 @@
         <div class="mk-hero-art mk-hero-art--home" aria-hidden="true"></div>
       </section>
 
+      <section class="mk-section mk-section--collage" aria-label="Product preview">
+        <div class="mk-collage">
+          <img class="mk-collage-center" src="/assets/images/MainPage.png" alt="NO-Q workspace preview" />
+          <img class="mk-collage-side mk-collage-side--l1" src="/assets/images/MainPage.png" alt="" aria-hidden="true" />
+          <img class="mk-collage-side mk-collage-side--l2" src="/assets/images/MainPage.png" alt="" aria-hidden="true" />
+          <img class="mk-collage-side mk-collage-side--r1" src="/assets/images/MainPage.png" alt="" aria-hidden="true" />
+          <img class="mk-collage-side mk-collage-side--r2" src="/assets/images/MainPage.png" alt="" aria-hidden="true" />
+        </div>
+      </section>
+
       <section class="mk-section mk-section--tight">
-        <div class="mk-strip mk-grid mk-grid--4">
-          <article class="mk-card mk-card--icon">
-            <div class="mk-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-            <h3 class="mk-h3">Auto-triage with policies</h3>
-            <p class="mk-muted">Extract intent, priority, and category without losing context.</p>
-          </article>
-          <article class="mk-card mk-card--icon">
-            <div class="mk-ic"><i class="fa-solid fa-palette"></i></div>
-            <h3 class="mk-h3">Tenant branding</h3>
-            <p class="mk-muted">Per-client colors, navbar, page theme, and support URL.</p>
-          </article>
-          <article class="mk-card mk-card--icon">
-            <div class="mk-ic"><i class="fa-solid fa-users-gear"></i></div>
-            <h3 class="mk-h3">Agent/Supervisor roles</h3>
-            <p class="mk-muted">Agents work tickets, supervisors run the workspace.</p>
-          </article>
-          <article class="mk-card mk-card--icon">
-            <div class="mk-ic"><i class="fa-solid fa-shield-halved"></i></div>
-            <h3 class="mk-h3">Audit-ready admin</h3>
-            <p class="mk-muted">Operational visibility with role enforcement on the backend.</p>
-          </article>
+        <div class="mk-cascade" id="mkFeatureCascade" aria-label="Product highlights carousel">
+          <button class="mk-cascade-btn mk-cascade-btn--prev" type="button" aria-label="Previous highlight">
+            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+          </button>
+
+          <div class="mk-cascade-viewport" tabindex="0" aria-label="Highlights">
+            <div class="mk-cascade-track">
+              <article class="mk-card mk-card--icon">
+                <div class="mk-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h3 class="mk-h3">Auto-triage with policies</h3>
+                <p class="mk-muted">Extract intent, priority, and category without losing context.</p>
+              </article>
+              <article class="mk-card mk-card--icon">
+                <div class="mk-ic"><i class="fa-solid fa-palette"></i></div>
+                <h3 class="mk-h3">Tenant branding</h3>
+                <p class="mk-muted">Per-client colors, navbar, page theme, and support URL.</p>
+              </article>
+              <article class="mk-card mk-card--icon">
+                <div class="mk-ic"><i class="fa-solid fa-users-gear"></i></div>
+                <h3 class="mk-h3">Agent/Supervisor roles</h3>
+                <p class="mk-muted">Agents work tickets, supervisors run the workspace.</p>
+              </article>
+              <article class="mk-card mk-card--icon">
+                <div class="mk-ic"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3 class="mk-h3">Audit-ready admin</h3>
+                <p class="mk-muted">Operational visibility with role enforcement on the backend.</p>
+              </article>
+            </div>
+          </div>
+
+          <button class="mk-cascade-btn mk-cascade-btn--next" type="button" aria-label="Next highlight">
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+          </button>
         </div>
       </section>
 
