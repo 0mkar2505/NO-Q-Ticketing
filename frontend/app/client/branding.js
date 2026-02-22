@@ -24,6 +24,10 @@ const primaryPicker = document.getElementById("primaryColorPicker");
 const primaryText = document.getElementById("primaryColorText");
 const brandTextPicker = document.getElementById("brandTextPicker");
 const brandTextText = document.getElementById("brandTextText");
+const navbarBgPicker = document.getElementById("navbarBgPicker");
+const navbarBgText = document.getElementById("navbarBgText");
+const subtextPicker = document.getElementById("subtextPicker");
+const subtextText = document.getElementById("subtextText");
 const assistantBubblePicker = document.getElementById("assistantBubblePicker");
 const assistantBubbleText = document.getElementById("assistantBubbleText");
 const assistantTextPicker = document.getElementById("assistantTextPicker");
@@ -69,7 +73,7 @@ function normalizeConfig(config) {
   return {
     default_priority: config?.default_priority || "normal",
     sla_response_hours: Number(config?.sla_response_hours || 4),
-    reply_signature: config?.reply_signature || "Thanks for reaching out.\nNO-Q Support Team",
+    reply_signature: String(config?.reply_signature || ""),
     notifications: {
       email_new_tickets: Boolean(notifications.email_new_tickets),
       daily_summary_report: Boolean(notifications.daily_summary_report),
@@ -79,8 +83,10 @@ function normalizeConfig(config) {
       brand_name: chat.brand_name || "NO-Q Support",
       logo_url: chat.logo_url || "",
       brand_text_color: chat.brand_text_color || chat.primary_color || "#7c3aed",
+      navbar_bg_color: chat.navbar_bg_color || "#ffffff",
       assistant_title: chat.assistant_title || "Guided Support Assistant",
       assistant_subtitle: chat.assistant_subtitle || "Answer a few guided prompts and we will create a support ticket for you.",
+      subtext_color: chat.subtext_color || "#64748b",
       page_bg_color: chat.page_bg_color || "#f8faff",
       primary_color: chat.primary_color || "#7c3aed",
       assistant_bubble_color: chat.assistant_bubble_color || "#eef2ff",
@@ -107,6 +113,8 @@ function applyToPreview(chat) {
   if (!previewRoot) return;
 
   previewRoot.style.setProperty("--support-brand-text-color", chat.brand_text_color || chat.primary_color);
+  previewRoot.style.setProperty("--support-navbar-bg", chat.navbar_bg_color || "#ffffff");
+  previewRoot.style.setProperty("--support-subtext-color", chat.subtext_color || "#64748b");
   previewRoot.style.setProperty("--support-primary-color", chat.primary_color);
   previewRoot.style.setProperty("--support-assistant-bubble-color", chat.assistant_bubble_color);
   previewRoot.style.setProperty("--support-assistant-text-color", chat.assistant_text_color);
@@ -130,8 +138,10 @@ function readChatUiFromForm() {
     brand_name: brandNameEl.value.trim(),
     logo_url: logoUrlEl.value.trim(),
     brand_text_color: clampHex(brandTextText.value, clampHex(primaryText.value, "#7c3aed")),
+    navbar_bg_color: clampHex(navbarBgText.value, "#ffffff"),
     assistant_title: assistantTitleEl.value.trim(),
     assistant_subtitle: assistantSubtitleEl.value.trim(),
+    subtext_color: clampHex(subtextText.value, "#64748b"),
     page_bg_color: clampHex(pageBgText.value, "#f8faff"),
     primary_color: clampHex(primaryText.value, "#7c3aed"),
     assistant_bubble_color: clampHex(assistantBubbleText.value, "#eef2ff"),
@@ -153,6 +163,8 @@ function applyConfigToForm(config) {
 
   syncColorPair(primaryPicker, primaryText, chat.primary_color);
   syncColorPair(brandTextPicker, brandTextText, chat.brand_text_color || chat.primary_color);
+  syncColorPair(navbarBgPicker, navbarBgText, chat.navbar_bg_color || "#ffffff");
+  syncColorPair(subtextPicker, subtextText, chat.subtext_color || "#64748b");
   syncColorPair(pageBgPicker, pageBgText, chat.page_bg_color || "#f8faff");
   syncColorPair(assistantBubblePicker, assistantBubbleText, chat.assistant_bubble_color);
   syncColorPair(assistantTextPicker, assistantTextText, chat.assistant_text_color);
@@ -181,6 +193,8 @@ function wirePreviewInputs() {
 
   wireColorPair(primaryPicker, primaryText);
   wireColorPair(brandTextPicker, brandTextText);
+  wireColorPair(navbarBgPicker, navbarBgText);
+  wireColorPair(subtextPicker, subtextText);
   wireColorPair(pageBgPicker, pageBgText);
   wireColorPair(assistantBubblePicker, assistantBubbleText);
   wireColorPair(assistantTextPicker, assistantTextText);

@@ -154,6 +154,8 @@ function applyCustomerChatUi(chatUi = {}) {
   // CSS defines these variables on `.support-page`, so set them there to override defaults.
   const scope = supportPageEl || document.documentElement;
   if (chatUi.brand_text_color) scope.style.setProperty("--support-brand-text-color", chatUi.brand_text_color);
+  if (chatUi.navbar_bg_color) scope.style.setProperty("--support-navbar-bg", chatUi.navbar_bg_color);
+  if (chatUi.subtext_color) scope.style.setProperty("--support-subtext-color", chatUi.subtext_color);
   if (chatUi.primary_color) scope.style.setProperty("--support-primary-color", chatUi.primary_color);
   if (chatUi.assistant_bubble_color) scope.style.setProperty("--support-assistant-bubble-color", chatUi.assistant_bubble_color);
   if (chatUi.assistant_text_color) scope.style.setProperty("--support-assistant-text-color", chatUi.assistant_text_color);

@@ -9,7 +9,8 @@ class ClientConfig:
     DEFAULTS = {
         "default_priority": "normal",
         "sla_response_hours": 4,
-        "reply_signature": "Thanks for reaching out.\nNO-Q Support Team",
+        # Optional signature appended to ticket replies. Keep blank by default to avoid spamming responses.
+        "reply_signature": "",
         "notifications": {
             "email_new_tickets": True,
             "daily_summary_report": True,
@@ -43,8 +44,12 @@ class ClientConfig:
             "brand_name": "NO-Q Support",
             "logo_url": "",
             "brand_text_color": "#7c3aed",
+            # Background for the public support page navbar (tenant branded).
+            "navbar_bg_color": "#ffffff",
             "assistant_title": "Guided Support Assistant",
             "assistant_subtitle": "Answer a few guided prompts and we will create a support ticket for you.",
+            # Subtitle/subtext color (tenant branded).
+            "subtext_color": "#64748b",
             # Background for the public support page (tenant branded).
             "page_bg_color": "#f8faff",
             "primary_color": "#7c3aed",

@@ -57,7 +57,7 @@ function normalizeConfig(config) {
   return {
     default_priority: config?.default_priority || "normal",
     sla_response_hours: Number(config?.sla_response_hours || 4),
-    reply_signature: config?.reply_signature || "",
+    reply_signature: String(config?.reply_signature || ""),
     notifications: {
       email_new_tickets: Boolean(notifications.email_new_tickets),
       daily_summary_report: Boolean(notifications.daily_summary_report),
@@ -95,6 +95,8 @@ function normalizeConfig(config) {
       brand_text_color: chat.brand_text_color || chat.primary_color || "#7c3aed",
       assistant_title: chat.assistant_title || "Guided Support Assistant",
       assistant_subtitle: chat.assistant_subtitle || "Answer a few guided prompts and we will create a support ticket for you.",
+      navbar_bg_color: chat.navbar_bg_color || "#ffffff",
+      subtext_color: chat.subtext_color || "#64748b",
       page_bg_color: chat.page_bg_color || "#f8faff",
       primary_color: chat.primary_color || "#7c3aed",
       assistant_bubble_color: chat.assistant_bubble_color || "#eef2ff",
@@ -212,10 +214,7 @@ async function saveConfigs() {
   if (isSaving) return;
 
   const payload = readFormConfig();
-  if (!payload.reply_signature) {
-    setConfigsFeedback("error", "Reply signature is required.");
-    return;
-  }
+  // Reply signature is optional.
 
   setSavingState(true);
   setConfigsFeedback("", "");

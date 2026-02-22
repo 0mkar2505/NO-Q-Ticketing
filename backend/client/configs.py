@@ -44,9 +44,8 @@ def _validate_payload(data):
     if sla_response_hours not in ALLOWED_SLA_HOURS:
         return None, "sla_response_hours must be one of: 2, 4, 8"
 
-    reply_signature = (data.get("reply_signature") or "").strip()
-    if not reply_signature:
-        return None, "reply_signature is required"
+    reply_signature = str(data.get("reply_signature") or "").strip()
+    # Signature is optional; when blank, replies will not be auto-appended with any footer.
     if len(reply_signature) > 1000:
         return None, "reply_signature is too long (max 1000 characters)"
 
@@ -65,15 +64,17 @@ def _validate_payload(data):
 
     brand_name = (customer_chat_ui.get("brand_name") or "").strip()
     logo_url = (customer_chat_ui.get("logo_url") or "").strip()
-    brand_text_color = (customer_chat_ui.get("brand_text_color") or "").strip()
+    brand_text_color = (customer_chat_ui.get("brand_text_color") or "#7c3aed").strip()
+    navbar_bg_color = (customer_chat_ui.get("navbar_bg_color") or "#ffffff").strip()
     assistant_title = (customer_chat_ui.get("assistant_title") or "").strip()
     assistant_subtitle = (customer_chat_ui.get("assistant_subtitle") or "").strip()
-    page_bg_color = (customer_chat_ui.get("page_bg_color") or "").strip()
-    primary_color = (customer_chat_ui.get("primary_color") or "").strip()
-    assistant_bubble_color = (customer_chat_ui.get("assistant_bubble_color") or "").strip()
-    assistant_text_color = (customer_chat_ui.get("assistant_text_color") or "").strip()
-    customer_bubble_color = (customer_chat_ui.get("customer_bubble_color") or "").strip()
-    customer_text_color = (customer_chat_ui.get("customer_text_color") or "").strip()
+    subtext_color = (customer_chat_ui.get("subtext_color") or "#64748b").strip()
+    page_bg_color = (customer_chat_ui.get("page_bg_color") or "#f8faff").strip()
+    primary_color = (customer_chat_ui.get("primary_color") or "#7c3aed").strip()
+    assistant_bubble_color = (customer_chat_ui.get("assistant_bubble_color") or "#eef2ff").strip()
+    assistant_text_color = (customer_chat_ui.get("assistant_text_color") or "#312e81").strip()
+    customer_bubble_color = (customer_chat_ui.get("customer_bubble_color") or "#dcfce7").strip()
+    customer_text_color = (customer_chat_ui.get("customer_text_color") or "#14532d").strip()
 
     if brand_name and len(brand_name) > MAX_BRAND_NAME_LENGTH:
         return None, f"customer_chat_ui.brand_name is too long (max {MAX_BRAND_NAME_LENGTH} characters)"
@@ -97,6 +98,8 @@ def _validate_payload(data):
 
     color_fields = {
         "brand_text_color": brand_text_color,
+        "navbar_bg_color": navbar_bg_color,
+        "subtext_color": subtext_color,
         "page_bg_color": page_bg_color,
         "primary_color": primary_color,
         "assistant_bubble_color": assistant_bubble_color,
@@ -121,8 +124,10 @@ def _validate_payload(data):
             "brand_name": brand_name,
             "logo_url": logo_url,
             "brand_text_color": brand_text_color,
+            "navbar_bg_color": navbar_bg_color,
             "assistant_title": assistant_title,
             "assistant_subtitle": assistant_subtitle,
+            "subtext_color": subtext_color,
             "page_bg_color": page_bg_color,
             "primary_color": primary_color,
             "assistant_bubble_color": assistant_bubble_color,

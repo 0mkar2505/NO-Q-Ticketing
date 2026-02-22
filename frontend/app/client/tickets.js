@@ -14,9 +14,7 @@ const replyBox = document.getElementById("reply-box");
 const sendReplyBtn = document.getElementById("send-reply");
 const resolveBtn = document.getElementById("resolve-ticket");
 const feedbackEl = document.getElementById("tickets-feedback");
-const runAiAssistBtn = document.getElementById("run-ai-assist");
-const aiPriorityEl = document.getElementById("ai-priority");
-const aiSummaryEl = document.getElementById("ai-summary");
+// AI Assist UI is disabled for now (future scope).
 const searchEl = document.getElementById("ticket-search");
 const statusFilterEl = document.getElementById("ticket-filter-status");
 const priorityFilterEl = document.getElementById("ticket-filter-priority");
@@ -84,10 +82,8 @@ function setSubmittingState(isBusy) {
 }
 
 function setAiState(isBusy) {
+  // Keep state for future scope; no UI to toggle right now.
   isAiRunning = isBusy;
-  if (!runAiAssistBtn) return;
-  runAiAssistBtn.disabled = isBusy || !currentTicketId;
-  runAiAssistBtn.textContent = isBusy ? "Generating..." : "Generate";
 }
 
 function startTicketAutoRefresh() {
@@ -378,10 +374,7 @@ function openTicket(ticket) {
   sendReplyBtn.disabled = isResolved || isSubmitting;
   setAiState(false);
 
-  const suggestedPriority = ticket.ai_priority_suggestion || "-";
-  const summary = ticket.ai_summary || "Summary will appear here after generation.";
-  aiPriorityEl.textContent = `Priority Suggestion: ${suggestedPriority}`;
-  aiSummaryEl.textContent = summary;
+  // AI Assist UI disabled.
 
   if (ticketRefreshBtn) ticketRefreshBtn.disabled = false;
   startTicketAutoRefresh();
@@ -509,39 +502,7 @@ resolveBtn.onclick = async () => {
   }
 };
 
-runAiAssistBtn.onclick = async () => {
-  if (!currentTicketId || isAiRunning) return;
-
-  setAiState(true);
-  setFeedback("", "");
-
-  try {
-    const res = await apiFetch(`${API_BASE}/tickets/${currentTicketId}/ai-assist`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      }
-    });
-
-    if (!res.ok) {
-      const error = await getErrorMessage(res, "Unable to generate AI assist");
-      setFeedback("error", error);
-      return;
-    }
-
-    const data = await res.json();
-    aiPriorityEl.textContent = `Priority Suggestion: ${data.ai_priority_suggestion || "-"}`;
-    aiSummaryEl.textContent = data.ai_summary || "Summary unavailable.";
-    setFeedback("success", "AI assist generated");
-    await refreshOpenTicket({ silent: true });
-    await loadTickets();
-  } catch (error) {
-    console.error("AI assist error:", error);
-    setFeedback("error", "AI assist unavailable right now.");
-  } finally {
-    setAiState(false);
-  }
-};
+// AI Assist UI disabled (future scope).
 
 function resetToFirstPageAndRefresh() {
   currentPage = 1;

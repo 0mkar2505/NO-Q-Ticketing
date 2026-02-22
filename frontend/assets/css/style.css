@@ -262,7 +262,7 @@ body.has-fixed-navbar #navbar {
 
 .nav-btn {
   background: var(--brand-primary);
-  color: white;
+  color: #ffffff !important;
   border: none;
   padding: 0.55rem 1.2rem;
   border-radius: 999px;
@@ -271,12 +271,26 @@ body.has-fixed-navbar #navbar {
   cursor: pointer;
   box-shadow: 0 14px 30px rgba(124, 58, 237, 0.18);
   transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-btn:hover {
   background: var(--brand-primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 18px 42px rgba(124, 58, 237, 0.22);
+}
+
+.nav-btn:visited {
+  color: #ffffff;
+}
+
+.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  transform: none !important;
 }
 
 /* AUTH NAVBAR */
@@ -334,6 +348,9 @@ body.has-fixed-navbar #navbar {
   background: var(--brand-primary);
   color: #fff;
   box-shadow: 0 12px 26px rgba(124, 58, 237, 0.20);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary:hover {
@@ -720,6 +737,25 @@ body.has-fixed-navbar #navbar {
 .mk-plan-cta {
   margin-top: 14px;
   width: 100%;
+  height: 40px;
+  padding: 0 16px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Pricing page: Growth CTA should match the other buttons (outlined), just slightly more "premium". */
+.mk-plan-cta--growth {
+  border-color: rgba(196, 181, 253, 0.48) !important;
+  background: rgba(124, 58, 237, 0.10) !important;
+  color: rgba(226, 232, 240, 0.92) !important;
+}
+
+.mk-plan-cta--growth:hover {
+  background: rgba(124, 58, 237, 0.18) !important;
+  border-color: rgba(196, 181, 253, 0.62) !important;
 }
 
 .mk-compare {
@@ -1371,7 +1407,7 @@ body.theme-dark .navbar:not(.support-preview-nav) {
 
 /* Keep branding preview (customer view) neutral/light so tenant colors are readable. */
 body.theme-dark .support-preview-nav {
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--support-navbar-bg, rgba(255, 255, 255, 0.86));
   border-bottom: 1px solid rgba(148, 163, 184, 0.28);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 }
@@ -1422,6 +1458,97 @@ body.theme-dark .footer-bottom {
 /* Marketing components */
 body.theme-dark .mk-kicker {
   background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(196, 181, 253, 0.22);
+  color: rgba(196, 181, 253, 0.96);
+}
+
+body.theme-dark .mk-page {
+  color: rgba(226, 232, 240, 0.86);
+}
+
+body.theme-dark .mk-title {
+  color: rgba(226, 232, 240, 0.96);
+}
+
+body.theme-dark .mk-lede {
+  color: rgba(226, 232, 240, 0.72);
+}
+
+body.theme-dark .mk-muted {
+  color: rgba(226, 232, 240, 0.70);
+}
+
+body.theme-dark .mk-h2,
+body.theme-dark .mk-h3,
+body.theme-dark .mk-node-title {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+body.theme-dark .mk-list {
+  color: rgba(226, 232, 240, 0.76);
+}
+
+body.theme-dark .mk-plan-copy,
+body.theme-dark .mk-price-unit {
+  color: rgba(226, 232, 240, 0.64);
+}
+
+body.theme-dark .mk-plan-top h2,
+body.theme-dark .mk-price-value {
+  color: rgba(226, 232, 240, 0.96);
+}
+
+body.theme-dark .mk-plan-ribbon {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.26);
+  color: rgba(226, 232, 240, 0.88);
+}
+
+body.theme-dark .mk-plan-cta.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(196, 181, 253, 0.26);
+  color: rgba(226, 232, 240, 0.90);
+}
+
+body.theme-dark .mk-plan-cta.btn-secondary:hover {
+  background: rgba(124, 58, 237, 0.22);
+}
+
+body.theme-dark .mk-shot {
+  background: rgba(15, 23, 42, 0.78);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .mk-shot-col,
+body.theme-dark .mk-shot-main,
+body.theme-dark .mk-shot-chat,
+body.theme-dark .mk-shot-side,
+body.theme-dark .mk-shot-lines {
+  border-color: rgba(148, 163, 184, 0.14);
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.14), rgba(15, 23, 42, 0)),
+    repeating-linear-gradient(180deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.16) 8px, transparent 8px, transparent 18px);
+}
+
+body.theme-dark .mk-pricing-toggle {
+  background: rgba(11, 16, 32, 0.78);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .mk-toggle-btn {
+  color: rgba(226, 232, 240, 0.78);
+}
+
+body.theme-dark .mk-toggle-btn--active {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.24);
+  color: rgba(196, 181, 253, 0.98);
+}
+
+body.theme-dark .mk-chip {
+  border-color: rgba(52, 211, 153, 0.28);
+  background: rgba(16, 185, 129, 0.12);
+  color: rgba(167, 243, 208, 0.95);
 }
 
 body.theme-dark .mk-card,
@@ -1440,6 +1567,39 @@ body.theme-dark .mk-node {
 body.theme-dark .mk-compare-head,
 body.theme-dark .mk-shot-top {
   background: rgba(15, 23, 42, 0.74);
+}
+
+body.theme-dark .mk-compare-row {
+  border-top-color: rgba(148, 163, 184, 0.12);
+  color: rgba(226, 232, 240, 0.78);
+}
+
+body.theme-dark .mk-compare-head {
+  color: rgba(226, 232, 240, 0.90);
+}
+
+body.theme-dark .mk-compare-feature {
+  color: rgba(226, 232, 240, 0.84);
+}
+
+body.theme-dark .mk-no {
+  color: rgba(148, 163, 184, 0.85);
+}
+
+body.theme-dark .mk-shot-title {
+  color: rgba(226, 232, 240, 0.80);
+}
+
+body.theme-dark .mk-dot {
+  background: rgba(148, 163, 184, 0.44);
+}
+
+/* Fix: "Want the full walkthrough?" CTA panel was still using light background */
+body.theme-dark .mk-cta {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(124, 58, 237, 0.22), transparent 42%),
+    rgba(11, 16, 32, 0.86);
+  border-color: rgba(148, 163, 184, 0.16);
 }
 
 body.theme-dark .mk-acc {
@@ -1470,12 +1630,32 @@ body.theme-dark .sidebar {
   border-right-color: rgba(148, 163, 184, 0.14);
 }
 
+body.theme-dark .sidebar-brand-name {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+body.theme-dark .sidebar-brand-sub {
+  color: rgba(226, 232, 240, 0.62);
+}
+
+body.theme-dark .sidebar-brand-badge {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.22);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.22);
+}
+
 body.theme-dark .sidebar-section-title {
   color: rgba(226, 232, 240, 0.54);
 }
 
 body.theme-dark .sidebar-nav a {
   color: rgba(226, 232, 240, 0.78);
+}
+
+body.theme-dark .sb-ic {
+  background: rgba(15, 23, 42, 0.66);
+  border-color: rgba(148, 163, 184, 0.16);
+  color: rgba(226, 232, 240, 0.70);
 }
 
 body.theme-dark .sidebar-nav a.active,
@@ -1487,6 +1667,14 @@ body.theme-dark .sidebar-nav a:hover {
 
 body.theme-dark .page-subtitle {
   color: rgba(226, 232, 240, 0.66);
+}
+
+body.theme-dark .stat-card h3 {
+  color: rgba(226, 232, 240, 0.66);
+}
+
+body.theme-dark .stat-number {
+  color: rgba(226, 232, 240, 0.96);
 }
 
 body.theme-dark .stat-card,
@@ -1528,6 +1716,11 @@ body.theme-dark .admin-activity-time {
   color: rgba(226, 232, 240, 0.62);
 }
 
+body.theme-dark .admin-badge {
+  background: rgba(124, 58, 237, 0.18);
+  color: rgba(226, 232, 240, 0.86);
+}
+
 body.theme-dark .ticket-toolbar input,
 body.theme-dark .ticket-toolbar select,
 body.theme-dark .admin-toolbar input,
@@ -1535,10 +1728,16 @@ body.theme-dark .settings-field select,
 body.theme-dark .settings-field input,
 body.theme-dark .settings-field textarea,
 body.theme-dark .form-group input,
+body.theme-dark .form-group select,
+body.theme-dark .form-group textarea,
 body.theme-dark .reply-section textarea {
   background: rgba(15, 23, 42, 0.72);
   color: rgba(226, 232, 240, 0.92);
   border-color: rgba(148, 163, 184, 0.18);
+}
+
+body.theme-dark .password-wrapper span {
+  color: rgba(226, 232, 240, 0.62) !important;
 }
 
 body.theme-dark .admin-table,
@@ -1559,6 +1758,140 @@ body.theme-dark .members-table td {
 
 body.theme-dark .members-table th {
   background: rgba(15, 23, 42, 0.74);
+}
+
+body.theme-dark .admin-status-active {
+  background: rgba(16, 185, 129, 0.14);
+  color: rgba(167, 243, 208, 0.92);
+}
+
+body.theme-dark .admin-status-inactive {
+  background: rgba(239, 68, 68, 0.14);
+  color: rgba(254, 202, 202, 0.92);
+}
+
+/* Auth / onboarding pages in dark mode */
+body.theme-dark .auth-card,
+body.theme-dark .modal-content {
+  background: rgba(17, 24, 39, 0.88);
+  border-color: rgba(148, 163, 184, 0.16);
+  color: rgba(226, 232, 240, 0.92);
+}
+
+body.theme-dark .auth-title,
+body.theme-dark .modal-content h2 {
+  color: rgba(226, 232, 240, 0.96);
+}
+
+body.theme-dark .auth-subtitle,
+body.theme-dark .modal-subtext,
+body.theme-dark .modal-content p,
+body.theme-dark .auth-switch,
+body.theme-dark .footer-quote {
+  color: rgba(226, 232, 240, 0.66);
+}
+
+body.theme-dark .form-group label {
+  color: rgba(226, 232, 240, 0.84);
+}
+
+body.theme-dark .toggle-password {
+  color: rgba(226, 232, 240, 0.62);
+}
+
+body.theme-dark .toggle-password:hover {
+  color: rgba(196, 181, 253, 0.95);
+}
+
+/* Analytics metric tiles (some are not using the shared card classes). */
+body.theme-dark .metric-card {
+  background: rgba(17, 24, 39, 0.86);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .metric-label {
+  color: rgba(226, 232, 240, 0.62);
+}
+
+body.theme-dark .metric-value,
+body.theme-dark .panel-head h2 {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+body.theme-dark .panel-tag {
+  background: rgba(124, 58, 237, 0.20);
+  color: rgba(226, 232, 240, 0.86);
+}
+
+body.theme-dark .bar-chart-placeholder {
+  background: rgba(15, 23, 42, 0.70);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+/* Knowledge base list items */
+body.theme-dark .knowledge-item {
+  background: rgba(17, 24, 39, 0.86);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .knowledge-item-title {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+body.theme-dark .knowledge-item-meta {
+  color: rgba(226, 232, 240, 0.62);
+}
+
+/* Team chat page */
+body.theme-dark .teamchat-card {
+  background: rgba(17, 24, 39, 0.86);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .teamchat-messages {
+  background: rgba(15, 23, 42, 0.70);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+body.theme-dark .teamchat-meta,
+body.theme-dark .teamchat-time {
+  color: rgba(226, 232, 240, 0.62);
+}
+
+body.theme-dark .teamchat-bubble {
+  background: rgba(17, 24, 39, 0.88);
+  border-color: rgba(148, 163, 184, 0.14);
+  color: rgba(226, 232, 240, 0.90);
+}
+
+body.theme-dark .teamchat-compose textarea {
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(226, 232, 240, 0.92);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+body.theme-dark .ticket-refresh-toggle {
+  color: rgba(226, 232, 240, 0.66);
+}
+
+body.theme-dark .branding-color-row label {
+  color: rgba(226, 232, 240, 0.84);
+}
+
+body.theme-dark .branding-color-row input[type="text"],
+body.theme-dark .branding-link-row input[readonly] {
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(226, 232, 240, 0.92);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+body.theme-dark .branding-color-row input[type="color"] {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+body.theme-dark .app-footer {
+  color: rgba(226, 232, 240, 0.62);
 }
 
 .auth-footer-content {
@@ -1654,6 +1987,69 @@ body.theme-dark .members-table th {
   padding: 24px 16px;
 }
 
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 10px 16px;
+}
+
+.sidebar-brand-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.10);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  box-shadow: 0 10px 22px rgba(124, 58, 237, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-brand-logo {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.sidebar-brand-name {
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.sidebar-brand-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.1;
+}
+
+.sb-ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.65);
+  color: rgba(51, 65, 85, 0.86);
+  flex: 0 0 34px;
+}
+
+.sb-ic svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sb-txt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .sidebar-section + .sidebar-section {
   margin-top: 14px;
   padding-top: 14px;
@@ -1670,7 +2066,9 @@ body.theme-dark .members-table th {
 }
 
 .sidebar-nav a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 10px 12px;
   margin-bottom: 6px;
   color: #334155;
@@ -1687,6 +2085,13 @@ body.theme-dark .members-table th {
   color: var(--brand-primary);
   border-color: rgba(124, 58, 237, 0.18);
   transform: translateY(-1px);
+}
+
+.sidebar-nav a.active .sb-ic,
+.sidebar-nav a:hover .sb-ic {
+  border-color: rgba(124, 58, 237, 0.22);
+  background: rgba(124, 58, 237, 0.12);
+  color: rgba(124, 58, 237, 0.98);
 }
 
 .app-content {
@@ -1818,8 +2223,8 @@ body.theme-dark .members-table th {
 }
 
 .dashboard-page--admin .admin-section-card {
-  background: #ffffff;
-  border-color: #e8eef9;
+  background: var(--surface);
+  border-color: rgba(148, 163, 184, 0.22);
 }
 
 /* App footer */
@@ -2923,8 +3328,8 @@ body.theme-dark .members-table th {
 
 .admin-section-card {
   margin-top: 16px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 18px;
   box-shadow: var(--shadow-1);
@@ -2940,21 +3345,21 @@ body.theme-dark .members-table th {
 
 .admin-section-head h2 {
   font-size: 16px;
-  color: #111827;
+  color: var(--text-main);
 }
 
 .admin-badge {
   font-size: 11px;
   font-weight: 600;
-  color: #6d28d9;
-  background: #f5f3ff;
+  color: rgba(109, 40, 217, 0.98);
+  background: rgba(245, 243, 255, 0.92);
   border-radius: 999px;
   padding: 4px 10px;
   white-space: nowrap;
 }
 
 .admin-empty-copy {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -2968,10 +3373,10 @@ body.theme-dark .members-table th {
 }
 
 .admin-activity-item {
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--border-strong);
   border-radius: 12px;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -2981,19 +3386,19 @@ body.theme-dark .members-table th {
 .admin-activity-main strong {
   display: block;
   font-size: 13px;
-  color: #0f172a;
+  color: var(--text-main);
   margin-bottom: 2px;
 }
 
 .admin-activity-detail {
   display: block;
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .admin-activity-time {
   font-size: 12px;
-  color: #94a3b8;
+  color: rgba(148, 163, 184, 0.9);
   white-space: nowrap;
   padding-top: 2px;
 }
@@ -3007,18 +3412,19 @@ body.theme-dark .members-table th {
 .admin-toolbar input {
   flex: 1;
   height: 36px;
-  border: 1px solid rgba(148, 163, 184, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.32);
   border-radius: 10px;
   padding: 0 12px;
   font-family: inherit;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface);
+  color: var(--text-main);
 }
 
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
@@ -3027,18 +3433,18 @@ body.theme-dark .members-table th {
 .admin-table td {
   text-align: left;
   padding: 10px 8px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  border-bottom: 1px solid var(--border);
   font-size: 13px;
 }
 
 .admin-table th {
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .admin-table-empty {
   text-align: center;
-  color: #94a3b8;
+  color: rgba(148, 163, 184, 0.9);
   padding: 22px 8px;
 }
 
@@ -3074,22 +3480,22 @@ body.theme-dark .members-table th {
 }
 
 .admin-kv-list div {
-  border: 1px solid #ede9fe;
+  border: 1px solid rgba(124, 58, 237, 0.18);
   border-radius: 10px;
   padding: 10px 12px;
-  background: #faf9ff;
+  background: rgba(124, 58, 237, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .admin-kv-list span {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .admin-kv-list strong {
-  color: #111827;
+  color: var(--text-main);
   font-size: 16px;
 }
 
@@ -3098,17 +3504,19 @@ body.theme-dark .members-table th {
   margin-bottom: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-main);
 }
 
 .admin-field input,
 .admin-field select {
   width: 100%;
-  border: 1px solid #d6d3e7;
+  border: 1px solid rgba(148, 163, 184, 0.32);
   border-radius: 8px;
   padding: 9px 12px;
   font-family: inherit;
   font-size: 14px;
+  background: var(--surface);
+  color: var(--text-main);
 }
 
 @media (max-width: 980px) {
@@ -3128,6 +3536,8 @@ body.theme-dark .members-table th {
   --support-assistant-text-color: #312e81;
   --support-customer-bubble-color: #dcfce7;
   --support-customer-text-color: #14532d;
+  --support-navbar-bg: rgba(255, 255, 255, 0.86);
+  --support-subtext-color: #64748b;
   /* Tenant can override this via branding (solid color or gradient). */
   --support-page-bg: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
   background: var(--support-page-bg);
@@ -3136,6 +3546,14 @@ body.theme-dark .members-table th {
 /* Allow branding to control the company name color in the support navbar. */
 .support-page .navbar--auth .navbar-brand {
   color: var(--support-brand-text-color, var(--support-primary-color));
+}
+
+.support-page .navbar--auth {
+  background: var(--support-navbar-bg);
+}
+
+.support-page .support-subtitle {
+  color: var(--support-subtext-color);
 }
 
 .support-preview .navbar--auth .navbar-brand {
@@ -3230,7 +3648,7 @@ body.theme-dark .members-table th {
 
 .support-subtitle {
   font-size: 14px;
-  color: #64748b;
+  color: var(--support-subtext-color, #64748b);
   margin-bottom: 12px;
 }
 
