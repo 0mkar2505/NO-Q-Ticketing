@@ -51,8 +51,9 @@ def retrieve_snippets(company_id, query, k=4, limit=120):
     out = []
     for score, e in scored[: max(1, int(k))]:
         content = (e.get("content") or "").strip()
-        if len(content) > 520:
-            content = content[:520] + "..."
+        # Give the model a bit more grounding context without overloading the prompt.
+        if len(content) > 900:
+            content = content[:900] + "..."
         out.append(
             {
                 "id": e.get("_id"),

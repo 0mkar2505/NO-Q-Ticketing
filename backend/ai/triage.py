@@ -76,11 +76,12 @@ def _openai_compat_chat_json(base_url, api_key, model, messages, timeout=20):
     payload = {
         "model": model,
         "messages": messages,
-        "temperature": 0.2,
+        # A bit more variation so the assistant doesn't feel overly "static".
+        "temperature": 0.45,
         # Groq free tier can be tight on total tokens (~6k). Allow richer output but keep a safety buffer:
         # target <= ~4k total tokens, leaving ~2k headroom.
         # We can't count tokens precisely here, so we cap output tokens and keep the input prompt bounded.
-        "max_tokens": 1100,
+        "max_tokens": 1800,
         "response_format": {"type": "json_object"},
     }
     body = json.dumps(payload).encode("utf-8")
@@ -241,11 +242,11 @@ def triage_support(company_id, company_name, customer_email, transcript, user_me
         f"Allowed categories: {categories}\n"
         f"Tenant policy notes: {policy_text or '(none)'}\n"
         "Rules:\n"
-        "- Do NOT repeat greetings or filler like \"I'm here to help\". Vary wording and be direct.\n"
+        "- Do NOT repeat greetings or filler like \"I'm here to help\" every turn. Be natural but not repetitive.\n"
         "- Do NOT ask the customer to confirm with \"okay\" / \"go ahead\". Ask the next question directly.\n"
-        "- If you still need info, ask at most 2 focused questions and set should_create_ticket=false.\n"
-        "- If enough info exists, set should_create_ticket=true and do not ask more than 1 optional question.\n"
-        "- Keep assistant_message <= 2 sentences.\n"
+        "- If you still need info, ask up to 3 focused questions and set should_create_ticket=false.\n"
+        "- If enough info exists, set should_create_ticket=true and keep questions minimal.\n"
+        "- assistant_message should be helpful and conversational, <= 6 sentences.\n"
     )
 
     user = (
@@ -312,9 +313,15 @@ def triage_support(company_id, company_name, customer_email, transcript, user_me
     if not assistant_message:
         assistant_message = "Thanks. Can you share a bit more detail so I can create the right ticket?"
 
-    # If we're ready to create, avoid looping language.
+    # If we're ready to create, avoid looping language and prompt the CTA.
     if triage.get("should_create_ticket"):
-        assistant_message = "Got it. Press Create Ticket to submit this to support."
+        templates = [
+            "Got it. Press Create Ticket to submit this to support.",
+            "Thanks, I have enough to file this. Press Create Ticket to send it to the support team.",
+            "Understood. Press Create Ticket and I'll package this up for support.",
+        ]
+        seed = len((user_message or "").strip()) + len(triage.get("summary") or "")
+        assistant_message = templates[seed % len(templates)]
         triage["questions_to_ask"] = []
 
     return {

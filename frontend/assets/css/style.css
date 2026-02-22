@@ -144,7 +144,7 @@ body.has-fixed-navbar #navbar {
 .logo-icon {
   width: 34px;
   height: 34px;
-  background-image: url("../images/NO-Q logo 1.png");
+  background-image: url("/assets/images/NO-Q%20logo%201.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
