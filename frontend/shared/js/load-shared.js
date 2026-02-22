@@ -33,6 +33,36 @@
 
   // Set active sidebar link after sidebar is loaded
   setTimeout(() => {
+    // Sidebar collapse (persisted across app pages).
+    const SIDEBAR_KEY = "noq_sidebar_collapsed";
+    const sidebarRoot = document.getElementById("sidebar");
+    const collapseBtn = sidebarRoot ? sidebarRoot.querySelector(".sidebar-collapse-btn") : null;
+
+    function applySidebarState(collapsed) {
+      document.body.classList.toggle("sidebar-collapsed", collapsed);
+      if (collapseBtn) {
+        collapseBtn.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
+        collapseBtn.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
+      }
+    }
+
+    // Add tooltips so icon-only mode is still usable.
+    document.querySelectorAll(".sidebar-nav a").forEach((a) => {
+      const txt = a.querySelector(".sb-txt");
+      const label = txt ? String(txt.textContent || "").trim() : "";
+      if (label && !a.getAttribute("title")) a.setAttribute("title", label);
+    });
+
+    const initialCollapsed = localStorage.getItem(SIDEBAR_KEY) === "1";
+    applySidebarState(initialCollapsed);
+    if (collapseBtn) {
+      collapseBtn.addEventListener("click", () => {
+        const next = !document.body.classList.contains("sidebar-collapsed");
+        localStorage.setItem(SIDEBAR_KEY, next ? "1" : "0");
+        applySidebarState(next);
+      });
+    }
+
     document.querySelectorAll(".sidebar-nav a").forEach((link) => {
       const resolvedPath = new URL(link.getAttribute("href"), window.location.href).pathname;
       if (resolvedPath === currentPath) {

@@ -10,6 +10,8 @@ const apiFetch = (path, options = {}) =>
 const ticketList = document.getElementById("ticket-list");
 const ticketView = document.getElementById("ticket-view");
 const messagesDiv = document.getElementById("messages");
+const replySection = document.getElementById("reply-section");
+const resolvedBanner = document.getElementById("ticket-resolved-banner");
 const replyBox = document.getElementById("reply-box");
 const sendReplyBtn = document.getElementById("send-reply");
 const resolveBtn = document.getElementById("resolve-ticket");
@@ -84,6 +86,14 @@ function setSubmittingState(isBusy) {
 function setAiState(isBusy) {
   // Keep state for future scope; no UI to toggle right now.
   isAiRunning = isBusy;
+}
+
+function updateResolvedUi(ticket) {
+  const status = String(ticket?.status || "").toLowerCase();
+  const isResolved = status === "resolved";
+
+  if (replySection) replySection.classList.toggle("hidden", isResolved);
+  if (resolvedBanner) resolvedBanner.classList.toggle("hidden", !isResolved);
 }
 
 function startTicketAutoRefresh() {
@@ -372,6 +382,7 @@ function openTicket(ticket) {
   resolveBtn.style.display = isResolved ? "none" : "block";
   replyBox.disabled = isResolved || isSubmitting;
   sendReplyBtn.disabled = isResolved || isSubmitting;
+  updateResolvedUi(ticket);
   setAiState(false);
 
   // AI Assist UI disabled.
@@ -395,6 +406,7 @@ function renderTicketView(ticket) {
   const status = String(ticket.status || "open").toLowerCase();
   statusEl.textContent = status;
   statusEl.className = `ticket-status ${status}`;
+  updateResolvedUi(ticket);
 
   const metaEl = document.getElementById("ticket-meta");
   if (metaEl) {

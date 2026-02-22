@@ -8,63 +8,318 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <link rel="stylesheet" href="/assets/css/style.css">
   <link rel="icon" type="image/png" href="/assets/images/NO-Q%20logo%201.png" />
-</head> 
+</head>
 
 <body class="page-transition theme-dark">
-  <div class="page-wrapper">
-    <!-- NAVBAR -->
+  <div class="page-wrapper mk-page mk-home-page">
     <nav class="navbar">
-      <!-- LEFT -->
-      <div class="nav-left">
-        <div class="logo-wrapper">
-          <div class="logo-icon"></div>
+      <div class="navbar-inner">
+        <div class="nav-left">
+          <div class="logo-wrapper">
+            <div class="logo-icon"></div>
+          </div>
+          <span class="logo-text">NO-Q</span>
         </div>
-        <span class="logo-text">NO-Q</span>
-      </div>
 
-      <!-- CENTER -->
-      <div class="nav-center">
-        <a href="#" class="nav-center-link is-disabled" aria-disabled="true" tabindex="-1">Live Support (Coming Soon)</a>
-        <a href="/public/plans.html" class="nav-center-link">Pricing</a>
-        <a href="/public/features.html" class="nav-center-link">Features</a>
-        <a href="/public/about.html" class="nav-center-link">About</a>
-      </div>
+        <div class="nav-center">
+          <a href="/" class="nav-center-link">Home</a>
+          <a href="/public/plans.html" class="nav-center-link">Pricing</a>
+          <a href="/public/features.html" class="nav-center-link">Features</a>
+          <a href="/public/about.html" class="nav-center-link">About</a>
+        </div>
 
-      <!-- RIGHT -->
         <div class="nav-right">
           <a href="/auth/login.html" class="nav-link">Login</a>
-          <a class="nav-btn" href="/auth/register.html" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Get Started</a>
-        </div>
-      </nav>
-
-    <!-- LANDING PAGE -->
-    <main class="landing">
-      <div class="landing-content">
-        <h1>AI-Powered Ticket Management</h1>
-        <p>
-          Convert customer conversations into structured,
-          actionable support tickets using hybrid AI.
-        </p>
-
-        <div class="landing-actions">
-          <button class="primary-btn" id="heroGetStartedBtn" type="button" disabled>Live Demo (Coming Soon)</button>
-          <a href="/auth/login.html" class="secondary-link">Login</a>
+          <a class="nav-btn" href="/auth/register.html">Get Started</a>
         </div>
       </div>
+    </nav>
+
+    <main class="mk-main mk-home">
+      <section class="mk-hero mk-hero--home">
+        <div class="mk-hero-inner">
+          <h1 class="mk-title">Support that feels instant, stays structured</h1>
+          <p class="mk-lede">
+            NO-Q turns customer chats into tenant-scoped tickets. Policies + knowledge base keep triage consistent,
+            while agents and supervisors manage everything inside a real SaaS workspace.
+          </p>
+          <div class="mk-hero-actions">
+            <a class="btn btn-primary" href="/auth/register.html">Start Onboarding</a>
+            <a class="btn btn-secondary" href="/public/plans.html">Show Pricing</a>
+          </div>
+        </div>
+        <div class="mk-hero-art mk-hero-art--home" aria-hidden="true"></div>
+      </section>
+
+      <section class="mk-section mk-section--tight">
+        <div class="mk-strip mk-grid mk-grid--4">
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <h3 class="mk-h3">Auto-triage with policies</h3>
+            <p class="mk-muted">Extract intent, priority, and category without losing context.</p>
+          </article>
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-palette"></i></div>
+            <h3 class="mk-h3">Tenant branding</h3>
+            <p class="mk-muted">Per-client colors, navbar, page theme, and support URL.</p>
+          </article>
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-users-gear"></i></div>
+            <h3 class="mk-h3">Agent/Supervisor roles</h3>
+            <p class="mk-muted">Agents work tickets, supervisors run the workspace.</p>
+          </article>
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3 class="mk-h3">Audit-ready admin</h3>
+            <p class="mk-muted">Operational visibility with role enforcement on the backend.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mk-section">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">Built for real workflows</h2>
+          <p class="mk-muted">Fast triage, strict tenant boundaries, and clean roles that scale.</p>
+        </div>
+        <div class="mk-proof">
+          <div class="mk-pills" aria-label="Industries">
+            <span class="mk-pill mk-pill--soft">SaaS</span>
+            <span class="mk-pill mk-pill--company">E-commerce</span>
+            <span class="mk-pill mk-pill--soft">Fintech</span>
+            <span class="mk-pill mk-pill--company">Education</span>
+            <span class="mk-pill mk-pill--soft">IT Services</span>
+          </div>
+          <div class="mk-metrics" aria-label="Metrics">
+            <div class="mk-metric">
+              <div class="mk-metric-k">3s</div>
+              <div class="mk-metric-v">triage loop</div>
+            </div>
+            <div class="mk-metric">
+              <div class="mk-metric-k">Tenant-scoped</div>
+              <div class="mk-metric-v">data + configs</div>
+            </div>
+            <div class="mk-metric">
+              <div class="mk-metric-k">RBAC</div>
+              <div class="mk-metric-v">enforced server-side</div>
+            </div>
+            <div class="mk-metric">
+              <div class="mk-metric-k">Audit log</div>
+              <div class="mk-metric-v">admin changes tracked</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mk-section" id="how-it-works">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">How it works</h2>
+          <p class="mk-muted">Customer to ticket to agent, without the messy handoff.</p>
+        </div>
+
+        <div class="mk-how">
+          <ol class="mk-steps" aria-label="Steps">
+            <li class="mk-step is-active" data-step="1">
+              <div class="mk-step-n">1</div>
+              <div>
+                <h3 class="mk-h3">Customer opens your branded support</h3>
+                <p class="mk-muted">The assistant collects details, applies policies, and stays on-brand.</p>
+              </div>
+            </li>
+            <li class="mk-step" data-step="2">
+              <div class="mk-step-n">2</div>
+              <div>
+                <h3 class="mk-h3">NO-Q creates a clean, structured ticket</h3>
+                <p class="mk-muted">Category, priority, and context are attached from the conversation.</p>
+              </div>
+            </li>
+            <li class="mk-step" data-step="3">
+              <div class="mk-step-n">3</div>
+              <div>
+                <h3 class="mk-h3">Agent responds in the inbox</h3>
+                <p class="mk-muted">Reply, resolve, and keep the customer updated with the full transcript.</p>
+              </div>
+            </li>
+          </ol>
+
+          <div class="mk-sticky">
+            <div class="mk-flow" aria-label="Workflow visual">
+              <div class="mk-flow-row">
+                <div class="mk-flow-card mk-flow-card--customer">
+                  <div class="mk-flow-title">Customer</div>
+                  <div class="mk-flow-copy">Branded support assistant</div>
+                </div>
+                <div class="mk-flow-arrow" aria-hidden="true"></div>
+                <div class="mk-flow-card mk-flow-card--ticket">
+                  <div class="mk-flow-title">Ticket</div>
+                  <div class="mk-flow-copy">Priority + category + transcript</div>
+                </div>
+                <div class="mk-flow-arrow" aria-hidden="true"></div>
+                <div class="mk-flow-card mk-flow-card--agent">
+                  <div class="mk-flow-title">Agent</div>
+                  <div class="mk-flow-copy">Inbox reply + resolution</div>
+                </div>
+              </div>
+              <div class="mk-flow-status" id="mkFlowStatus">Step 1: collecting details</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mk-section" id="live-ui-mock">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">Live UI mock</h2>
+          <p class="mk-muted">A lightweight preview of the product feel, without needing a demo environment.</p>
+        </div>
+
+        <div class="mk-live">
+          <div class="mk-live-copy">
+            <h3 class="mk-h3">A ticket inbox that stays readable</h3>
+            <p class="mk-muted">
+              Your team sees a clear queue, conversation context, and the final structured ticket fields.
+              Customers get simple status checks using ticket ID + email.
+            </p>
+            <ul class="mk-list mk-list--compact">
+              <li>Priority + status mix</li>
+              <li>Conversation timeline</li>
+              <li>Policy-driven triage</li>
+            </ul>
+          </div>
+
+          <div class="mk-mock" role="img" aria-label="Animated UI mock">
+            <div class="mk-mock-top">
+              <span class="mk-dot"></span><span class="mk-dot"></span><span class="mk-dot"></span>
+              <span class="mk-shot-title">NO-Q Inbox</span>
+            </div>
+            <div class="mk-mock-body">
+              <div class="mk-mock-inbox">
+                <div class="mk-mock-ticket is-active">
+                  <div class="mk-mock-badge mk-mock-badge--high">HIGH</div>
+                  <div class="mk-mock-subj">Checkout failed, money deducted</div>
+                  <div class="mk-mock-meta">Payments • 2m ago</div>
+                </div>
+                <div class="mk-mock-ticket">
+                  <div class="mk-mock-badge mk-mock-badge--med">MED</div>
+                  <div class="mk-mock-subj">Password reset link not working</div>
+                  <div class="mk-mock-meta">Auth • 6m ago</div>
+                </div>
+                <div class="mk-mock-ticket">
+                  <div class="mk-mock-badge mk-mock-badge--low">LOW</div>
+                  <div class="mk-mock-subj">Need invoice for last month</div>
+                  <div class="mk-mock-meta">Billing • 14m ago</div>
+                </div>
+              </div>
+
+              <div class="mk-mock-chat">
+                <div class="mk-mock-bubble mk-mock-bubble--assistant">Tell me what happened and I will create the right ticket.</div>
+                <div class="mk-mock-bubble mk-mock-bubble--customer">Stripe declined but money was deducted.</div>
+                <div class="mk-mock-bubble mk-mock-bubble--assistant mk-mock-typing">
+                  <span class="mk-typing-dot"></span><span class="mk-typing-dot"></span><span class="mk-typing-dot"></span>
+                </div>
+                <div class="mk-mock-bubble mk-mock-bubble--assistant mk-mock-bubble--final">Got it. Please press Create Ticket to proceed.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mk-section" id="security-teaser">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">Isolation by design</h2>
+          <p class="mk-muted">The important boundaries are enforced server-side, so tenants cannot “see” each other even if UI changes.</p>
+        </div>
+
+        <div class="mk-grid mk-grid--3 mk-isolation">
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-layer-group"></i></div>
+            <h3 class="mk-h3">Tenant-scoped collections</h3>
+            <p class="mk-muted">Tickets, configs, branding, and knowledge base entries are scoped by company_id.</p>
+          </article>
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-user-shield"></i></div>
+            <h3 class="mk-h3">Role checks on every route</h3>
+            <p class="mk-muted">Admin vs supervisor vs agent permissions are enforced on the backend.</p>
+          </article>
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-clipboard-list"></i></div>
+            <h3 class="mk-h3">Audit-friendly changes</h3>
+            <p class="mk-muted">System updates can be logged so admin actions stay traceable.</p>
+          </article>
+        </div>
+
+        <div class="mk-security-actions">
+          <a class="btn btn-secondary" href="/public/security.html">Read the Security overview</a>
+        </div>
+      </section>
+
+      <section class="mk-section" id="faq">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">FAQ</h2>
+          <p class="mk-muted">Quick answers to reduce onboarding friction.</p>
+        </div>
+
+        <div class="mk-accordion" id="home-faq">
+          <button class="mk-acc" type="button" aria-expanded="true">
+            Do you isolate data between companies?
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="mk-acc-panel mk-acc-panel--open">
+            Yes. Tickets, configs, branding, and knowledge base entries are stored per company workspace and enforced by backend checks.
+          </div>
+
+          <button class="mk-acc" type="button" aria-expanded="false">
+            What roles exist inside a company?
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="mk-acc-panel">
+            Supervisors manage the workspace (branding, configs, members). Agents focus on ticket handling (reply, resolve, inbox workflow).
+          </div>
+
+          <button class="mk-acc" type="button" aria-expanded="false">
+            Does the AI need huge prompts to work?
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="mk-acc-panel">
+            No. The assistant uses policies and tenant knowledge base context to stay relevant without requiring long back-and-forth.
+          </div>
+
+          <button class="mk-acc" type="button" aria-expanded="false">
+            Can customers check ticket status?
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="mk-acc-panel">
+            Yes. Customers can use ticket ID + their email to view status and continue the conversation while the ticket is open.
+          </div>
+
+          <button class="mk-acc" type="button" aria-expanded="false">
+            What happens during onboarding?
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="mk-acc-panel">
+            A company workspace is created with a supervisor account. You pick a plan (demo checkout), then wait for admin approval to activate.
+          </div>
+        </div>
+      </section>
+
+      <section class="mk-section mk-section--cta">
+        <div class="mk-cta">
+          <div>
+            <h2 class="mk-h2">Ready to build your support workspace?</h2>
+            <p class="mk-muted">Start onboarding to create a tenant, then invite agents and go live.</p>
+          </div>
+          <div class="mk-cta-actions">
+            <a class="btn btn-primary" href="/auth/register.html">Start Onboarding</a>
+            <a class="btn btn-secondary" href="/auth/login.html">Login</a>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-divider"></div>
-
       <div class="footer-main">
         <div class="footer-brand">
           <h2>
@@ -72,11 +327,9 @@
             <span>without the wait.</span>
           </h2>
           <p>
-            NO-Q helps teams convert conversations into structured,
-            actionable support tickets.
+            Convert conversations into structured support tickets, powered by hybrid AI.
           </p>
         </div>
-
         <div class="footer-links-group">
           <h4>OZU Technologies</h4>
           <a href="/public/about.html">About us</a>
@@ -84,9 +337,8 @@
           <a href="/public/security.html">Security</a>
         </div>
       </div>
-
       <div class="footer-bottom">
-        <p>© 2026 NO-Q. All rights reserved.</p>
+        <p>&copy; 2026 NO-Q. All rights reserved.</p>
         <div class="footer-socials">
           <a href="https://github.com/0mkar2505" target="_blank" aria-label="GitHub">
             <i class="fa-brands fa-github"></i>
@@ -99,11 +351,7 @@
     </footer>
   </div>
 
-  <script>
-    // Live demo will be implemented later. Keep button disabled for now.
-  </script>
-
-  <script src="/assets/js/script.js"></script>
+  <script src="/public/index.js"></script>
   <script src="/shared/js/page-transition.js"></script>
 </body>
 </html>
