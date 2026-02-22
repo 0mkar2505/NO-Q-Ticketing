@@ -1147,99 +1147,47 @@ body.has-fixed-navbar #navbar {
 .mk-home .mk-section--collage {
   /* Start clearly below the hero CTA row. */
   padding-top: 34px;
-  padding-bottom: 22px;
+  padding-bottom: 32px;
 }
 
-.mk-collage {
-  position: relative;
+/* Simple product collage: main screenshot centered with a purple glow. */
+.mk-collage-simple {
   max-width: 1120px;
   margin: 0 auto;
-  height: 680px; /* allow the full 1017x666 screenshot to render without cropping */
-  /* Keep everything inside this section so it doesn't collide with the carousel below. */
-  overflow: hidden;
 }
 
-/* Reference-style clean collage: no extra glow layer, just 5 overlapping tiles. */
+.mk-collage-stage {
+  position: relative;
+  padding: 8px 18px 8px;
+}
 
-.mk-collage-center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
+.mk-collage-frame {
   width: min(980px, 100%);
-  height: auto; /* match the image's intrinsic aspect ratio */
-  max-height: 650px;
-  transform: translate(-50%, -50%);
-  /* Match the PNG edge exactly to avoid any halo/transparent line from clipping. */
-  border-radius: 0;
-  /* Don't add an extra "frame" around the screenshot. */
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  filter: drop-shadow(0 26px 70px rgba(0, 0, 0, 0.52));
-  display: block;
-  /* Let the image scale naturally; avoid any contain/cover letterboxing artifacts. */
-  object-fit: initial;
-  z-index: 4;
-}
-
-.mk-collage-side {
-  position: absolute;
-  top: 50%;
-  width: 270px;
-  height: 380px;
-  transform: translateY(-50%);
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
-  filter: drop-shadow(0 22px 58px rgba(0, 0, 0, 0.40));
+  margin: 0 auto;
+  aspect-ratio: 1017 / 666; /* MainPage.png ratio */
+  border-radius: 26px;
+  border: 1px solid rgba(196, 181, 253, 0.18);
+  background: rgba(11, 16, 32, 0.70);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(124, 58, 237, 0.12),
+    0 0 90px rgba(124, 58, 237, 0.26);
   overflow: hidden;
-  background: transparent;
-  object-fit: cover;
 }
 
-.mk-collage-side--l1 {
-  left: 40px;
-  width: 240px;
-  height: 340px;
-  transform: translateY(-50%);
-  z-index: 1;
-}
-
-.mk-collage-side--l2 {
-  left: 140px;
-  width: 285px;
-  height: 400px;
-  transform: translateY(-50%);
-  z-index: 2;
-}
-
-.mk-collage-side--r1 {
-  right: 140px;
-  width: 285px;
-  height: 400px;
-  transform: translateY(-50%);
-  z-index: 2;
-}
-
-.mk-collage-side--r2 {
-  right: 40px;
-  width: 240px;
-  height: 340px;
-  transform: translateY(-50%);
-  z-index: 1;
+.mk-collage-main {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain; /* no crop */
 }
 
 @media (max-width: 980px) {
-  .mk-collage {
-    height: 420px;
+  .mk-collage-stage {
+    padding: 0 0 8px;
   }
-  .mk-collage-side {
-    display: none;
-  }
-  .mk-collage-center {
-    width: 100%;
+  .mk-collage-frame {
     border-radius: 18px;
-    max-height: 360px;
   }
 }
 
@@ -1257,13 +1205,19 @@ body.has-fixed-navbar #navbar {
 
 .mk-cascade {
   position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
 }
 
 .mk-cascade-viewport {
   overflow: hidden; /* avoid scroll-wheel hijacking on the landing page */
+  max-width: 860px;
+  margin: 0 auto;
   padding: 0;
-  border-radius: 22px;
-  background: radial-gradient(circle at 10% 0%, rgba(124, 58, 237, 0.08), transparent 38%);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(17, 24, 39, 0.46);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.26);
 }
 
 .mk-cascade-viewport:focus-visible {
@@ -1330,6 +1284,12 @@ body.has-fixed-navbar #navbar {
   background: rgba(11, 16, 32, 0.78);
   border-color: rgba(196, 181, 253, 0.22);
   transform: translateY(-50%) scale(1.04);
+}
+
+.mk-cascade-btn:disabled {
+  opacity: 0.42;
+  cursor: default;
+  transform: translateY(-50%);
 }
 
 .mk-cascade-btn--prev { left: 10px; }
@@ -1525,9 +1485,13 @@ body.has-fixed-navbar #navbar {
 
 .mk-live {
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 14px;
+  grid-template-columns: minmax(320px, 440px) 1fr;
+  gap: 26px;
   align-items: start;
+}
+
+.mk-live-copy {
+  padding-top: 8px;
 }
 
 .mk-mock {
@@ -1536,6 +1500,8 @@ body.has-fixed-navbar #navbar {
   background: rgba(255, 255, 255, 0.86);
   box-shadow: var(--shadow-2);
   overflow: hidden;
+  max-width: 760px;
+  margin-left: auto;
 }
 
 .mk-mock-top {
@@ -1550,8 +1516,8 @@ body.has-fixed-navbar #navbar {
 .mk-mock-body {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
-  gap: 12px;
-  padding: 12px;
+  gap: 14px;
+  padding: 14px;
 }
 
 .mk-mock-inbox {
@@ -1563,7 +1529,7 @@ body.has-fixed-navbar #navbar {
   border-radius: 14px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   background: rgba(255, 255, 255, 0.70);
-  padding: 10px;
+  padding: 12px;
   position: relative;
   overflow: hidden;
 }
@@ -1725,6 +1691,30 @@ body.theme-dark .mk-mock-ticket,
 body.theme-dark .mk-mock-chat {
   background: rgba(17, 24, 39, 0.86);
   border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .mk-mock-badge {
+  background: rgba(15, 23, 42, 0.75);
+  border-color: rgba(148, 163, 184, 0.16);
+  color: rgba(226, 232, 240, 0.90);
+}
+
+body.theme-dark .mk-mock-badge--high {
+  background: rgba(244, 63, 94, 0.16);
+  border-color: rgba(244, 63, 94, 0.28);
+  color: rgba(253, 164, 175, 0.98);
+}
+
+body.theme-dark .mk-mock-badge--med {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.28);
+  color: rgba(253, 230, 138, 0.98);
+}
+
+body.theme-dark .mk-mock-badge--low {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: rgba(167, 243, 208, 0.98);
 }
 
 body.theme-dark .mk-metric-k,
