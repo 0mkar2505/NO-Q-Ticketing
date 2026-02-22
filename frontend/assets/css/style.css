@@ -414,6 +414,13 @@ body.has-fixed-navbar #navbar {
   box-shadow: 0 20px 46px rgba(124, 58, 237, 0.26);
 }
 
+.primary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .navbar-logo--app {
   height: 32px;
   width: auto;
@@ -1333,6 +1340,225 @@ body.has-fixed-navbar #navbar {
     var(--brand-primary),
     #9f67ff
   );
+}
+
+/* ===== DARK THEME (MARKETING PAGES) ===== */
+body.theme-dark {
+  --bg-0: #070818;
+  --bg-1: #0b1020;
+  --surface: rgba(17, 24, 39, 0.88);
+  --surface-2: rgba(15, 23, 42, 0.78);
+  --text-main: #e5e7eb;
+  --text-muted: rgba(226, 232, 240, 0.74);
+  --border: rgba(148, 163, 184, 0.16);
+  --border-strong: rgba(148, 163, 184, 0.22);
+  --ring: 0 0 0 4px rgba(124, 58, 237, 0.26);
+}
+
+body.theme-dark::before {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 12% -8%, rgba(124, 58, 237, 0.22), transparent 40%),
+    radial-gradient(circle at 92% 18%, rgba(14, 165, 233, 0.14), transparent 36%),
+    radial-gradient(circle at 50% 120%, rgba(244, 63, 94, 0.10), transparent 44%);
+}
+
+body.theme-dark .navbar:not(.support-preview-nav) {
+  background: rgba(11, 16, 32, 0.78);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+}
+
+/* Keep branding preview (customer view) neutral/light so tenant colors are readable. */
+body.theme-dark .support-preview-nav {
+  background: rgba(255, 255, 255, 0.86);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+body.theme-dark .nav-center-link,
+body.theme-dark .nav-link {
+  color: rgba(226, 232, 240, 0.78);
+}
+
+body.theme-dark .nav-center-link:hover,
+body.theme-dark .nav-link:hover {
+  color: #c4b5fd;
+}
+
+body.theme-dark .logo-text {
+  color: #c4b5fd;
+}
+
+body.theme-dark .btn-secondary {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(196, 181, 253, 0.30);
+  color: rgba(196, 181, 253, 0.95);
+}
+
+body.theme-dark .btn-secondary:hover {
+  background: rgba(124, 58, 237, 0.18);
+}
+
+body.theme-dark .site-footer,
+body.theme-dark .site-footer--auth {
+  background: rgba(11, 16, 32, 0.92);
+}
+
+body.theme-dark .footer-brand p,
+body.theme-dark .footer-links-group a,
+body.theme-dark .footer-bottom {
+  color: rgba(226, 232, 240, 0.68);
+}
+
+body.theme-dark .footer-links-group a:hover {
+  color: #c4b5fd;
+}
+
+body.theme-dark .footer-bottom {
+  border-top-color: rgba(148, 163, 184, 0.14);
+}
+
+/* Marketing components */
+body.theme-dark .mk-kicker {
+  background: rgba(15, 23, 42, 0.55);
+}
+
+body.theme-dark .mk-card,
+body.theme-dark .mk-story-card,
+body.theme-dark .mk-plan,
+body.theme-dark .mk-compare,
+body.theme-dark .mk-show,
+body.theme-dark .mk-shot,
+body.theme-dark .mk-diagram,
+body.theme-dark .mk-accordion,
+body.theme-dark .mk-node {
+  background: rgba(17, 24, 39, 0.86);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .mk-compare-head,
+body.theme-dark .mk-shot-top {
+  background: rgba(15, 23, 42, 0.74);
+}
+
+body.theme-dark .mk-acc {
+  color: rgba(226, 232, 240, 0.86);
+}
+
+body.theme-dark .mk-acc i {
+  color: rgba(226, 232, 240, 0.62);
+}
+
+body.theme-dark .mk-pill {
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(226, 232, 240, 0.84);
+}
+
+/* ===== DARK THEME (APP PAGES) ===== */
+body.theme-dark .app-content {
+  background:
+    radial-gradient(circle at 92% -10%, rgba(124, 58, 237, 0.22), transparent 44%),
+    radial-gradient(circle at -8% 115%, rgba(14, 165, 233, 0.14), transparent 40%),
+    #070818;
+}
+
+body.theme-dark .sidebar {
+  background:
+    radial-gradient(circle at 30% 0%, rgba(124, 58, 237, 0.20), transparent 46%),
+    linear-gradient(180deg, rgba(11, 16, 32, 0.92), rgba(7, 8, 24, 0.92));
+  border-right-color: rgba(148, 163, 184, 0.14);
+}
+
+body.theme-dark .sidebar-section-title {
+  color: rgba(226, 232, 240, 0.54);
+}
+
+body.theme-dark .sidebar-nav a {
+  color: rgba(226, 232, 240, 0.78);
+}
+
+body.theme-dark .sidebar-nav a.active,
+body.theme-dark .sidebar-nav a:hover {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.22);
+  color: rgba(196, 181, 253, 0.98);
+}
+
+body.theme-dark .page-subtitle {
+  color: rgba(226, 232, 240, 0.66);
+}
+
+body.theme-dark .stat-card,
+body.theme-dark .panel-card,
+body.theme-dark .admin-section-card,
+body.theme-dark .settings-card,
+body.theme-dark .ticket-list,
+body.theme-dark .ticket-view,
+body.theme-dark .members-table-wrap,
+body.theme-dark .ticket-create-card {
+  background: rgba(17, 24, 39, 0.86);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .messages {
+  background: rgba(15, 23, 42, 0.70);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+body.theme-dark .message {
+  background: rgba(17, 24, 39, 0.88);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+body.theme-dark .message strong,
+body.theme-dark .admin-section-head h2,
+body.theme-dark .settings-field label,
+body.theme-dark .ticket-item .ticket-subject,
+body.theme-dark .ticket-view h3 {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+body.theme-dark .message small,
+body.theme-dark .ticket-meta,
+body.theme-dark .settings-copy,
+body.theme-dark .admin-empty-copy,
+body.theme-dark .ticket-pagination span,
+body.theme-dark .admin-activity-time {
+  color: rgba(226, 232, 240, 0.62);
+}
+
+body.theme-dark .ticket-toolbar input,
+body.theme-dark .ticket-toolbar select,
+body.theme-dark .admin-toolbar input,
+body.theme-dark .settings-field select,
+body.theme-dark .settings-field input,
+body.theme-dark .settings-field textarea,
+body.theme-dark .form-group input,
+body.theme-dark .reply-section textarea {
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(226, 232, 240, 0.92);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+body.theme-dark .admin-table,
+body.theme-dark .analytics-table {
+  background: rgba(17, 24, 39, 0.86);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.theme-dark .admin-table th,
+body.theme-dark .admin-table td,
+body.theme-dark .analytics-table th,
+body.theme-dark .analytics-table td,
+body.theme-dark .members-table th,
+body.theme-dark .members-table td {
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+  color: rgba(226, 232, 240, 0.84);
+}
+
+body.theme-dark .members-table th {
+  background: rgba(15, 23, 42, 0.74);
 }
 
 .auth-footer-content {
@@ -2367,7 +2593,9 @@ body.has-fixed-navbar #navbar {
   border: 1px solid #e6ecf6;
   border-radius: 14px;
   overflow: hidden;
-  background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+  /* Match the public support page background in the preview. */
+  --support-page-bg: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+  background: var(--support-page-bg);
 }
 
 .support-preview .support-preview-nav {
@@ -2900,7 +3128,9 @@ body.has-fixed-navbar #navbar {
   --support-assistant-text-color: #312e81;
   --support-customer-bubble-color: #dcfce7;
   --support-customer-text-color: #14532d;
-  background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+  /* Tenant can override this via branding (solid color or gradient). */
+  --support-page-bg: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+  background: var(--support-page-bg);
 }
 
 /* Allow branding to control the company name color in the support navbar. */

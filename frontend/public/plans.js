@@ -3,6 +3,8 @@
   const priceEls = Array.from(document.querySelectorAll(".mk-price-value"));
   if (!toggleBtns.length || !priceEls.length) return;
 
+  const formatINR = new Intl.NumberFormat("en-IN");
+
   function setBilling(mode) {
     toggleBtns.forEach((btn) => {
       btn.classList.toggle("mk-toggle-btn--active", btn.dataset.billing === mode);
@@ -16,7 +18,8 @@
       el.classList.remove("mk-price-pop");
       // trigger reflow so animation plays each change
       void el.offsetWidth;
-      el.textContent = `$${value}`;
+      const n = Number(value);
+      el.textContent = Number.isFinite(n) ? `₹${formatINR.format(n)}` : `₹${value}`;
       el.classList.add("mk-price-pop");
     });
   }
@@ -27,4 +30,3 @@
 
   setBilling("monthly");
 })();
-

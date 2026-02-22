@@ -32,6 +32,8 @@ const customerBubblePicker = document.getElementById("customerBubblePicker");
 const customerBubbleText = document.getElementById("customerBubbleText");
 const customerTextPicker = document.getElementById("customerTextPicker");
 const customerTextText = document.getElementById("customerTextText");
+const pageBgPicker = document.getElementById("pageBgPicker");
+const pageBgText = document.getElementById("pageBgText");
 
 const previewRoot = document.getElementById("branding-preview");
 const previewLogo = document.getElementById("preview-logo");
@@ -79,6 +81,7 @@ function normalizeConfig(config) {
       brand_text_color: chat.brand_text_color || chat.primary_color || "#7c3aed",
       assistant_title: chat.assistant_title || "Guided Support Assistant",
       assistant_subtitle: chat.assistant_subtitle || "Answer a few guided prompts and we will create a support ticket for you.",
+      page_bg_color: chat.page_bg_color || "#f8faff",
       primary_color: chat.primary_color || "#7c3aed",
       assistant_bubble_color: chat.assistant_bubble_color || "#eef2ff",
       assistant_text_color: chat.assistant_text_color || "#312e81",
@@ -109,6 +112,7 @@ function applyToPreview(chat) {
   previewRoot.style.setProperty("--support-assistant-text-color", chat.assistant_text_color);
   previewRoot.style.setProperty("--support-customer-bubble-color", chat.customer_bubble_color);
   previewRoot.style.setProperty("--support-customer-text-color", chat.customer_text_color);
+  previewRoot.style.setProperty("--support-page-bg", chat.page_bg_color || "#f8faff");
 
   if (previewBrand) previewBrand.textContent = chat.brand_name || "Support";
   if (previewTitle) previewTitle.textContent = chat.assistant_title || "Guided Support Assistant";
@@ -128,6 +132,7 @@ function readChatUiFromForm() {
     brand_text_color: clampHex(brandTextText.value, clampHex(primaryText.value, "#7c3aed")),
     assistant_title: assistantTitleEl.value.trim(),
     assistant_subtitle: assistantSubtitleEl.value.trim(),
+    page_bg_color: clampHex(pageBgText.value, "#f8faff"),
     primary_color: clampHex(primaryText.value, "#7c3aed"),
     assistant_bubble_color: clampHex(assistantBubbleText.value, "#eef2ff"),
     assistant_text_color: clampHex(assistantTextText.value, "#312e81"),
@@ -148,6 +153,7 @@ function applyConfigToForm(config) {
 
   syncColorPair(primaryPicker, primaryText, chat.primary_color);
   syncColorPair(brandTextPicker, brandTextText, chat.brand_text_color || chat.primary_color);
+  syncColorPair(pageBgPicker, pageBgText, chat.page_bg_color || "#f8faff");
   syncColorPair(assistantBubblePicker, assistantBubbleText, chat.assistant_bubble_color);
   syncColorPair(assistantTextPicker, assistantTextText, chat.assistant_text_color);
   syncColorPair(customerBubblePicker, customerBubbleText, chat.customer_bubble_color);
@@ -175,6 +181,7 @@ function wirePreviewInputs() {
 
   wireColorPair(primaryPicker, primaryText);
   wireColorPair(brandTextPicker, brandTextText);
+  wireColorPair(pageBgPicker, pageBgText);
   wireColorPair(assistantBubblePicker, assistantBubbleText);
   wireColorPair(assistantTextPicker, assistantTextText);
   wireColorPair(customerBubblePicker, customerBubbleText);

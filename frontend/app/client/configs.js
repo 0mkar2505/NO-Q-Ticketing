@@ -95,6 +95,7 @@ function normalizeConfig(config) {
       brand_text_color: chat.brand_text_color || chat.primary_color || "#7c3aed",
       assistant_title: chat.assistant_title || "Guided Support Assistant",
       assistant_subtitle: chat.assistant_subtitle || "Answer a few guided prompts and we will create a support ticket for you.",
+      page_bg_color: chat.page_bg_color || "#f8faff",
       primary_color: chat.primary_color || "#7c3aed",
       assistant_bubble_color: chat.assistant_bubble_color || "#eef2ff",
       assistant_text_color: chat.assistant_text_color || "#312e81",

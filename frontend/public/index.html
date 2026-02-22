@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" href="/assets/images/NO-Q%20logo%201.png" />
 </head> 
 
-<body class="page-transition">
+<body class="page-transition theme-dark">
   <div class="page-wrapper">
     <!-- NAVBAR -->
     <nav class="navbar">
@@ -55,7 +55,7 @@
         </p>
 
         <div class="landing-actions">
-          <button class="primary-btn" id="heroGetStartedBtn">Try Live Demo</button>
+          <button class="primary-btn" id="heroGetStartedBtn" type="button" disabled>Live Demo (Coming Soon)</button>
           <a href="/support" class="secondary-link">Open Guided Support</a>
         </div>
       </div>
@@ -100,28 +100,7 @@
   </div>
 
   <script>
-    function routeUser() {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        window.location.href = "/auth/login.html";
-        return;
-      }
-
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        if (payload.role === "admin") {
-          window.location.href = "/app/admin/dashboard.html";
-        } else {
-          window.location.href = "/app/client/dashboard.html";
-        }
-      } catch {
-        localStorage.removeItem("token");
-        window.location.href = "/auth/login.html";
-      }
-    }
-
-    document.getElementById("heroGetStartedBtn")?.addEventListener("click", routeUser);
+    // Live demo will be implemented later. Keep button disabled for now.
   </script>
 
   <script src="/assets/js/script.js"></script>

@@ -45,6 +45,8 @@ class ClientConfig:
             "brand_text_color": "#7c3aed",
             "assistant_title": "Guided Support Assistant",
             "assistant_subtitle": "Answer a few guided prompts and we will create a support ticket for you.",
+            # Background for the public support page (tenant branded).
+            "page_bg_color": "#f8faff",
             "primary_color": "#7c3aed",
             "assistant_bubble_color": "#eef2ff",
             "assistant_text_color": "#312e81",

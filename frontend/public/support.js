@@ -159,6 +159,7 @@ function applyCustomerChatUi(chatUi = {}) {
   if (chatUi.assistant_text_color) scope.style.setProperty("--support-assistant-text-color", chatUi.assistant_text_color);
   if (chatUi.customer_bubble_color) scope.style.setProperty("--support-customer-bubble-color", chatUi.customer_bubble_color);
   if (chatUi.customer_text_color) scope.style.setProperty("--support-customer-text-color", chatUi.customer_text_color);
+  if (chatUi.page_bg_color) scope.style.setProperty("--support-page-bg", chatUi.page_bg_color);
 }
 
 function clearOptions() {

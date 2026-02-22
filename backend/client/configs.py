@@ -68,6 +68,7 @@ def _validate_payload(data):
     brand_text_color = (customer_chat_ui.get("brand_text_color") or "").strip()
     assistant_title = (customer_chat_ui.get("assistant_title") or "").strip()
     assistant_subtitle = (customer_chat_ui.get("assistant_subtitle") or "").strip()
+    page_bg_color = (customer_chat_ui.get("page_bg_color") or "").strip()
     primary_color = (customer_chat_ui.get("primary_color") or "").strip()
     assistant_bubble_color = (customer_chat_ui.get("assistant_bubble_color") or "").strip()
     assistant_text_color = (customer_chat_ui.get("assistant_text_color") or "").strip()
@@ -96,6 +97,7 @@ def _validate_payload(data):
 
     color_fields = {
         "brand_text_color": brand_text_color,
+        "page_bg_color": page_bg_color,
         "primary_color": primary_color,
         "assistant_bubble_color": assistant_bubble_color,
         "assistant_text_color": assistant_text_color,
@@ -121,6 +123,7 @@ def _validate_payload(data):
             "brand_text_color": brand_text_color,
             "assistant_title": assistant_title,
             "assistant_subtitle": assistant_subtitle,
+            "page_bg_color": page_bg_color,
             "primary_color": primary_color,
             "assistant_bubble_color": assistant_bubble_color,
             "assistant_text_color": assistant_text_color,
