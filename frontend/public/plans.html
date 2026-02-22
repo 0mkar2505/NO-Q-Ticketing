@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pricing | NO-Q</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="icon" type="image/png" href="/assets/images/NO-Q%20logo%201.png" />
+</head>
+<body class="page-transition">
+  <div class="page-wrapper mk-page">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="logo-wrapper">
+          <div class="logo-icon"></div>
+        </div>
+        <span class="logo-text">NO-Q</span>
+      </div>
+
+      <div class="nav-center">
+        <a href="/support" class="nav-center-link">Live Support</a>
+        <a href="/public/plans.html" class="nav-center-link">Pricing</a>
+        <a href="/public/features.html" class="nav-center-link">Features</a>
+        <a href="/public/about.html" class="nav-center-link">About</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/auth/login.html" class="nav-link">Login</a>
+        <a class="nav-btn" href="/auth/register.html" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Get Started</a>
+      </div>
+    </nav>
+
+    <main class="mk-main">
+      <section class="mk-hero mk-hero--pricing">
+        <div class="mk-hero-inner">
+          <p class="mk-kicker">Pricing</p>
+          <h1 class="mk-title">Plans That Scale With Support</h1>
+          <p class="mk-lede">
+            Start simple, then unlock advanced branding, knowledge base, and reporting as your team grows.
+          </p>
+
+          <div class="mk-hero-actions">
+            <a class="btn btn-primary" href="/auth/register.html">Start Onboarding</a>
+            <a class="btn btn-secondary" href="/support">Try Live Support</a>
+          </div>
+        </div>
+
+        <div class="mk-pricing-toggle" role="group" aria-label="Billing period">
+          <button class="mk-toggle-btn mk-toggle-btn--active" type="button" data-billing="monthly">Monthly</button>
+          <button class="mk-toggle-btn" type="button" data-billing="yearly">Yearly <span class="mk-chip">Save 20%</span></button>
+        </div>
+      </section>
+
+      <section class="mk-section mk-section--tight">
+        <div class="mk-grid mk-grid--3">
+          <article class="mk-plan" data-plan="starter">
+            <div class="mk-plan-top">
+              <h2>Starter</h2>
+              <p class="mk-plan-copy">For small teams shipping fast.</p>
+            </div>
+            <div class="mk-price">
+              <span class="mk-price-value" data-price-monthly="19" data-price-yearly="15">$19</span>
+              <span class="mk-price-unit">/ seat / month</span>
+            </div>
+            <ul class="mk-list">
+              <li>Ticket inbox</li>
+              <li>Customer support assistant</li>
+              <li>Agent + supervisor roles</li>
+              <li>Basic analytics</li>
+            </ul>
+            <a class="btn btn-secondary mk-plan-cta" href="/auth/register.html">Choose Starter</a>
+          </article>
+
+          <article class="mk-plan mk-plan--featured" data-plan="growth">
+            <div class="mk-plan-ribbon">Most Popular</div>
+            <div class="mk-plan-top">
+              <h2>Growth</h2>
+              <p class="mk-plan-copy">Branding + knowledge base for AI.</p>
+            </div>
+            <div class="mk-price">
+              <span class="mk-price-value" data-price-monthly="39" data-price-yearly="31">$39</span>
+              <span class="mk-price-unit">/ seat / month</span>
+            </div>
+            <ul class="mk-list">
+              <li>Everything in Starter</li>
+              <li>Per-client branding</li>
+              <li>Knowledge base (RAG)</li>
+              <li>Team chat</li>
+            </ul>
+            <a class="btn btn-primary mk-plan-cta" href="/auth/register.html">Choose Growth</a>
+          </article>
+
+          <article class="mk-plan" data-plan="enterprise">
+            <div class="mk-plan-top">
+              <h2>Enterprise</h2>
+              <p class="mk-plan-copy">Controls, reporting, and customization.</p>
+            </div>
+            <div class="mk-price">
+              <span class="mk-price-value" data-price-monthly="79" data-price-yearly="63">$79</span>
+              <span class="mk-price-unit">/ seat / month</span>
+            </div>
+            <ul class="mk-list">
+              <li>Everything in Growth</li>
+              <li>Advanced analytics</li>
+              <li>Custom policies</li>
+              <li>Priority support</li>
+            </ul>
+            <a class="btn btn-secondary mk-plan-cta" href="/auth/register.html">Talk to Sales</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="mk-section">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">Compare tiers</h2>
+          <p class="mk-muted">A quick matrix of what each plan includes.</p>
+        </div>
+
+        <div class="mk-compare">
+          <div class="mk-compare-row mk-compare-head">
+            <div>Feature</div>
+            <div>Starter</div>
+            <div>Growth</div>
+            <div>Enterprise</div>
+          </div>
+
+          <div class="mk-compare-row">
+            <div class="mk-compare-feature">Ticket inbox + replies</div>
+            <div class="mk-yes">Yes</div><div class="mk-yes">Yes</div><div class="mk-yes">Yes</div>
+          </div>
+          <div class="mk-compare-row">
+            <div class="mk-compare-feature">Customer assistant</div>
+            <div class="mk-yes">Yes</div><div class="mk-yes">Yes</div><div class="mk-yes">Yes</div>
+          </div>
+          <div class="mk-compare-row">
+            <div class="mk-compare-feature">Branding customization</div>
+            <div class="mk-no">No</div><div class="mk-yes">Yes</div><div class="mk-yes">Yes</div>
+          </div>
+          <div class="mk-compare-row">
+            <div class="mk-compare-feature">Knowledge base (RAG)</div>
+            <div class="mk-no">No</div><div class="mk-yes">Yes</div><div class="mk-yes">Yes</div>
+          </div>
+          <div class="mk-compare-row">
+            <div class="mk-compare-feature">Advanced analytics</div>
+            <div class="mk-no">No</div><div class="mk-no">No</div><div class="mk-yes">Yes</div>
+          </div>
+          <div class="mk-compare-row">
+            <div class="mk-compare-feature">Custom policies</div>
+            <div class="mk-no">No</div><div class="mk-no">No</div><div class="mk-yes">Yes</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mk-section mk-section--cta">
+        <div class="mk-cta">
+          <div>
+            <h2 class="mk-h2">Ready to launch your support workspace?</h2>
+            <p class="mk-muted">Onboarding takes a minute. Admin approval happens right after.</p>
+          </div>
+          <div class="mk-cta-actions">
+            <a class="btn btn-primary" href="/auth/register.html">Start Onboarding</a>
+            <a class="btn btn-secondary" href="/public/security.html">Security</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-main">
+        <div class="footer-brand">
+          <h2>
+            NO-Q - support,<br />
+            <span>without the wait.</span>
+          </h2>
+          <p>
+            Convert conversations into structured support tickets, powered by hybrid AI.
+          </p>
+        </div>
+        <div class="footer-links-group">
+          <h4>OZU Technologies</h4>
+          <a href="/public/about.html">About us</a>
+          <a href="/public/plans.html">Pricing</a>
+          <a href="/public/security.html">Security</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 NO-Q. All rights reserved.</p>
+        <div class="footer-socials">
+          <a href="https://github.com/0mkar2505" target="_blank" aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a href="https://www.linkedin.com/in/omkar-zad" target="_blank" aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/public/plans.js"></script>
+  <script src="/shared/js/page-transition.js"></script>
+</body>
+</html>
+

@@ -23,7 +23,7 @@
     </header>
 
     <main class="auth-page">
-      <div class="auth-card" style="max-width: 980px;">
+      <div class="auth-card ob-pricing">
         <h1 class="auth-title">Choose a plan</h1>
         <p class="auth-subtitle">
           Complete checkout to submit your workspace for admin approval.
@@ -31,42 +31,49 @@
 
         <p id="pricing-error" class="form-error"></p>
 
-        <div class="pricing-grid" style="margin-top: 18px;">
-          <div class="settings-card" style="border-radius: 14px;">
-            <h2 style="margin-bottom: 6px;">Starter</h2>
-            <p class="settings-copy">For small teams getting started.</p>
-            <ul class="settings-copy" style="margin-top: 10px; line-height: 1.6;">
+        <div class="ob-pricing-grid">
+          <div class="settings-card ob-plan">
+            <div class="ob-plan-head">
+              <h2>Starter</h2>
+              <p class="settings-copy">For small teams getting started.</p>
+            </div>
+            <ul class="settings-copy ob-plan-list">
               <li>Ticket inbox</li>
               <li>Agent + supervisor roles</li>
               <li>Customer support assistant</li>
             </ul>
-            <button class="btn btn-primary" type="button" data-plan="starter" style="margin-top: 14px;">Checkout Starter</button>
+            <button class="btn btn-primary" type="button" data-plan="starter">Checkout Starter</button>
           </div>
 
-          <div class="settings-card" style="border-radius: 14px; border-color: #c4b5fd;">
-            <h2 style="margin-bottom: 6px;">Growth</h2>
-            <p class="settings-copy">Best for teams scaling support.</p>
-            <ul class="settings-copy" style="margin-top: 10px; line-height: 1.6;">
+          <div class="settings-card ob-plan ob-plan--featured">
+            <div class="ob-plan-ribbon">Recommended</div>
+            <div class="ob-plan-head">
+              <h2>Growth</h2>
+              <p class="settings-copy">Best for teams scaling support.</p>
+            </div>
+            <ul class="settings-copy ob-plan-list">
               <li>Everything in Starter</li>
               <li>Branding + customization</li>
               <li>Knowledge base for AI</li>
             </ul>
-            <button class="btn btn-primary" type="button" data-plan="growth" style="margin-top: 14px;">Checkout Growth</button>
+            <button class="btn btn-primary" type="button" data-plan="growth">Checkout Growth</button>
           </div>
 
-          <div class="settings-card" style="border-radius: 14px;">
-            <h2 style="margin-bottom: 6px;">Enterprise</h2>
-            <p class="settings-copy">For advanced controls and reporting.</p>
-            <ul class="settings-copy" style="margin-top: 10px; line-height: 1.6;">
+          <div class="settings-card ob-plan">
+            <div class="ob-plan-head">
+              <h2>Enterprise</h2>
+              <p class="settings-copy">For advanced controls and reporting.</p>
+            </div>
+            <ul class="settings-copy ob-plan-list">
               <li>Everything in Growth</li>
               <li>Advanced analytics</li>
               <li>Custom policies</li>
             </ul>
-            <button class="btn btn-primary" type="button" data-plan="enterprise" style="margin-top: 14px;">Checkout Enterprise</button>
+            <button class="btn btn-primary" type="button" data-plan="enterprise">Checkout Enterprise</button>
           </div>
         </div>
 
-        <p class="settings-copy" style="margin-top: 14px;">
+        <p class="settings-copy ob-pricing-note">
           Note: This project uses a demo checkout. After checkout, your account stays locked until an admin approves the company.
         </p>
       </div>

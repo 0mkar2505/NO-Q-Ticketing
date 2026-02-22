@@ -1,6 +1,7 @@
 (() => {
-  function navigateWithFade(path, duration = 260) {
-    document.body.style.transition = `opacity ${duration}ms ease`;
+  function navigateWithFade(path, duration = 420) {
+    document.body.classList.add("is-leaving");
+    document.body.style.transition = `opacity ${duration}ms cubic-bezier(0.22, 1, 0.36, 1)`;
     document.body.style.opacity = "0";
     setTimeout(() => {
       window.location.href = path;

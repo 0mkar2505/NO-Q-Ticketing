@@ -53,14 +53,29 @@ def serve_support(company_slug):
     # Tenant is derived client-side from the URL path (/support/<slug>) so customers never type it.
     return send_from_directory(FRONTEND_DIR, "public/support.html")
 
-@app.route("/", defaults={"path": "public/index.html"})
+@app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
-    file_path = os.path.join(FRONTEND_DIR, path)
+    # Root should always render the marketing home page.
+    if not path:
+        return send_from_directory(FRONTEND_DIR, "public/index.html")
 
-    if os.path.isfile(file_path):
-        return send_from_directory(FRONTEND_DIR, path)
+    # 1) Exact match under frontend/ (e.g. assets/*, app/*, auth/*, shared/*, public/*)
+    candidates = [path]
 
+    # 2) If someone hits /features.html instead of /public/features.html, serve from public/.
+    candidates.append(os.path.join("public", path))
+
+    # 3) If someone hits /features (no extension), try /public/features.html (marketing pages).
+    if "." not in os.path.basename(path) and not path.endswith("/"):
+        candidates.append(os.path.join("public", f"{path}.html"))
+
+    for candidate in candidates:
+        file_path = os.path.join(FRONTEND_DIR, candidate)
+        if os.path.isfile(file_path):
+            return send_from_directory(FRONTEND_DIR, candidate)
+
+    # Fallback: keep the user on the home page for unknown routes.
     return send_from_directory(FRONTEND_DIR, "public/index.html")
 
 

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security | NO-Q</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="icon" type="image/png" href="/assets/images/NO-Q%20logo%201.png" />
+</head>
+<body class="page-transition">
+  <div class="page-wrapper mk-page">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="logo-wrapper">
+          <div class="logo-icon"></div>
+        </div>
+        <span class="logo-text">NO-Q</span>
+      </div>
+
+      <div class="nav-center">
+        <a href="/support" class="nav-center-link">Live Support</a>
+        <a href="/public/plans.html" class="nav-center-link">Pricing</a>
+        <a href="/public/features.html" class="nav-center-link">Features</a>
+        <a href="/public/about.html" class="nav-center-link">About</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/auth/login.html" class="nav-link">Login</a>
+        <a class="nav-btn" href="/auth/register.html" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Get Started</a>
+      </div>
+    </nav>
+
+    <main class="mk-main">
+      <section class="mk-hero mk-hero--security">
+        <div class="mk-hero-inner">
+          <p class="mk-kicker">Security</p>
+          <h1 class="mk-title">Tenant Boundaries, Role Controls, Auditability</h1>
+          <p class="mk-lede">
+            NO-Q is designed as a multi-tenant SaaS: company data stays scoped, and access is enforced by role.
+          </p>
+          <div class="mk-hero-actions">
+            <a class="btn btn-primary" href="/public/plans.html">View Pricing</a>
+            <a class="btn btn-secondary" href="/support">Try Live Support</a>
+          </div>
+        </div>
+        <div class="mk-hero-art mk-hero-art--security" aria-hidden="true"></div>
+      </section>
+
+      <section class="mk-section">
+        <div class="mk-grid mk-grid--3">
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3 class="mk-h3">Tenant Isolation</h3>
+            <p class="mk-muted">Tickets, configs, branding, and KB entries are scoped per company workspace.</p>
+          </article>
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-user-lock"></i></div>
+            <h3 class="mk-h3">Role-Based Access</h3>
+            <p class="mk-muted">Platform admin, supervisor, and agent actions are enforced on the backend.</p>
+          </article>
+          <article class="mk-card mk-card--icon">
+            <div class="mk-ic"><i class="fa-solid fa-clipboard-check"></i></div>
+            <h3 class="mk-h3">Auditability</h3>
+            <p class="mk-muted">Admin-level system updates can be logged to support traceability.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mk-section">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">How isolation works</h2>
+          <p class="mk-muted">A simplified view of how requests are scoped within the platform.</p>
+        </div>
+
+        <div class="mk-diagram" role="img" aria-label="Tenant isolation diagram">
+          <div class="mk-diagram-col">
+            <div class="mk-pill">Customer</div>
+            <div class="mk-arrow"></div>
+            <div class="mk-pill mk-pill--soft">Support URL</div>
+          </div>
+
+          <div class="mk-diagram-mid">
+            <div class="mk-node">
+              <div class="mk-node-title">NO-Q API</div>
+              <div class="mk-node-copy">Auth + RBAC + company scope</div>
+            </div>
+          </div>
+
+          <div class="mk-diagram-col">
+            <div class="mk-pill mk-pill--company">Company A</div>
+            <div class="mk-pill mk-pill--company">Company B</div>
+            <div class="mk-pill mk-pill--company">Company C</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mk-section">
+        <div class="mk-section-head">
+          <h2 class="mk-h2">Controls</h2>
+          <p class="mk-muted">A few platform controls you can tighten further for production deployments.</p>
+        </div>
+
+        <div class="mk-accordion" id="security-accordion">
+          <button class="mk-acc" type="button" aria-expanded="true">
+            <span>Rate limits + abuse protection</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="mk-acc-panel mk-acc-panel--open">
+            <p>Apply rate limits to public support endpoints and add simple spam protection to keep costs stable.</p>
+          </div>
+
+          <button class="mk-acc" type="button" aria-expanded="false">
+            <span>Secret management</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="mk-acc-panel">
+            <p>Use environment variables for keys and rotate secrets. Avoid hardcoding hostnames or tokens in frontend code.</p>
+          </div>
+
+          <button class="mk-acc" type="button" aria-expanded="false">
+            <span>Security headers</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="mk-acc-panel">
+            <p>Add CSP, HSTS, X-Content-Type-Options, and other headers once you deploy behind HTTPS.</p>
+          </div>
+
+          <button class="mk-acc" type="button" aria-expanded="false">
+            <span>Monitoring + audit logs</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="mk-acc-panel">
+            <p>Centralize logs, track admin actions, and alert on repeated auth failures or unusual ticket volume spikes.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mk-section mk-section--cta">
+        <div class="mk-cta">
+          <div>
+            <h2 class="mk-h2">Need a demo walkthrough?</h2>
+            <p class="mk-muted">Try the assistant, then review the created ticket from the client portal.</p>
+          </div>
+          <div class="mk-cta-actions">
+            <a class="btn btn-primary" href="/support">Try Live Support</a>
+            <a class="btn btn-secondary" href="/public/features.html">Features</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-main">
+        <div class="footer-brand">
+          <h2>
+            NO-Q - support,<br />
+            <span>without the wait.</span>
+          </h2>
+          <p>
+            Convert conversations into structured support tickets, powered by hybrid AI.
+          </p>
+        </div>
+        <div class="footer-links-group">
+          <h4>OZU Technologies</h4>
+          <a href="/public/about.html">About us</a>
+          <a href="/public/plans.html">Pricing</a>
+          <a href="/public/security.html">Security</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 NO-Q. All rights reserved.</p>
+        <div class="footer-socials">
+          <a href="https://github.com/0mkar2505" target="_blank" aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a href="https://www.linkedin.com/in/omkar-zad" target="_blank" aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/public/security.js"></script>
+  <script src="/shared/js/page-transition.js"></script>
+</body>
+</html>
+
