@@ -1,5 +1,5 @@
 (() => {
-  function navigateWithFade(path, duration = 180) {
+  function navigateWithFade(path, duration = 260) {
     document.body.style.transition = `opacity ${duration}ms ease`;
     document.body.style.opacity = "0";
     setTimeout(() => {

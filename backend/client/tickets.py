@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from auth.middleware import require_auth
 from models.ticket import Ticket
+from models.client_config import ClientConfig
 from ai.ticket_ai_service import generate_ticket_ai_assist
 
 client_tickets_bp = Blueprint("client_tickets", __name__)
@@ -52,6 +53,12 @@ def reply_ticket(ticket_id):
 
     if not message:
         return jsonify({"error": "Message is required"}), 400
+
+    # Apply tenant reply signature (stored in Settings) if configured.
+    cfg = ClientConfig.get_by_company(request.user["company_id"]) or {}
+    signature = (cfg.get("reply_signature") or "").strip()
+    if signature and signature not in message:
+        message = f"{message}\n\n{signature}"
 
     actor = {
         "name": request.user.get("name") or "",

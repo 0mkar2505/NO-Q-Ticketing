@@ -2,7 +2,7 @@ const form = document.getElementById("loginForm");
 const errorEl = document.getElementById("error");
 const submitBtn = document.getElementById("submitBtn");
 
-function navigateWithFade(path, duration = 180) {
+function navigateWithFade(path, duration = 260) {
   document.body.classList.add("is-leaving");
   document.body.style.transition = `opacity ${duration}ms ease`;
   document.body.style.opacity = "0";
@@ -57,6 +57,19 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (!res.ok) {
+      // Onboarding states (locked until payment/admin approval).
+      if (res.status === 403 && data && data.code) {
+        const code = String(data.code || "");
+        if (code === "pending_payment") {
+          navigateWithFade("../public/pricing.html");
+          return;
+        }
+        if (code === "awaiting_admin_approval") {
+          navigateWithFade("../public/awaiting-approval.html");
+          return;
+        }
+      }
+
       showError(errorEl, data.error || "Invalid email or password");
       submitBtn.textContent = originalBtnText;
       submitBtn.disabled = false;

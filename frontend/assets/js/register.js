@@ -3,11 +3,51 @@ const errorEl = document.getElementById("error");
 const submitBtn = document.getElementById("submitBtn");
 const successModalSubtextEl = document.querySelector("#successModal .modal-subtext");
 
+function slugify(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function isValidHandle(handle) {
   const value = String(handle || "").trim().toLowerCase();
   if (value.length < 3 || value.length > 32) return false;
   return /^[a-z0-9._-]+$/.test(value);
 }
+
+let handleWasEdited = false;
+
+function suggestHandle(companyName) {
+  const base = slugify(companyName);
+  if (!base) return "";
+  const candidate = `${base}-admin`.slice(0, 32);
+  return candidate.replace(/-+$/g, "");
+}
+
+// Auto-suggest handle from company name until the user edits it manually.
+(() => {
+  const companyInput = document.getElementById("company");
+  const handleInput = document.getElementById("handle");
+  if (!companyInput || !handleInput) return;
+
+  handleInput.addEventListener("input", () => {
+    handleWasEdited = Boolean(handleInput.value.trim());
+  });
+
+  companyInput.addEventListener("input", () => {
+    if (handleWasEdited) return;
+    const suggested = suggestHandle(companyInput.value);
+    if (suggested) handleInput.value = suggested;
+  });
+
+  // Initial suggestion if company is prefilled.
+  if (!handleInput.value.trim() && companyInput.value.trim()) {
+    const suggested = suggestHandle(companyInput.value);
+    if (suggested) handleInput.value = suggested;
+  }
+})();
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
