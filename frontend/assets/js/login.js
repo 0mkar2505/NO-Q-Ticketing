@@ -2,7 +2,7 @@ const form = document.getElementById("loginForm");
 const errorEl = document.getElementById("error");
 const submitBtn = document.getElementById("submitBtn");
 
-function navigateWithFade(path, duration = 260) {
+function navigateWithFade(path, duration = 180) {
   document.body.classList.add("is-leaving");
   document.body.style.transition = `opacity ${duration}ms ease`;
   document.body.style.opacity = "0";

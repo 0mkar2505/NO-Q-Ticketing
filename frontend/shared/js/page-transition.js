@@ -34,9 +34,9 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   document.body.classList.add("is-leaving");
   document.body.style.opacity = "0";
-  document.body.style.transition = "opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)";
+  document.body.style.transition = "opacity 280ms cubic-bezier(0.22, 1, 0.36, 1)";
 
   setTimeout(() => {
     window.location.href = url.href;
-  }, 420);
+  }, 280);
 });

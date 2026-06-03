@@ -81,7 +81,7 @@ def _openai_compat_chat_json(base_url, api_key, model, messages, timeout=20):
         # Groq free tier can be tight on total tokens (~6k). Allow richer output but keep a safety buffer:
         # target <= ~4k total tokens, leaving ~2k headroom.
         # We can't count tokens precisely here, so we cap output tokens and keep the input prompt bounded.
-        "max_tokens": 1800,
+        "max_tokens": 2000,
         "response_format": {"type": "json_object"},
     }
     body = json.dumps(payload).encode("utf-8")
